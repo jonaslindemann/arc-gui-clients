@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/arcstat-ui">
+        <file>../../images/reload.png</file>
+        <file>../../images/gtk-cancel.png</file>
+        <file>../../images/gtk-clear.png</file>
+        <file>../../images/document-save.png</file>
+        <file>../../images/document-new.png</file>
+        <file>../../images/document-open.png</file>
+        <file>../../images/edit-redo.png</file>
+    </qresource>
+</RCC>

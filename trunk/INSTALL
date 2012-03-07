@@ -1,0 +1,69 @@
+-----------------------------------------------
+ARC Storage Explorer  installation instructions
+-----------------------------------------------
+
+ARC Storage Explrer (arcstorage-ui)  is a prototype user interface client for 
+accessing ARC storage resources. The client is implemented in C++ using the 
+QT4 user interface toolkit and the ARC C++ libraries
+
+------------
+Requirements
+------------
+
+QT4
+glib
+glibmm
+sigc++
+ARC client libraries
+
+------------
+Installation
+------------
+
+Untar the tarball in a suitable location:
+
+$ tar xvzf ArcStorageExplorer-x.y.tar.gz
+$ cd ArcStorageExplorer-x.y
+
+Edit the macx.pri, unix.pri or win32.pri file with locations of the specified libraries
+
+Linux
+-----
+
+$ ./configure
+$ make
+
+MacOS X
+-------
+
+$ ./configure
+$ make
+
+Windows
+-------
+
+Not yet completed.
+
+The binary files will be created in the bin directory.
+
+-----
+Usage
+-----
+
+If everything was setup correctly the user interfaces can be started by typing:
+
+$ cd bin
+$ arcproxy-ui
+$ arcstat-ui
+$ arcstorage-ui
+
+NOTE MacOS X: It is important that GLOBUS_LOCATION, X509_CERT_DIR, X509_USER_PROXY are 
+defined before running the ARC Storage Explorer. An example setup scripts is shown below:
+
+export ARC_LOCATION=/opt/local/nordugrid
+export GLOBUS_LOCATION=$ARC_LOCATION
+export PATH=$ARC_LOCATION/bin:$ARC_LOCATION/sbin:$PATH
+export X509_USER_PROXY=$HOME/x509_up$UID
+export X509_CERT_DIR=$ARC_LOCATION/etc/grid-security/certificates
+
+The file is also available in the "misc" directory in the source distribution.

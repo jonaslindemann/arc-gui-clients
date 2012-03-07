@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+import os, sys, shutil
+
+buildDir = "./builddir"
+
+if __name__ == '__main__':
+	
+	if os.path.exists(buildDir):
+		print "Removing build dir..."
+		shutil.rmtree(buildDir)
+
+	print "Creating build dir..."
+	os.mkdir(buildDir)
+
+	currDir = os.getcwd()
+	os.chdir(buildDir)
+	os.system("cmake -DCMAKE_BUILD_TYPE=Debug ..")
+	os.chdir(currDir)
+		
