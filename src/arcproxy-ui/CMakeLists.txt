@@ -4,10 +4,12 @@ include(${QT_USE_FILE})
 
 SET(arcproxyui_UIS
     mainwindow.ui
+    infodialog.ui
 )
 
 SET(arcproxyui_SRCS
   arcproxy-utils.cpp
+  infodialog.cpp
   mainwindow.cpp
   main.cpp
 )
@@ -15,6 +17,7 @@ SET(arcproxyui_SRCS
 SET(arcproxyui_MOC_HDRS
   arcproxy-utils.h
   mainwindow.h
+  infodialog.h
 )
 
 SET(arcproxyui_RCS 

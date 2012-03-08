@@ -33,6 +33,12 @@ private Q_SLOTS:
 
     void on_removeButton_clicked();
 
+    void on_passphraseText_returnPressed();
+
+    void on_proxyTypeCombo_currentIndexChanged(int index);
+
+    void on_infoButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

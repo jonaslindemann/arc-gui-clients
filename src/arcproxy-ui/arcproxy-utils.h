@@ -51,6 +51,9 @@ public:
     int removeProxy();
 
     void setPassphrase(const QString& passphrase);
+    void setValidityPeriod(int seconds);
+    void setUseGSIProxy(bool flag);
+    bool getUseGSIProxy();
 
     QString getIdentity();
 
