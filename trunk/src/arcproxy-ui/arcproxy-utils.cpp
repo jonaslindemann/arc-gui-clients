@@ -189,8 +189,6 @@ static std::string tokens_to_string(std::vector<std::string> tokens) {
 ArcProxyController::ArcProxyController()
     :logger(Arc::Logger::getRootLogger(), "arcproxy"), logCerr(std::cerr)
 {
-    std::cout << "ArcProxyController()" << std::endl;
-
     setlocale(LC_ALL, "");
 
     m_use_gsi_comm = false;
@@ -221,10 +219,19 @@ void ArcProxyController::setPassphrase(const QString& passphrase)
     m_passphrase = passphrase;
 }
 
+void ArcProxyController::setUseGSIProxy(bool flag)
+{
+    m_use_gsi_proxy = flag;
+}
+
+bool ArcProxyController::getUseGSIProxy()
+{
+    return m_use_gsi_proxy;
+}
+
+
 int ArcProxyController::initialize()
 {
-    std::cout << "initialize()" << std::endl;
-
     Arc::Logger::getRootLogger().removeDestinations();
     Arc::Logger::getRootLogger().addDestination(logCerr);
     Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
@@ -315,6 +322,18 @@ QString ArcProxyController::getIdentity()
     identity = cred.GetDN().c_str();
     return identity;
 }
+
+void ArcProxyController::setValidityPeriod(int seconds)
+{
+    std::string constraintString;
+    std::stringstream out;
+    out << "validityPeriod=" << seconds;
+    constraintString = out.str();
+
+    m_constraintlist.clear();
+    m_constraintlist.push_back(constraintString);
+}
+
 
 int ArcProxyController::printInformation()
 {
@@ -454,8 +473,6 @@ int ArcProxyController::printInformation()
 
 int ArcProxyController::removeProxy()
 {
-    std::cout << "removeProxy()" << std::endl;
-
     if (m_proxy_path.empty()) {
         logger.msg(Arc::ERROR, "Cannot find the path of the proxy file, "
                      "please setup environment X509_USER_PROXY, "
@@ -474,8 +491,6 @@ int ArcProxyController::removeProxy()
 
 int ArcProxyController::generateProxy()
 {
-    std::cout << "generateProxy()" << std::endl;
-
     Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization");

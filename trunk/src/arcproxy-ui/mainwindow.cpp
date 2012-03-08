@@ -3,6 +3,8 @@
 
 #include <QMessageBox>
 
+#include "infodialog.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -18,7 +20,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_proxyController.initialize();
     ui->identityText->setText(m_proxyController.getIdentity());
+
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QDateTime notValidAfter = currentTime.addSecs(12*60*60);
+
+    ui->proxyLifeTimeEdit->setDateTime(notValidAfter);
     ui->passphraseText->setFocus();
+
+    if (m_proxyController.getUseGSIProxy())
+        ui->proxyTypeCombo->setCurrentIndex(1);
+    else
+        ui->proxyTypeCombo->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
@@ -50,17 +62,66 @@ void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
 }
 
 void MainWindow::on_generateButton_clicked()
-{
+{   
+    if (ui->passphraseText->text().isEmpty())
+    {
+        QMessageBox::warning(this, "Proxy generation", "Passphrase can't be empy.");
+        return;
+    }
+
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QDateTime notAfterTime = ui->proxyLifeTimeEdit->dateTime();
+
+    m_proxyController.setValidityPeriod(currentTime.secsTo(notAfterTime));
+
     m_proxyController.setPassphrase(ui->passphraseText->text());
     int result = m_proxyController.generateProxy();
 
     if (result!=EXIT_SUCCESS)
-    {
         QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
-    }
+    else
+        QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
+
+
 }
 
 void MainWindow::on_removeButton_clicked()
 {
     m_proxyController.removeProxy();
+}
+
+void MainWindow::on_passphraseText_returnPressed()
+{
+    if (ui->passphraseText->text().isEmpty())
+    {
+        QMessageBox::warning(this, "Proxy generation", "Passphrase can't be empy.");
+        return;
+    }
+
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QDateTime notAfterTime = ui->proxyLifeTimeEdit->dateTime();
+
+    m_proxyController.setValidityPeriod(currentTime.secsTo(notAfterTime));
+
+    m_proxyController.setPassphrase(ui->passphraseText->text());
+    int result = m_proxyController.generateProxy();
+
+    if (result!=EXIT_SUCCESS)
+        QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
+    else
+        QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
+}
+
+void MainWindow::on_proxyTypeCombo_currentIndexChanged(int index)
+{
+    if (index == 0)
+        m_proxyController.setUseGSIProxy(false);
+    else
+        m_proxyController.setUseGSIProxy(true);
+}
+
+void MainWindow::on_infoButton_clicked()
+{
+    InfoDialog dlg;
+    dlg.exec();
 }
