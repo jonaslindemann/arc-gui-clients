@@ -3,12 +3,17 @@
 import os, sys, shutil
 
 buildDir = "./builddir"
+binDir = "./bin"
 
 if __name__ == '__main__':
 	
 	if os.path.exists(buildDir):
 		print "Removing build dir..."
 		shutil.rmtree(buildDir)
+		
+	if os.path.exists(binDir):
+		print "Removing bin dir..."
+		shutil.rmtree(binDir)
 
 	print "Creating build dir..."
 	os.mkdir(buildDir)
