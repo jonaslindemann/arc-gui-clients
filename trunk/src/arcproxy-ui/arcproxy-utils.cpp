@@ -69,7 +69,7 @@ static void write_proxy_file(const std::string& path, const std::string& content
     ::close(f);
 }
 
-static void m_remove_proxy_file(const std::string& path) {
+static void remove_proxy_file(const std::string& path) {
     if((::unlink(path.c_str()) != 0) && (errno != ENOENT)) {
         throw std::runtime_error("Failed to remove proxy file " + path);
     }
@@ -1243,7 +1243,7 @@ int ArcProxyController::generateProxy()
             if(!cstore.Store(myproxyopt,proxy_cred_str_pem,true,proxy_start,proxy_period))
                 throw std::invalid_argument("Failed to delegate proxy to MyProxy service");
 
-            m_remove_proxy_file(m_proxy_path);
+            remove_proxy_file(m_proxy_path);
 
             std::cout << Arc::IString("Succeeded to put a proxy onto MyProxy server") << std::endl;
 
@@ -1252,7 +1252,7 @@ int ArcProxyController::generateProxy()
     } catch (std::exception& err) {
         logger.msg(Arc::ERROR, err.what());
         tls_process_error(logger);
-        m_remove_proxy_file(m_proxy_path);
+        remove_proxy_file(m_proxy_path);
         return EXIT_FAILURE;
     }
 
