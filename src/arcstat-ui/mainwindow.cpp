@@ -19,10 +19,19 @@ MainWindow::MainWindow(QWidget *parent) :
     m_debugStream = new QDebugStream(std::cout, this);
     m_debugStream2 = new QDebugStream(std::cerr, this);
 
+    // Change splitter
+
+    ui->leftRightSplitter->setStretchFactor(0,1);
+    ui->leftRightSplitter->setStretchFactor(1,2);
+    ui->jobListTable->setColumnWidth(2, 100);
+
+    ui->topBottomSplitter->setStretchFactor(0,4);
+
     // Create job controller
 
     m_jobController = new ArcJobController();
-    m_jobController->setTabWidget(ui->tabWidget);
+    m_jobController->setJobTable(ui->jobTable);
+    m_jobController->setJobListTable(ui->jobListTable);
     m_jobController->setup();
 
     connect(m_jobController, SIGNAL(onQueryJobStatusDone()), this, SLOT(onQueryJobStatusDone()));
@@ -41,7 +50,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::disableActions()
 {
-    ui->tabWidget->setDisabled(true);
+    ui->jobTable->setDisabled(true);
     ui->actionCleanSelected->setDisabled(true);
     ui->actionDownloadSelected->setDisabled(true);
     ui->actionKillSelected->setDisabled(true);
@@ -51,7 +60,7 @@ void MainWindow::disableActions()
 
 void MainWindow::enableActions()
 {
-    ui->tabWidget->setEnabled(true);
+    ui->jobTable->setEnabled(true);
     ui->actionCleanSelected->setEnabled(true);
     ui->actionDownloadSelected->setEnabled(true);
     ui->actionKillSelected->setEnabled(true);
