@@ -13,11 +13,14 @@ TEMPLATE = app
 SOURCES += src/arcstat-ui/main.cpp\
         src/artstat-ui/mainwindow.cpp \
     src/arcstat-ui/arcjobcontroller.cpp \
-    src/arcstat-ui/jobinfo.cpp
+    src/arcstat-ui/jobinfo.cpp \
+    src/arcstat-ui/mainwindow.cpp \
+    src/arcstat-ui/JmBase.cpp
 
 HEADERS  += src/arcstat-ui/mainwindow.h \
     src/arcstat-ui/arcjobcontroller.h \
-    src/arcstat-ui/jobinfo.h
+    src/arcstat-ui/jobinfo.h \
+    src/arcstat-ui/JmBase.h
 
 FORMS    += src/arcstat-ui/mainwindow.ui
 

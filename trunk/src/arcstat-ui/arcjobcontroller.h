@@ -13,28 +13,30 @@
 #include <arc/client/Job.h>
 #include <arc/client/JobSupervisor.h>
 
+#include "JmBase.h"
+
 class ArcJobController : public QObject
 {
     Q_OBJECT
 private:
-    QTabWidget* m_tabWidget;
-    QStringList m_jobLists;
-    QString m_currentJobListFile;
-    QList<QTableWidget*> m_jobTables;
+
     QFutureWatcher<void> m_queryJobStatusWatcher;
     QFutureWatcher<void> m_downloadJobsWatcher;
     QFutureWatcher<void> m_killJobsWatcher;
     QFutureWatcher<void> m_cleanJobsWatcher;
+    QFutureWatcher<void> m_resubmitJobsWatcher;
     QFuture<void> m_queryJobStatusFuture;
-    QTableWidget* m_currentJobTable;
+    QTableWidget* m_jobTable;
+    QTableWidget* m_jobListTable;
 
     Arc::JobSupervisor* m_jobSupervisor;
     std::list<Arc::Job> m_arcJobList;
     Arc::UserConfig m_userConfig;
-    QList<const Arc::Job*> m_jobList;
-    QSet<int> m_jobSelectionIndex;
-    QList<const Arc::Job*> m_selectedJobList;
     std::list<std::string> m_selectedJobIds;
+
+    QList<JmJobList*> m_jmJobLists;
+    JmJobList* m_currentJmJobList;
+    QSet<int> m_jobSelectionIndex;
 
     QString m_downloadDir;
     Arc::LogStream logDest;
@@ -44,7 +46,10 @@ public:
 
     void setup();
 
-    void setTabWidget(QTabWidget* tabWidget);
+    void updateJobList();
+
+    void setJobTable(QTableWidget* tableWidget);
+    void setJobListTable(QTableWidget* tableWidget);
     void setStatusOutput(QTextEdit* statusOutput);
     void newJobList(const QString& jobListName);
     void openJobList(const QString& jobListName);
@@ -58,6 +63,7 @@ public:
     void startDownloadJobs();
     void startKillJobs();
     void startCleanJobs();
+    void startResubmitJobs();
 
     void selectAllJobs();
     void clearSelection();
@@ -65,12 +71,14 @@ public:
     void cleanJobs();
     void killJobs();
     void getJobs();
+    void resubmitJobs();
 
 private Q_SLOTS:
     void queryJobStatusFinished();
     void downloadJobsFinished();
     void killJobsFinished();
     void cleanJobsFinished();
+    void resubmitJobsFinished();
     void itemSelectionChanged();
 
 Q_SIGNALS:
@@ -78,6 +86,7 @@ Q_SIGNALS:
     void onDownloadJobsDone();
     void onKillJobsDone();
     void onCleanJobsDone();
+    void onResubmitJobsDone();
 };
 
 #endif // ARCJOBCONTROLLER_H

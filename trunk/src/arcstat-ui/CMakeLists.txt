@@ -7,12 +7,14 @@ SET(arcstatui_UIS
 )
 
 SET(arcstatui_SRCS
+  JmBase.cpp
   mainwindow.cpp
   main.cpp
   arcjobcontroller.cpp
 )
 
 SET(arcstatui_MOC_HDRS
+  JmBase.h
   mainwindow.h
   arcjobcontroller.h
 )
