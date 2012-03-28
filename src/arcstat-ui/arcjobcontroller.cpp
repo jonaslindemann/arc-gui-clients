@@ -463,19 +463,173 @@ void ArcJobController::resubmitJobs()
     if (m_selectedJobIds.size()==0)
         return;
 
-    // Create job supervisor and job controllers
+    //-------------------------------------------------
 
-    qDebug() << "Creating job supervisor...";
-    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
-    qDebug() << "Getting job controllers...";
-    std::list<Arc::JobController*> jobControllers = jobSupervisor.GetJobControllers();
-    std::list<Arc::JobController*>::iterator cit;
-
+    bool all = false;
+    std::string joblist;
+    std::string jobidfileout;
+    std::list<std::string> jobidfilesin;
+    std::list<std::string> clusters;
+    std::list<std::string> qlusters;
+    std::list<std::string> indexurls;
+    bool keep = false;
+    bool same = false;
     std::list<std::string> status;
+    bool show_plugins = false;
+    int timeout = -1;
+    std::string conffile;
+    std::string debug;
+    std::string broker;
 
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        qDebug() << "Cleaning job...";
-        //(*cit)->Resubmit(status, false);
+    // Different selected services are needed in two different context,
+    // so the two copies of UserConfig objects will contain different
+    // selected services.
+    Arc::UserConfig usercfg2 = m_userConfig;
+
+    if (m_jobSupervisor!=0)
+        delete m_jobSupervisor;
+
+    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_selectedJobIds);
+    //Arc::JobSupervisor m_jobSupervisor(m_userConfig, m_selectedJobIds);
+    if (!m_jobSupervisor->JobsFound()) {
+      std::cout << Arc::IString("No jobs") << std::endl;
+      return;
+    }
+    std::list<Arc::JobController*> jobcont = m_jobSupervisor->GetJobControllers();
+
+    // If the user specified a joblist on the command line joblist equals
+    // usercfg.JobListFile(). If not use the default, ie. usercfg.JobListFile().
+    if (jobcont.empty()) {
+        qDebug() << "No job controller plugins loaded";
+      return;
+    }
+
+    // Clearing jobs.
+    m_selectedJobIds.clear();
+
+    std::list<Arc::Job> toberesubmitted;
+    for (std::list<Arc::JobController*>::iterator it = jobcont.begin();
+         it != jobcont.end(); it++) {
+      std::list<Arc::Job> cont_jobs;
+      cont_jobs = (*it)->GetJobDescriptions(status, true);
+      toberesubmitted.insert(toberesubmitted.begin(), cont_jobs.begin(), cont_jobs.end());
+    }
+    if (toberesubmitted.empty()) {
+        qDebug() << "No jobs to resubmit";
+      return;
+    }
+
+    if (same) {
+      qlusters.clear();
+      usercfg2.ClearSelectedServices();
+    }
+    else if (!qlusters.empty() || !indexurls.empty())
+      usercfg2.ClearSelectedServices();
+
+    // Preventing resubmitted jobs to be send to old clusters
+
+    for (std::list<Arc::Job>::iterator it = toberesubmitted.begin();
+         it != toberesubmitted.end(); it++)
+      if (same) {
+        qlusters.push_back(it->Flavour + ":" + it->Cluster.str());
+        qDebug() << "Trying to resubmit job to " << it->Cluster.str().c_str();
+      }
+      else {
+        qlusters.remove(it->Flavour + ":" + it->Cluster.str());
+        qlusters.push_back("-" + it->Flavour + ":" + it->Cluster.str());
+        qDebug() << "Disregarding " << it->Cluster.str().c_str();
+      }
+    qlusters.sort();
+    qlusters.unique();
+
+    usercfg2.AddServices(qlusters, Arc::COMPUTING);
+    if (!same && !indexurls.empty())
+      usercfg2.AddServices(indexurls, Arc::INDEX);
+
+    // Resubmitting jobs
+    Arc::TargetGenerator targen(usercfg2);
+    targen.RetrieveExecutionTargets();
+
+    if (targen.GetExecutionTargets().empty()) {
+      std::cout << Arc::IString("Job submission aborted because no resource returned any information") << std::endl;
+      return;
+    }
+
+    Arc::BrokerLoader loader;
+    Arc::Broker *ChosenBroker = loader.load(m_userConfig.Broker().first, usercfg2);
+    if (!ChosenBroker) {
+        qDebug() << "Unable to load broker " << usercfg2.Broker().first.c_str();
+      return;
+    }
+
+    std::list<Arc::Job> resubmittedJobs;
+
+    // Loop over jobs
+    for (std::list<Arc::Job>::iterator it = toberesubmitted.begin();
+         it != toberesubmitted.end(); it++) {
+      resubmittedJobs.push_back(Arc::Job());
+
+      std::list<Arc::JobDescription> jobdescs;
+      Arc::JobDescription::Parse(it->JobDescriptionDocument, jobdescs); // Do not check for validity. We are only interested in that the outgoing job description is valid.
+      if (jobdescs.empty()) {
+        std::cout << Arc::IString("Job resubmission failed, unable to parse obtained job description") << std::endl;
+        resubmittedJobs.pop_back();
+        continue;
+      }
+      jobdescs.front().Identification.ActivityOldId = it->ActivityOldID;
+      jobdescs.front().Identification.ActivityOldId.push_back(it->JobID.str());
+
+      // remove the queuename which was added during the original submission of the job
+      jobdescs.front().Resources.QueueName = "";
+
+      if (ChosenBroker->Submit(targen.GetExecutionTargets(), jobdescs.front(), resubmittedJobs.back())) {
+        std::string jobid = resubmittedJobs.back().JobID.str();
+        if (!jobidfileout.empty())
+          if (!Arc::Job::WriteJobIDToFile(jobid, jobidfileout))
+              qDebug() << "Cannot write jobid " << jobid.c_str() << " to file " << jobidfileout.c_str();
+        m_selectedJobIds.push_back(it->JobID.str());
+      }
+      else {
+        std::cout << Arc::IString("Job resubmission failed, no more possible targets") << std::endl;
+        resubmittedJobs.pop_back();
+      }
+    } //end loop over all job descriptions
+
+    if (!Arc::Job::WriteJobsToFile(m_userConfig.JobListFile(), resubmittedJobs)) {
+      std::cout << Arc::IString("Warning: Failed to lock job list file %s", m_userConfig.JobListFile())
+                << std::endl;
+      std::cout << Arc::IString("To recover missing jobs, run arcsync") << std::endl;
+    }
+
+    if (m_selectedJobIds.empty())
+      return;
+
+    //m_userConfig.ClearSelectedServices();
+
+    // Only kill and clean jobs that have been resubmitted
+
+    if (m_jobSupervisor!=0)
+        delete m_jobSupervisor;
+
+    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_selectedJobIds);
+
+    //Arc::JobSupervisor killmaster(m_userConfig, m_selectedJobIds);
+    if (!m_jobSupervisor->JobsFound()) {
+      std::cout << Arc::IString("No jobs") << std::endl;
+      return;
+    }
+    std::list<Arc::JobController*> killcont = m_jobSupervisor->GetJobControllers();
+    if (killcont.empty()) {
+        qDebug() << "No job controller plugins loaded";
+      return;
+    }
+
+    for (std::list<Arc::JobController*>::iterator it = killcont.begin();
+         it != killcont.end(); it++) {
+      // Order matters.
+      if (!(*it)->Kill(status, keep) && !keep && !(*it)->Clean(status, true)) {
+          qDebug() << "Job could not be killed or cleaned";
+      }
     }
 }
 
@@ -557,8 +711,8 @@ void ArcJobController::itemSelectionChanged()
             qDebug() << realIdx;
             //m_selectedJobList.append(m_jobList[realIdx]);
             //m_selectedJobIds.push_back(m_jobList[realIdx]->JobID.str());
-            m_selectedJobIds.push_back(m_currentJmJobList->at(idx)->id().toStdString());
-            qDebug() << m_currentJmJobList->at(idx)->id();
+            m_selectedJobIds.push_back(m_currentJmJobList->at(realIdx)->id().toStdString());
+            qDebug() << m_currentJmJobList->at(realIdx)->id();
         }
     }
 

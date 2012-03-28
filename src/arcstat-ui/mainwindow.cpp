@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_jobController, SIGNAL(onDownloadJobsDone()), this, SLOT(onDownloadJobsDone()));
     connect(m_jobController, SIGNAL(onKillJobsDone()), this, SLOT(onKillJobsDone()));
     connect(m_jobController, SIGNAL(onCleanJobsDone()), this, SLOT(onCleanJobsDone()));
+    connect(m_jobController, SIGNAL(onResubmitJobsDone()), this, SLOT(onResubmitJobsDone()));
 }
 
 MainWindow::~MainWindow()
@@ -143,6 +144,14 @@ void MainWindow::onCleanJobsDone()
     m_jobController->startQueryJobStatus();
 }
 
+void MainWindow::onResubmitJobsDone()
+{
+    this->statusBar()->showMessage("");
+    this->enableActions();
+    qDebug() << "onResubmitJobsDone()";
+    m_jobController->startQueryJobStatus();
+}
+
 void MainWindow::on_actionOpenJobList_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this,
@@ -198,4 +207,11 @@ void MainWindow::on_actionDownloadSelected_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
+}
+
+void MainWindow::on_actionResubmitSelected_triggered()
+{
+    this->disableActions();
+    m_jobController->startResubmitJobs();
+    this->statusBar()->showMessage("Resubmitting jobs...");
 }

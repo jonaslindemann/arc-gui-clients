@@ -40,6 +40,7 @@ private Q_SLOTS:
     void onDownloadJobsDone();
     void onKillJobsDone();
     void onCleanJobsDone();
+    void onResubmitJobsDone();
 
     void on_tabWidget_currentChanged(int index);
 
@@ -56,6 +57,8 @@ private Q_SLOTS:
     void on_actionDownloadSelected_triggered();
 
     void on_actionExit_triggered();
+
+    void on_actionResubmitSelected_triggered();
 
 private:
     Ui::MainWindow *ui;

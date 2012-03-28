@@ -25,7 +25,6 @@ private:
     QFutureWatcher<void> m_killJobsWatcher;
     QFutureWatcher<void> m_cleanJobsWatcher;
     QFutureWatcher<void> m_resubmitJobsWatcher;
-    QFuture<void> m_queryJobStatusFuture;
     QTableWidget* m_jobTable;
     QTableWidget* m_jobListTable;
 
