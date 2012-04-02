@@ -27,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->topBottomSplitter->setStretchFactor(0,4);
 
+    QCoreApplication::setOrganizationName("Lunarc");
+    QCoreApplication::setOrganizationDomain("lunarc.lu.se");
+    QCoreApplication::setApplicationName("ARC Job Manager");
+
     // Create job controller
 
     m_jobController = new ArcJobController();
@@ -39,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_jobController, SIGNAL(onKillJobsDone()), this, SLOT(onKillJobsDone()));
     connect(m_jobController, SIGNAL(onCleanJobsDone()), this, SLOT(onCleanJobsDone()));
     connect(m_jobController, SIGNAL(onResubmitJobsDone()), this, SLOT(onResubmitJobsDone()));
+    connect(m_jobController, SIGNAL(onQueryAllJobListStatusDone()), this, SLOT(onQueryAllJobListStatusDone()));
 }
 
 MainWindow::~MainWindow()
@@ -97,7 +102,8 @@ void MainWindow::showEvent ( QShowEvent * event )
         m_firstShow = false;
 
         this->disableActions();
-        m_jobController->startQueryJobStatus();
+        //m_jobController->startQueryJobStatus();
+        m_jobController->startQueryAllJobListStatus();
     }
 }
 
@@ -118,6 +124,13 @@ void MainWindow::onQueryJobStatusDone()
     this->statusBar()->showMessage("");
     this->enableActions();
     qDebug() << "onQueryJobStatusDone()";
+}
+
+void MainWindow::onQueryAllJobListStatusDone()
+{
+    this->statusBar()->showMessage("");
+    this->enableActions();
+    qDebug() << "onQueryAllJobListStatusDone()";
 }
 
 void MainWindow::onDownloadJobsDone()
@@ -214,4 +227,9 @@ void MainWindow::on_actionResubmitSelected_triggered()
     this->disableActions();
     m_jobController->startResubmitJobs();
     this->statusBar()->showMessage("Resubmitting jobs...");
+}
+
+void MainWindow::on_actionRemoveJobList_triggered()
+{
+    m_jobController->removeSelectedJobList();
 }

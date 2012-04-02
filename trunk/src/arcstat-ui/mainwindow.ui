@@ -118,6 +118,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenJobList"/>
+    <addaction name="actionRemoveJobList"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -159,6 +160,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpenJobList"/>
+   <addaction name="actionRemoveJobList"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionKillSelected"/>
    <addaction name="actionCleanSelected"/>
@@ -238,7 +240,7 @@
   <action name="actionOpenJobList">
    <property name="icon">
     <iconset resource="arcstat-ui.qrc">
-     <normaloff>:/arcstat-ui/images/document-open.png</normaloff>:/arcstat-ui/images/document-open.png</iconset>
+     <normaloff>:/arcstat-ui/images/add.png</normaloff>:/arcstat-ui/images/add.png</iconset>
    </property>
    <property name="text">
     <string>Open job list...</string>
@@ -266,6 +268,15 @@
    </property>
    <property name="shortcut">
     <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionRemoveJobList">
+   <property name="icon">
+    <iconset resource="arcstat-ui.qrc">
+     <normaloff>:/arcstat-ui/images/remove.png</normaloff>:/arcstat-ui/images/remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remove job list</string>
    </property>
   </action>
  </widget>

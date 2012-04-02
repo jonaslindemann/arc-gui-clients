@@ -32,6 +32,7 @@
 #include <QPixmap>
 #include <QPainter>
 #include <QLabel>
+#include <QSettings>
 
 #include "qdebugstream.h"
 
@@ -42,6 +43,8 @@ ArcJobController::ArcJobController()
     m_jobTable = 0;
     m_jobSupervisor = 0;
     m_jobListTable = 0;
+
+    this->loadState();
 
     //Arc::ArcLocation::Init(argv[0]);
 
@@ -55,10 +58,13 @@ ArcJobController::ArcJobController()
     connect(&m_killJobsWatcher, SIGNAL(finished()), this, SLOT(killJobsFinished()));
     connect(&m_cleanJobsWatcher, SIGNAL(finished()), this, SLOT(cleanJobsFinished()));
     connect(&m_resubmitJobsWatcher, SIGNAL(finished()), this, SLOT(resubmitJobsFinished()));
+    connect(&m_queryAllJobListStatusWatcher, SIGNAL(finished()), this, SLOT(queryAllJobListStatusFinished()));
 }
 
 ArcJobController::~ArcJobController()
 {
+    this->saveState();
+
     if (m_jobSupervisor!=0)
         delete m_jobSupervisor;
 }
@@ -70,8 +76,68 @@ void ArcJobController::setStatusOutput(QTextEdit *statusOutput)
 void ArcJobController::setup()
 {
     m_jobTable->clear();
-    this->newJobList(QString(m_userConfig.JobListFile().c_str()));
+
+    QStringList labels;
+    labels << "JobID" << "Name" << "State";
+    m_jobTable->setHorizontalHeaderLabels(labels);
+    m_jobTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    m_jobTable->verticalHeader()->hide();
+    m_jobTable->setShowGrid(true);
+    m_jobTable->setFrameStyle(QFrame::NoFrame);
+
+    if (m_jmJobLists.count()==0)
+        this->newJobList(QString(m_userConfig.JobListFile().c_str()));
     this->updateJobList();
+    connect(m_jobListTable, SIGNAL(itemSelectionChanged()), this, SLOT(jobListSelectionChanged()));
+    connect(m_jobTable, SIGNAL(itemSelectionChanged()), this, SLOT(jobTableSelectionChanged()));
+}
+
+void ArcJobController::saveState()
+{
+    qDebug() << "saveState";
+
+    QSettings settings;
+
+    settings.beginGroup("JobLists");
+    settings.beginWriteArray("joblists");
+    int i;
+
+    for (i=0; i<m_jmJobLists.count(); i++)
+    {
+        settings.setArrayIndex(i);
+        settings.setValue("joblist", m_jmJobLists[i]->filename());
+    }
+    settings.endArray();
+    settings.endGroup();
+    settings.sync();
+}
+
+void ArcJobController::loadState()
+{
+    qDebug() << "loadState";
+
+    int i;
+
+    for (i=0;i<m_jmJobLists.count();i++)
+        delete m_jmJobLists[i];
+
+    m_jmJobLists.clear();
+
+    QSettings settings;
+
+    settings.beginGroup("JobLists");
+    int size = settings.beginReadArray("joblists");
+    for (i=0; i<size; i++)
+    {
+        settings.setArrayIndex(i);
+        JmJobList* jobList = new JmJobList();
+        jobList->setFilename(settings.value("joblist").toString());
+        m_jmJobLists.append(jobList);
+    }
+    settings.endArray();
+    settings.endGroup();
+
+    m_currentJmJobList = m_jmJobLists[0];
 }
 
 void ArcJobController::updateJobList()
@@ -96,7 +162,7 @@ void ArcJobController::updateJobList()
     */
 
     QStringList labels;
-    labels << "Job list" << "Size" << "Status (W/R/F/O)";
+    labels << "Job list" << "Size" << "Status (W/R/F/O/U)";
     m_jobListTable->setHorizontalHeaderLabels(labels);
     m_jobListTable->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
     m_jobListTable->horizontalHeader()->setResizeMode(1, QHeaderView::ResizeToContents);
@@ -105,7 +171,7 @@ void ArcJobController::updateJobList()
     m_jobListTable->setShowGrid(true);
     m_jobListTable->setFrameStyle(QFrame::NoFrame);
     m_jobListTable->setSelectionBehavior(QTableWidget::SelectRows);
-    //m_jobTable->setSelectionMode(QAbstractItemView::MultiSelection);
+    m_jobTable->setSelectionMode(QAbstractItemView::MultiSelection);
 
     int i;
 
@@ -199,123 +265,23 @@ void ArcJobController::updateJobList()
     }
 }
 
-void ArcJobController::newJobList(const QString &jobListName)
+void ArcJobController::updateJobTable()
 {
-    if (m_jobListTable!=0)
-    {
-        //QTableWidget* jobTable = new QTableWidget(0, 3);
-        m_jobTable->clear();
-        m_jobTable->setRowCount(0);
-        m_jobTable->setColumnCount(3);
-        QStringList labels;
-        labels << "JobID" << "Name" << "State";
-        m_jobTable->setHorizontalHeaderLabels(labels);
-        m_jobTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
-        m_jobTable->verticalHeader()->hide();
-        m_jobTable->setShowGrid(true);
-        m_jobTable->setFrameStyle(QFrame::NoFrame);
-        m_jobTable->setSelectionBehavior(QTableWidget::SelectRows);
-        m_jobTable->setSelectionMode(QAbstractItemView::MultiSelection);
-
-        connect(m_jobTable, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
-
-        JmJobList* jmJobList = new JmJobList();
-        jmJobList->setFilename(jobListName);
-        m_jmJobLists.append(jmJobList);
-
-        // Store index to m_jobList in table, to handle case when table is sorted.
-
-        m_currentJmJobList = jmJobList;
-
-        this->updateJobList();
-
-    }
-}
-
-void ArcJobController::setJobTable(QTableWidget *tableWidget)
-{
-    m_jobTable = tableWidget;
-}
-
-void ArcJobController::setJobListTable(QTableWidget *tableWidget)
-{
-    m_jobListTable = tableWidget;
-}
-
-void ArcJobController::openJobList(const QString& jobListName)
-{
-    this->newJobList(jobListName);
-}
-
-void ArcJobController::setCurrentJobList(int idx)
-{
-    if ((idx>=0)&&(idx<m_jmJobLists.size()))
-    {
-        m_currentJmJobList = m_jmJobLists[idx];
-    }
-}
-
-void ArcJobController::setDownloadDir(const QString& downloadDir)
-{
-    m_downloadDir = downloadDir;
-}
-
-
-void ArcJobController::queryJobStatus()
-{
-    using namespace std;
-
-    // Read existing jobs from job list file
-
-    Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
-
-    // Clear the current JmJobList;
-
-    m_currentJmJobList->clear();
-
-    // Create an initial JmJobList will _all_ jobs in ARC joblist
-
-    std::list<Arc::Job>::iterator jli;
-
-    for (jli=m_arcJobList.begin(); jli!=m_arcJobList.end(); jli++) {
-        QString jobId = (*jli).JobID.fullstr().c_str();
-        QString jobName = (*jli).Name.c_str();
-        m_currentJmJobList->add(jobId, jobName, "Unknown");
-    }
-
-    // Create job supervisor and job controllers
-
-    if (m_jobSupervisor!=0)
-        delete m_jobSupervisor;
-
-    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
-    std::list<Arc::JobController*> jobControllers = m_jobSupervisor->GetJobControllers();
-
-    // Query status
-
-    std::list<std::string> status;
-    std::vector<const Arc::Job*> jobs;
-    std::list<Arc::JobController*>::iterator cit;
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        //cout << "Querying job controller." << endl;
-        (*cit)->FetchJobs(status, jobs);
-    }
-
-    // Update JmJobList
-
-    std::vector<const Arc::Job*>::iterator sit;
-
-    for (sit=jobs.begin(); sit!=jobs.end(); sit++) {
-        QString jobId = (*sit)->JobID.fullstr().c_str();
-        QString jobState = (*sit)->State.GetGeneralState().c_str();
-        m_currentJmJobList->fromJobId(jobId)->setState(jobState);
-    }
-
     // Populate QT Table
 
     m_jobTable->setRowCount(0);
     m_jobTable->setColumnCount(3);
     m_jobTable->setSortingEnabled(false);
+
+
+    QStringList labels;
+    labels << "JobID" << "Name" << "State";
+    m_jobTable->setHorizontalHeaderLabels(labels);
+    m_jobTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    m_jobTable->verticalHeader()->hide();
+    m_jobTable->setShowGrid(true);
+    m_jobTable->setFrameStyle(QFrame::NoFrame);
+
     int currentRow = 0;
 
     int i;
@@ -353,6 +319,139 @@ void ArcJobController::queryJobStatus()
     }
 
     m_jobTable->setSortingEnabled(true);
+}
+
+void ArcJobController::newJobList(const QString &jobListName)
+{
+    if (m_jobListTable!=0)
+    {
+        /*
+        //QTableWidget* jobTable = new QTableWidget(0, 3);
+        m_jobTable->clear();
+        m_jobTable->setRowCount(0);
+        m_jobTable->setColumnCount(3);
+        QStringList labels;
+        labels << "JobID" << "Name" << "State";
+        m_jobTable->setHorizontalHeaderLabels(labels);
+        m_jobTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+        m_jobTable->verticalHeader()->hide();
+        m_jobTable->setShowGrid(true);
+        m_jobTable->setFrameStyle(QFrame::NoFrame);
+        m_jobTable->setSelectionBehavior(QTableWidget::SelectRows);
+        m_jobTable->setSelectionMode(QAbstractItemView::MultiSelection);
+        */
+
+        JmJobList* jmJobList = new JmJobList();
+        jmJobList->setFilename(jobListName);
+        m_jmJobLists.append(jmJobList);
+
+        // Store index to m_jobList in table, to handle case when table is sorted.
+
+        m_currentJmJobList = jmJobList;
+
+        this->updateJobList();
+        this->updateJobTable();
+
+    }
+}
+
+void ArcJobController::setJobTable(QTableWidget *tableWidget)
+{
+    m_jobTable = tableWidget;
+}
+
+void ArcJobController::setJobListTable(QTableWidget *tableWidget)
+{
+    m_jobListTable = tableWidget;
+}
+
+void ArcJobController::openJobList(const QString& jobListName)
+{
+    this->newJobList(jobListName);
+}
+
+void ArcJobController::setCurrentJobList(int idx)
+{
+    if ((idx>=0)&&(idx<m_jmJobLists.size()))
+    {
+        m_currentJmJobList = m_jmJobLists[idx];
+    }
+}
+
+void ArcJobController::setDownloadDir(const QString& downloadDir)
+{
+    m_downloadDir = downloadDir;
+}
+
+void ArcJobController::queryJobStatus(JmJobList* jobList)
+{
+    // Read existing jobs from job list file
+
+    Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
+
+    // Clear the current JmJobList;
+
+    jobList->clear();
+
+    // Create an initial JmJobList will _all_ jobs in ARC joblist
+
+    std::list<Arc::Job>::iterator jli;
+
+    for (jli=m_arcJobList.begin(); jli!=m_arcJobList.end(); jli++) {
+        QString jobId = (*jli).JobID.fullstr().c_str();
+        QString jobName = (*jli).Name.c_str();
+        jobList->add(jobId, jobName, "Unknown");
+    }
+
+    // Create job supervisor and job controllers
+
+    if (m_jobSupervisor!=0)
+        delete m_jobSupervisor;
+
+    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
+    std::list<Arc::JobController*> jobControllers = m_jobSupervisor->GetJobControllers();
+
+    // Query status
+
+    std::list<std::string> status;
+    std::vector<const Arc::Job*> jobs;
+    std::list<Arc::JobController*>::iterator cit;
+    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
+        //cout << "Querying job controller." << endl;
+        (*cit)->FetchJobs(status, jobs);
+    }
+
+    // Update JmJobList
+
+    std::vector<const Arc::Job*>::iterator sit;
+
+    for (sit=jobs.begin(); sit!=jobs.end(); sit++) {
+        QString jobId = (*sit)->JobID.fullstr().c_str();
+        QString jobState = (*sit)->State.GetGeneralState().c_str();
+        jobList->fromJobId(jobId)->setState(jobState);
+    }
+}
+
+void ArcJobController::queryJobStatus()
+{
+    using namespace std;
+
+    if (m_currentJmJobList==0)
+        return;
+
+    this->queryJobStatus(m_currentJmJobList);
+
+    // Update job table
+
+    this->updateJobTable();
+}
+
+void ArcJobController::queryAllJobListStatus()
+{
+    int i;
+
+    for (i=0; i<m_jmJobLists.count(); i++)
+        this->queryJobStatus(m_jmJobLists[i]);
 
 }
 
@@ -360,6 +459,12 @@ void ArcJobController::startQueryJobStatus()
 {
     //Arc::Logger::getRootLogger().removeDestinations();
     m_queryJobStatusWatcher.setFuture(QtConcurrent::run(this, &ArcJobController::queryJobStatus));
+}
+
+void ArcJobController::startQueryAllJobListStatus()
+{
+    //Arc::Logger::getRootLogger().removeDestinations();
+    m_queryAllJobListStatusWatcher.setFuture(QtConcurrent::run(this, &ArcJobController::queryAllJobListStatus));
 }
 
 void ArcJobController::startDownloadJobs()
@@ -390,13 +495,23 @@ void ArcJobController::queryJobStatusFinished()
 {
     qDebug() << "query finished.";
     this->updateJobList();
+    this->updateJobTable();
     Q_EMIT onQueryJobStatusDone();
+}
+
+void ArcJobController::queryAllJobListStatusFinished()
+{
+    qDebug() << "query finished.";
+    this->updateJobList();
+    this->updateJobTable();
+    Q_EMIT onQueryAllJobListStatusDone();
 }
 
 void ArcJobController::downloadJobsFinished()
 {
     qDebug() << "download finished.";
     this->updateJobList();
+    this->updateJobTable();
     Q_EMIT onDownloadJobsDone();
 }
 
@@ -404,6 +519,7 @@ void ArcJobController::killJobsFinished()
 {
     qDebug() << "download finished.";
     this->updateJobList();
+    this->updateJobTable();
     Q_EMIT onKillJobsDone();
 }
 
@@ -411,6 +527,7 @@ void ArcJobController::cleanJobsFinished()
 {
     qDebug() << "download finished.";
     this->updateJobList();
+    this->updateJobTable();
     Q_EMIT onCleanJobsDone();
 }
 
@@ -418,6 +535,7 @@ void ArcJobController::resubmitJobsFinished()
 {
     qDebug() << "download finished.";
     this->updateJobList();
+    this->updateJobTable();
     Q_EMIT onResubmitJobsDone();
 }
 
@@ -684,7 +802,7 @@ void ArcJobController::getJobs()
     }
 }
 
-void ArcJobController::itemSelectionChanged()
+void ArcJobController::jobTableSelectionChanged()
 {   
     int i;
 
@@ -717,4 +835,32 @@ void ArcJobController::itemSelectionChanged()
     }
 
     qDebug() << "<--";
+}
+
+void ArcJobController::jobListSelectionChanged()
+{
+    qDebug() << "jobListSelectionChanged()";
+
+    if (m_jobListTable->selectedItems().count()>0)
+    {
+        m_currentJmJobList = m_jmJobLists[m_jobListTable->selectedItems()[0]->row()];
+        m_userConfig.JobListFile(m_currentJmJobList->filename().toStdString());
+        this->updateJobTable();
+    }
+}
+
+void ArcJobController::removeSelectedJobList()
+{
+    if (m_currentJmJobList!=0)
+    {
+        m_jmJobLists.removeOne(m_currentJmJobList);
+        delete m_currentJmJobList;
+        if (m_jmJobLists.count()>0)
+            m_currentJmJobList = m_jmJobLists.first();
+        else
+            m_currentJmJobList = 0;
+
+        this->updateJobList();
+        this->updateJobTable();
+    }
 }

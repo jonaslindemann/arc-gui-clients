@@ -1,6 +1,7 @@
 #include "JmBase.h"
 
 #include <QFileInfo>
+#include <QDebug>
 
 JmJob::JmJob()
 {
@@ -130,6 +131,7 @@ QString JmJobList::name()
 
 void JmJobList::setFilename(QString filename)
 {
+    qDebug()<< "setFilename " << filename;
     if (filename!="")
     {
         m_filename = filename;

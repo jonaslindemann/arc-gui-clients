@@ -37,6 +37,7 @@ protected:
 private Q_SLOTS:
     void on_actionRefresh_triggered();
     void onQueryJobStatusDone();
+    void onQueryAllJobListStatusDone();
     void onDownloadJobsDone();
     void onKillJobsDone();
     void onCleanJobsDone();
@@ -59,6 +60,8 @@ private Q_SLOTS:
     void on_actionExit_triggered();
 
     void on_actionResubmitSelected_triggered();
+
+    void on_actionRemoveJobList_triggered();
 
 private:
     Ui::MainWindow *ui;
