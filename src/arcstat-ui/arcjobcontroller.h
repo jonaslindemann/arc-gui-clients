@@ -8,6 +8,7 @@
 #include <QFutureWatcher>
 #include <QHash>
 #include <QSet>
+#include <QTableWidgetItem>
 
 #include <arc/UserConfig.h>
 #include <arc/client/Job.h>
@@ -25,6 +26,7 @@ private:
     QFutureWatcher<void> m_killJobsWatcher;
     QFutureWatcher<void> m_cleanJobsWatcher;
     QFutureWatcher<void> m_resubmitJobsWatcher;
+    QFutureWatcher<void> m_queryAllJobListStatusWatcher;
     QTableWidget* m_jobTable;
     QTableWidget* m_jobListTable;
 
@@ -39,46 +41,54 @@ private:
 
     QString m_downloadDir;
     Arc::LogStream logDest;
+    void updateJobList();
+    void updateJobTable();
+
 public:
     ArcJobController();
     virtual ~ArcJobController();
 
     void setup();
 
-    void updateJobList();
-
     void setJobTable(QTableWidget* tableWidget);
     void setJobListTable(QTableWidget* tableWidget);
     void setStatusOutput(QTextEdit* statusOutput);
-    void newJobList(const QString& jobListName);
-    void openJobList(const QString& jobListName);
 
     void setDownloadDir(const QString& downloadDir);
-
     void setCurrentJobList(int idx);
 
+    void newJobList(const QString& jobListName);
+    void openJobList(const QString& jobListName);
+    void removeSelectedJobList();
+    void queryJobStatus(JmJobList* jobList);
     void queryJobStatus();
+    void queryAllJobListStatus();
+    void cleanJobs();
+    void killJobs();
+    void getJobs();
+    void resubmitJobs();
+    void selectAllJobs();
+    void clearSelection();
+
+    void saveState();
+    void loadState();
+
     void startQueryJobStatus();
+    void startQueryAllJobListStatus();
     void startDownloadJobs();
     void startKillJobs();
     void startCleanJobs();
     void startResubmitJobs();
 
-    void selectAllJobs();
-    void clearSelection();
-
-    void cleanJobs();
-    void killJobs();
-    void getJobs();
-    void resubmitJobs();
-
 private Q_SLOTS:
     void queryJobStatusFinished();
+    void queryAllJobListStatusFinished();
     void downloadJobsFinished();
     void killJobsFinished();
     void cleanJobsFinished();
     void resubmitJobsFinished();
-    void itemSelectionChanged();
+    void jobTableSelectionChanged();
+    void jobListSelectionChanged();
 
 Q_SIGNALS:
     void onQueryJobStatusDone();
@@ -86,6 +96,7 @@ Q_SIGNALS:
     void onKillJobsDone();
     void onCleanJobsDone();
     void onResubmitJobsDone();
+    void onQueryAllJobListStatusDone();
 };
 
 #endif // ARCJOBCONTROLLER_H
