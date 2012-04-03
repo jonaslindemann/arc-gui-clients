@@ -80,8 +80,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConf
 
 target_link_libraries (arcproxy-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
 
-if(LINUX)
-install(TARGETS arcproxy-ui
-   RUNTIME
-   DESTINATION bin)
-endif(LINUX)
+#if(LINUX)
+install(TARGETS arcproxy-ui DESTINATION bin)
+#endif(LINUX)

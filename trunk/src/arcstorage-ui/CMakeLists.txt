@@ -90,8 +90,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Ar
 
 target_link_libraries (arcstorage-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES})
 
-if (LINUX)
-install(TARGETS arcstorage-ui
-   RUNTIME
-   DESTINATION bin)
-endif(LINUX)
+#if (LINUX)
+install(TARGETS arcstorage-ui DESTINATION bin)
+#endif(LINUX)
