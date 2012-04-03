@@ -1,5 +1,5 @@
 -----------------------------------------------
-ARC Storage Explorer  installation instructions
+ARC GUI Clients installation instructions
 -----------------------------------------------
 
 ARC Storage Explrer (arcstorage-ui)  is a prototype user interface client for 
@@ -14,7 +14,7 @@ QT4
 glib
 glibmm
 sigc++
-ARC client libraries
+ARC client libraries (1.1)
 
 ------------
 Installation
@@ -22,10 +22,8 @@ Installation
 
 Untar the tarball in a suitable location:
 
-$ tar xvzf ArcStorageExplorer-x.y.tar.gz
-$ cd ArcStorageExplorer-x.y
-
-Edit the macx.pri, unix.pri or win32.pri file with locations of the specified libraries
+$ tar xvzf arc-gui-clients-0.x.y-Source.tar.gz
+$ cd arc-gui-clients-0.x.y-Source
 
 Linux
 -----
