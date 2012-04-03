@@ -77,8 +77,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConf
 
 target_link_libraries (arcstat-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES})
 
-if (LINUX)
-install(TARGETS arcstat-ui
-   RUNTIME
-   DESTINATION bin)
-endif(LINUX)
+#if (LINUX)
+install(TARGETS arcstat-ui DESTINATION bin)
+#endif(LINUX)
