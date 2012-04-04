@@ -114,11 +114,6 @@ void MainWindow::on_actionRefresh_triggered()
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::on_tabWidget_currentChanged(int index)
-{
-
-}
-
 void MainWindow::onQueryJobStatusDone()
 {
     this->statusBar()->showMessage("");

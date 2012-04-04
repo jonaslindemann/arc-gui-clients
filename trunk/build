@@ -12,6 +12,6 @@ if __name__ == '__main__':
 
 	currDir = os.getcwd()
 	os.chdir(buildDir)
-	os.system("make -j4")
+	os.system("make")
 	os.chdir(currDir)
 		

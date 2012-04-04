@@ -2,6 +2,8 @@
 
 #include <QFileInfo>
 #include <QDebug>
+#include <QPainter>
+#include <QPen>
 
 JmJob::JmJob()
 {
@@ -143,5 +145,79 @@ void JmJobList::setFilename(QString filename)
 QString JmJobList::filename()
 {
     return m_filename;
+}
+
+JmJobListDisplay::JmJobListDisplay(QWidget *parent)
+    :QWidget(parent)
+{
+    m_jobList = 0;
+}
+
+void JmJobListDisplay::setJobList(JmJobList* jobList)
+{
+    m_jobList = jobList;
+}
+
+void JmJobListDisplay::paintEvent(QPaintEvent *event)
+{
+    if (m_jobList!=0)
+    {
+        QPainter p(this);
+        //painter.fillRect(rect(), Qt::black);
+        //painter.setPen(QPen(Qt::blue,1));
+
+        int waitingJobs = 0;
+        int runningJobs = 0;
+        int finishedJobs = 0;
+        int otherJobs = 0;
+        int unknownJobs = 0;
+        int totalJobs = m_jobList->count();
+
+        waitingJobs += m_jobList->stateCount("Preparing");
+        waitingJobs += m_jobList->stateCount("Submitting");
+        waitingJobs += m_jobList->stateCount("Hold");
+        waitingJobs += m_jobList->stateCount("Queuing");
+        waitingJobs += m_jobList->stateCount("Finishing");
+        runningJobs += m_jobList->stateCount("Running");
+        finishedJobs += m_jobList->stateCount("Finished");
+        otherJobs += m_jobList->stateCount("Killed");
+        otherJobs += m_jobList->stateCount("Failed");
+        otherJobs += m_jobList->stateCount("Deleted");
+        unknownJobs = m_jobList->stateCount("Unknown");
+        unknownJobs += m_jobList->stateCount("Other");
+
+        p.setBrush(Qt::red);
+
+        // | ----W---- | ---R--- | ---F--- | ---O--- | ---U--- |
+        // 0           x1        x2        x3        x4        x5
+
+        int x1 = int((double)(waitingJobs/(double)totalJobs) * (double)this->width());
+        int x2 = int((double)((waitingJobs+runningJobs)/(double)totalJobs) * (double)this->width());
+        int x3 = int((double)((waitingJobs+runningJobs+finishedJobs)/(double)totalJobs) * (double)this->width());
+        int x4 = int((double)((waitingJobs+runningJobs+finishedJobs+otherJobs)/(double)totalJobs) * (double)this->width());
+        int x5 = this->width() - 1;
+
+        qDebug() << x1;
+        qDebug() << x2;
+        qDebug() << x3;
+        qDebug() << x4;
+
+        p.setBrush(Qt::yellow);
+        p.drawRect(0, 0, x1, this->height()-1);
+        p.setBrush(Qt::cyan);
+        p.drawRect(x1, 0, x2-x1, this->height()-1);
+        p.setBrush(Qt::green);
+        p.drawRect(x2, 0, x3-x2, this->height()-1);
+        p.setBrush(Qt::red);
+        p.drawRect(x3, 0, x4-x3, this->height()-1);
+        p.setBrush(Qt::gray);
+        p.drawRect(x4, 0, x5-x4, this->height()-1);
+        p.end();
+    }
+}
+
+void JmJobListDisplay::resizeEvent(QResizeEvent *event)
+{
+
 }
 

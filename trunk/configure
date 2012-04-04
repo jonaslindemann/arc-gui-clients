@@ -29,6 +29,8 @@ if __name__ == '__main__':
 
     if options.prefix!="":
 	cmakeOptions += "-DCMAKE_INSTALL_PREFIX=%s " % options.prefix
+    else: 
+	cmakeOptions += "-DCMAKE_INSTALL_PREFIX=%s " % os.path.expanduser("~")
 
     if options.debug:
 	cmakeOptions += "-DCMAKE_BUILD_TYPE=Debug "
