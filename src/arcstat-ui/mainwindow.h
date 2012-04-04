@@ -43,8 +43,6 @@ private Q_SLOTS:
     void onCleanJobsDone();
     void onResubmitJobsDone();
 
-    void on_tabWidget_currentChanged(int index);
-
     void on_actionOpenJobList_triggered();
 
     void on_actionSelectAll_triggered();

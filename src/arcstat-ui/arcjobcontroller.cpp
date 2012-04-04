@@ -137,11 +137,19 @@ void ArcJobController::loadState()
     settings.endArray();
     settings.endGroup();
 
-    m_currentJmJobList = m_jmJobLists[0];
+    if (m_jmJobLists.count()>0)
+        m_currentJmJobList = m_jmJobLists[0];
+    else
+        m_currentJmJobList = 0;
 }
 
 void ArcJobController::updateJobList()
 {
+    if (m_jobListTable->selectedItems().count()!=0)
+        this->m_currentJobListIndex = m_jobListTable->selectedItems()[0]->row();
+    else
+        this->m_currentJobListIndex = -1;
+
     m_jobListTable->clear();
     m_jobListTable->setRowCount(0);
     m_jobListTable->setColumnCount(3);
@@ -179,69 +187,8 @@ void ArcJobController::updateJobList()
     {
         JmJobList* jobList = m_jmJobLists.at(i);
 
-        QString statusString;
-
-        int waitingJobs = 0;
-        int runningJobs = 0;
-        int finishedJobs = 0;
-        int otherJobs = 0;
-        int unknownJobs = 0;
-        int totalJobs = jobList->count();
-
-        waitingJobs += jobList->stateCount("Preparing");
-        waitingJobs += jobList->stateCount("Submitting");
-        waitingJobs += jobList->stateCount("Hold");
-        waitingJobs += jobList->stateCount("Queuing");
-        waitingJobs += jobList->stateCount("Finishing");
-        runningJobs += jobList->stateCount("Running");
-        finishedJobs += jobList->stateCount("Finished");
-        otherJobs += jobList->stateCount("Killed");
-        otherJobs += jobList->stateCount("Failed");
-        otherJobs += jobList->stateCount("Deleted");
-        unknownJobs = jobList->stateCount("Unknown");
-        unknownJobs += jobList->stateCount("Other");
-
-        int barLength = 100;
-        int barHeight = 20;
-
-        QPixmap* pix = new QPixmap(barLength, barHeight);
-        QPainter p(pix);
-        p.setBrush(Qt::red);
-
-        // | ----W---- | ---R--- | ---F--- | ---O--- | ---U--- |
-        // 0           x1        x2        x3        x4        x5
-
-        int x1 = int((double)(waitingJobs/(double)totalJobs) * (double)barLength);
-        int x2 = int((double)((waitingJobs+runningJobs)/(double)totalJobs) * (double)barLength);
-        int x3 = int((double)((waitingJobs+runningJobs+finishedJobs)/(double)totalJobs) * (double)barLength);
-        int x4 = int((double)((waitingJobs+runningJobs+finishedJobs+otherJobs)/(double)totalJobs) * (double)barLength);
-        int x5 = barLength - 1;
-
-        qDebug() << x1;
-        qDebug() << x2;
-        qDebug() << x3;
-        qDebug() << x4;
-
-        p.setBrush(Qt::yellow);
-        p.drawRect(0, 0, x1, barHeight-1);
-        p.setBrush(Qt::cyan);
-        p.drawRect(x1, 0, x2-x1, barHeight-1);
-        p.setBrush(Qt::green);
-        p.drawRect(x2, 0, x3-x2, barHeight-1);
-        p.setBrush(Qt::red);
-        p.drawRect(x3, 0, x4-x3, barHeight-1);
-        p.setBrush(Qt::gray);
-        p.drawRect(x4, 0, x5-x4, barHeight-1);
-        p.end();
-
-        statusString += QString::number(waitingJobs);
-        statusString += "/" + QString::number(runningJobs);
-        statusString += "/" + QString::number(finishedJobs);
-        statusString += "/" + QString::number(otherJobs);
-        statusString += "/" + QString::number(unknownJobs);
-
         QStringList tableRow;
-        tableRow << jobList->name() << QString::number(jobList->count()) << statusString;
+        tableRow << jobList->name() << QString::number(jobList->count()) << "";
         m_jobListTable->insertRow(m_jobListTable->rowCount());
 
         QTableWidgetItem* item = new QTableWidgetItem(tableRow[0]);
@@ -253,16 +200,14 @@ void ArcJobController::updateJobList()
         m_jobListTable->item(m_jobListTable->rowCount()-1, 1)->setTextAlignment(Qt::AlignCenter);
         m_jobListTable->item(m_jobListTable->rowCount()-1, 2)->setTextAlignment(Qt::AlignVCenter|Qt::AlignRight);
 
-        //QIcon icon(pix.scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-        QLabel* lbl = new QLabel();
-        lbl->setPixmap(*pix);
-        lbl->setBaseSize(barLength,barHeight);
-        lbl->setContentsMargins(10,0,10,0);
-        m_jobListTable->setCellWidget(m_jobListTable->rowCount()-1, 2, lbl);
-        //m_jobListTable->item(m_jobListTable->rowCount()-1, 2)->setIcon(icon);
+        JmJobListDisplay* jobDisplay = new JmJobListDisplay();
+        jobDisplay->setJobList(jobList);
+        m_jobListTable->setCellWidget(m_jobListTable->rowCount()-1, 2, jobDisplay);
 
     }
+
+    if (m_currentJobListIndex!=-1)
+        m_jobListTable->selectRow(m_currentJobListIndex);
 }
 
 void ArcJobController::updateJobTable()

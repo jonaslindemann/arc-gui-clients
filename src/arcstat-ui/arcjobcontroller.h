@@ -38,6 +38,7 @@ private:
     QList<JmJobList*> m_jmJobLists;
     JmJobList* m_currentJmJobList;
     QSet<int> m_jobSelectionIndex;
+    int m_currentJobListIndex;
 
     QString m_downloadDir;
     Arc::LogStream logDest;

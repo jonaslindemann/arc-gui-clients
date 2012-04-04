@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QHash>
+#include <QWidget>
 
 class JmJob : public QObject
 {
@@ -53,6 +54,23 @@ public:
     QString filename();
 
     int stateCount(QString state);
+};
+
+class JmJobListDisplay : public QWidget
+{
+    Q_OBJECT
+private:
+    JmJobList* m_jobList;
+public:
+    JmJobListDisplay(QWidget *parent = 0);
+
+    void setJobList(JmJobList* jobList);
+
+public Q_SLOTS:
+
+protected:
+    void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // JMBASE_H
