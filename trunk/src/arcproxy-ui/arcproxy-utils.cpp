@@ -34,6 +34,152 @@
 
 #include <openssl/ui.h>
 
+#include <QDir>
+#include <QDebug>
+#include <QFileInfo>
+#include <QMessageBox>
+
+VomsListEntry::VomsListEntry()
+{
+    m_alias = "";
+    m_machine = "";
+    m_port = "";
+    m_hostDn = "";
+    m_officialName = "";
+}
+
+void VomsListEntry::setAlias(QString alias)
+{
+    m_alias = alias;
+}
+
+QString VomsListEntry::alias()
+{
+    return m_alias;
+}
+
+void VomsListEntry::setMachine(QString machine)
+{
+    m_machine = machine;
+}
+
+QString VomsListEntry::machine()
+{
+    return m_machine;
+}
+
+void VomsListEntry::setPort(QString port)
+{
+    m_port = port;
+}
+
+QString VomsListEntry::port()
+{
+    return m_port;
+}
+
+void VomsListEntry::setHostDN(QString dn)
+{
+    m_hostDn = dn;
+}
+
+QString VomsListEntry::hostDN()
+{
+    return m_hostDn;
+}
+
+QString VomsListEntry::officialName()
+{
+    return m_alias;
+}
+
+VomsList::VomsList()
+{
+    this->read();
+}
+
+VomsList::~VomsList()
+{
+    this->clear();
+}
+
+void VomsList::clear()
+{
+    int i;
+
+    for (i=0; i<this->count(); i++)
+        delete this->at(i);
+
+    m_vomsList.clear();
+}
+
+bool VomsList::read()
+{
+    // ~/.arc/vomses, ~/.voms/vomses, $ARC_LOCATION/etc/vomses, $ARC_LOCATION/etc/grid-security/vomses, $PWD/vomses, /etc/vomses, /etc/grid-security/vomses
+
+    QStringList vomsPaths;
+
+    vomsPaths << QDir::homePath() + "/.arc/vomses";
+    vomsPaths << QDir::homePath() + "/.voms/vomses";
+    vomsPaths << "/etc/vomses";
+    vomsPaths << "/etc/grid-security/vomses";
+
+    this->clear();
+
+    int i, j;
+
+    for (i=0; i<vomsPaths.count(); i++)
+    {
+        if (QFileInfo(vomsPaths[i]).exists())
+        {
+            QFile vomsFile(vomsPaths[i]);
+            if(!vomsFile.open(QIODevice::ReadOnly)) {
+                QMessageBox::information(0, "error", vomsFile.errorString());
+            }
+
+            QTextStream in(&vomsFile);
+
+            while(!in.atEnd()) {
+                QString line = in.readLine();
+                QStringList fields = line.split(" ");
+
+                QStringList strippedFields;
+
+                for (j=0; j<fields.count(); j++)
+                {
+                    strippedFields.append(fields[j].replace("\"", ""));
+                }
+
+                qDebug() << strippedFields;
+
+                VomsListEntry* entry = new VomsListEntry();
+                entry->setAlias(strippedFields[0]);
+                entry->setMachine(strippedFields[1]);
+                entry->setPort(strippedFields[2]);
+                entry->setHostDN(strippedFields[3]);
+
+                m_vomsList.append(entry);
+            }
+
+            vomsFile.close();
+        }
+    }
+}
+
+VomsListEntry* VomsList::at(int idx)
+{
+    if ((idx>=0)&&(idx<m_vomsList.count()))
+        return m_vomsList.at(idx);
+    else
+        return 0;
+}
+
+int VomsList::count()
+{
+    return m_vomsList.count();
+}
+
+
 using namespace ArcCredential;
 
 static int create_proxy_file(const std::string& path) {
@@ -212,6 +358,11 @@ ArcProxyController::~ArcProxyController()
 {
     m_passphrase.fill(0);
     m_passphrase.clear();
+}
+
+VomsList& ArcProxyController::vomsList()
+{
+    return m_vomsList;
 }
 
 void ArcProxyController::setPassphrase(const QString& passphrase)
