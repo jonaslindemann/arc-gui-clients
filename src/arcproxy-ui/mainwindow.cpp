@@ -31,6 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->proxyTypeCombo->setCurrentIndex(1);
     else
         ui->proxyTypeCombo->setCurrentIndex(0);
+
+    int i;
+
+    for (i=0; i<m_proxyController.vomsList().count(); i++)
+        ui->vomsServerCombo->addItem(m_proxyController.vomsList().at(i)->alias());
+
+    ui->vomsServerCombo->clearEditText();
 }
 
 MainWindow::~MainWindow()

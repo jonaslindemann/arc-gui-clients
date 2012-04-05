@@ -5,9 +5,49 @@
 
 #include <QObject>
 #include <QString>
+#include <QList>
 
 #include <arc/Logger.h>
 #include <arc/UserConfig.h>
+
+class VomsListEntry : public QObject
+{
+private:
+    QString m_alias;
+    QString m_machine;
+    QString m_port;
+    QString m_hostDn;
+    QString m_officialName;
+public:
+    VomsListEntry();
+
+    void setAlias(QString alias);
+    QString alias();
+
+    void setMachine(QString machine);
+    QString machine();
+
+    void setPort(QString port);
+    QString port();
+
+    void setHostDN(QString dn);
+    QString hostDN();
+
+    QString officialName();
+};
+
+class VomsList : public QObject
+{
+private:
+    QList<VomsListEntry*> m_vomsList;
+public:
+    VomsList();
+    virtual ~VomsList();
+    void clear();
+    bool read();
+    VomsListEntry* at(int idx);
+    int count();
+};
 
 class ArcProxyController : public QObject
 {
@@ -41,6 +81,8 @@ private:
     Arc::LogStream logCerr;
 
     QString m_passphrase;
+
+    VomsList m_vomsList;
 public:
     ArcProxyController();
     virtual ~ArcProxyController();
@@ -56,6 +98,8 @@ public:
     bool getUseGSIProxy();
 
     QString getIdentity();
+
+    VomsList& vomsList();
 
 /*
 private Q_SLOTS:
