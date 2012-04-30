@@ -14,6 +14,8 @@
 #include <arc/client/Job.h>
 #include <arc/client/JobSupervisor.h>
 
+#define ARC_VERSION_2
+
 #include "JmBase.h"
 
 class ArcJobController : public QObject

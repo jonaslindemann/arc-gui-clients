@@ -390,8 +390,13 @@ int ArcProxyController::initialize()
 
     Arc::ArcLocation::Init("");
 
+#ifdef ARC_VERSION_1
     Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
-    //Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
+#endif
+
+#ifdef ARC_VERSION_2
+    Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
+#endif
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization");
         return EXIT_FAILURE;
@@ -488,7 +493,14 @@ void ArcProxyController::setValidityPeriod(int seconds)
 
 int ArcProxyController::printInformation()
 {
+#ifdef ARC_VERSION_1
     Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
+#endif
+
+#ifdef ARC_VERSION_2
+    Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
+#endif
+
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization");
         return EXIT_FAILURE;
@@ -642,7 +654,14 @@ int ArcProxyController::removeProxy()
 
 int ArcProxyController::generateProxy()
 {
+#ifdef ARC_VERSION_1
     Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
+#endif
+
+#ifdef ARC_VERSION_2
+    Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
+#endif
+
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization");
         return EXIT_FAILURE;
