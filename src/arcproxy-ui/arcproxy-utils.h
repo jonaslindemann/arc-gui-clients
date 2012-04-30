@@ -10,6 +10,8 @@
 #include <arc/Logger.h>
 #include <arc/UserConfig.h>
 
+#define ARC_VERSION_2 1
+
 class VomsListEntry : public QObject
 {
 private:
