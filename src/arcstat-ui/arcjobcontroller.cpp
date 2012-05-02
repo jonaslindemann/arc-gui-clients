@@ -13,7 +13,9 @@
 #include <arc/XMLNode.h>
 #include <arc/client/Broker.h>
 #include <arc/client/JobDescription.h>
+#ifndef ARC_VERSION_2
 #include <arc/client/TargetGenerator.h>
+#endif
 #include <arc/client/Submitter.h>
 #include <arc/loader/Plugin.h>
 #include <arc/loader/FinderLoader.h>
@@ -330,6 +332,7 @@ void ArcJobController::setDownloadDir(const QString& downloadDir)
 
 void ArcJobController::queryJobStatus(JmJobList* jobList)
 {
+#ifndef ARC_VERSION_2
     // Read existing jobs from job list file
 
     Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
@@ -375,6 +378,45 @@ void ArcJobController::queryJobStatus(JmJobList* jobList)
         QString jobState = (*sit)->State.GetGeneralState().c_str();
         jobList->fromJobId(jobId)->setState(jobState);
     }
+#else
+
+    // Read existing jobs from job list file
+
+    Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
+
+    // Clear the current JmJobList;
+
+    jobList->clear();
+
+    // Create an initial JmJobList will _all_ jobs in ARC joblist
+
+    std::list<Arc::Job>::iterator jli;
+
+    for (jli=m_arcJobList.begin(); jli!=m_arcJobList.end(); jli++) {
+        QString jobId = (*jli).JobID.fullstr().c_str();
+        QString jobName = (*jli).Name.c_str();
+        jobList->add(jobId, jobName, "Unknown");
+    }
+
+    // Create job supervisor and job controllers
+
+    if (m_jobSupervisor!=0)
+        delete m_jobSupervisor;
+
+    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
+    m_jobSupervisor->Update();
+    m_arcJobList = m_jobSupervisor->GetSelectedJobs();
+
+    // Update JmJobList
+
+    std::list<Arc::Job>::iterator sit;
+
+    for (sit=m_arcJobList.begin(); sit!=m_arcJobList.end(); sit++) {
+        QString jobId = (*sit).JobID.fullstr().c_str();
+        QString jobState = (*sit).State.GetGeneralState().c_str();
+        jobList->fromJobId(jobId)->setState(jobState);
+    }
+#endif
 }
 
 void ArcJobController::queryJobStatus()
@@ -503,6 +545,8 @@ void ArcJobController::cleanJobs()
     if (m_selectedJobIds.size()==0)
         return;
 
+#ifndef ARC_VERSION_2
+
     // Create job supervisor and job controllers
 
     qDebug() << "Creating job supervisor...";
@@ -517,6 +561,14 @@ void ArcJobController::cleanJobs()
         qDebug() << "Cleaning job...";
         (*cit)->Clean(status, false);
     }
+#else
+
+    // Create job supervisor and job controllers
+
+    qDebug() << "Creating job supervisor...";
+    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
+    jobSupervisor.Clean();
+#endif
 }
 
 void ArcJobController::resubmitJobs()
@@ -543,6 +595,8 @@ void ArcJobController::resubmitJobs()
     std::string conffile;
     std::string debug;
     std::string broker;
+
+#ifndef ARC_VERSION_2
 
     // Different selected services are needed in two different context,
     // so the two copies of UserConfig objects will contain different
@@ -694,6 +748,9 @@ void ArcJobController::resubmitJobs()
           qDebug() << "Job could not be killed or cleaned";
       }
     }
+#else
+
+#endif
 }
 
 void ArcJobController::killJobs()
@@ -702,6 +759,8 @@ void ArcJobController::killJobs()
 
     if (m_selectedJobIds.size()==0)
         return;
+
+#ifndef ARC_VERSION_2
 
     // Create job supervisor and job controllers
 
@@ -717,6 +776,9 @@ void ArcJobController::killJobs()
         qDebug() << "Kill job...";
         (*cit)->Kill(status, false);
     }
+#else
+
+#endif
 }
 
 void ArcJobController::getJobs()
@@ -730,6 +792,8 @@ void ArcJobController::getJobs()
 
     if (m_downloadDir == "")
         return;
+
+#ifndef ARC_VERSION_2
 
     // Create job supervisor and job controllers
 
@@ -745,6 +809,9 @@ void ArcJobController::getJobs()
         qDebug() << "Get job...";
         (*cit)->Get(status, m_downloadDir.toStdString(), false, false);
     }
+#else
+
+#endif
 }
 
 void ArcJobController::jobTableSelectionChanged()
