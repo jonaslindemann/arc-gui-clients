@@ -396,6 +396,7 @@ void ArcJobController::queryJobStatus(JmJobList* jobList)
         QString jobId = (*jli).JobID.fullstr().c_str();
         QString jobName = (*jli).Name.c_str();
         jobList->add(jobId, jobName, "Unknown");
+        qDebug() << "adding " << jobId;
     }
 
     // Create job supervisor and job controllers
@@ -566,8 +567,47 @@ void ArcJobController::cleanJobs()
     // Create job supervisor and job controllers
 
     qDebug() << "Creating job supervisor...";
-    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
-    jobSupervisor.Clean();
+    Arc::JobSupervisor jobSupervisor(m_userConfig, m_arcJobList);
+    jobSupervisor.ClearSelection();
+
+    std::list<std::string>::iterator sli;
+    std::list<Arc::URL> jobIds;
+    std::list<Arc::URL>::iterator jii;
+
+    for (sli=m_selectedJobIds.begin(); sli!=m_selectedJobIds.end(); sli++)
+    {
+        QString str;
+        str.fromStdString( (*sli) );
+        jobIds.push_back(Arc::URL(*sli));
+    }
+
+    for (jii=jobIds.begin(); jii!=jobIds.end(); jii++)
+        std::cout << (*jii) << std::endl;
+
+
+    jobSupervisor.SelectByID(jobIds);
+    if (jobSupervisor.Clean())
+    {
+        std::cout << "Succesfully cleaned job(s)." << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed cleaning job(s)." << std::endl;
+    }
+
+    std::list<Arc::URL> cleaned = jobSupervisor.GetIDsProcessed();
+    const std::list<Arc::URL>& notcleaned = jobSupervisor.GetIDsNotProcessed();
+
+    for (std::list<Arc::Job>::const_iterator it = jobSupervisor.GetAllJobs().begin(); it != jobSupervisor.GetAllJobs().end(); ++it) {
+       if (it->State == Arc::JobState::UNDEFINED) {
+         cleaned.push_back(it->JobID);
+       }
+     }
+
+    std::cout << "Jobs to be cleaned = " << cleaned.size() << std::endl;
+
+    if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cleaned))
+        std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
 #endif
 }
 
@@ -777,7 +817,44 @@ void ArcJobController::killJobs()
         (*cit)->Kill(status, false);
     }
 #else
+    // Create job supervisor and job controllers
 
+    qDebug() << "Creating job supervisor...";
+    Arc::JobSupervisor jobSupervisor(m_userConfig, m_arcJobList);
+    jobSupervisor.ClearSelection();
+
+    std::list<std::string>::iterator sli;
+    std::list<Arc::URL> jobIds;
+    std::list<Arc::URL>::iterator jii;
+
+    for (sli=m_selectedJobIds.begin(); sli!=m_selectedJobIds.end(); sli++)
+    {
+        QString str;
+        str.fromStdString( (*sli) );
+        jobIds.push_back(Arc::URL(*sli));
+    }
+
+    for (jii=jobIds.begin(); jii!=jobIds.end(); jii++)
+        std::cout << (*jii) << std::endl;
+
+
+    jobSupervisor.SelectByID(jobIds);
+    if (jobSupervisor.Cancel())
+    {
+        std::cout << "Succesfully cancelling job(s)." << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed cancelling job(s)." << std::endl;
+    }
+
+    std::list<Arc::URL> cancelled = jobSupervisor.GetIDsProcessed();
+    const std::list<Arc::URL>& notCancelled = jobSupervisor.GetIDsNotProcessed();
+
+    std::cout << "Jobs to be cancelled = " << cancelled.size() << std::endl;
+
+    if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cancelled))
+        std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
 #endif
 }
 
