@@ -94,7 +94,7 @@ bool FileTransfer::execute()
 
     if (m_sourceUrl.IsSecureProtocol() || m_destUrl.IsSecureProtocol())
     {
-        m_config->InitializeCredentials();
+        m_config->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
         if (!Arc::Credential::IsCredentialsValid(*m_config))
         {
             logger.msg(Arc::ERROR, "Unable to copy file %s: No valid credentials found", m_sourceUrl.str());

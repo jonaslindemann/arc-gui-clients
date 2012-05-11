@@ -36,6 +36,7 @@ private:
     std::list<Arc::Job> m_arcJobList;
     Arc::UserConfig m_userConfig;
     std::list<std::string> m_selectedJobIds;
+    std::list<Arc::Job> m_selectedJobList;
 
     QList<JmJobList*> m_jmJobLists;
     JmJobList* m_currentJmJobList;

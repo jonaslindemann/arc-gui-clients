@@ -12,36 +12,36 @@ CONFIG   += no_keywords
 TARGET = arcstorage-ui
 TEMPLATE = app
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    fileserver.cpp \
-    localfileserver.cpp \
-    arcfileelement.cpp \
-    ftpfileserver.cpp \
-    dragdropabletreewidget.cpp \
-    fileserverfactory.cpp \
-    filepropertiesdialog.cpp \
-    srmfileserver.cpp \
-    srmsettingsdialog.cpp \
-    settings.cpp \
-    filetransfer.cpp
+SOURCES += src/arcstorage-ui/main.cpp\
+        src/arcstorage-ui/mainwindow.cpp \
+    src/arcstorage-ui/fileserver.cpp \
+    src/arcstorage-ui/localfileserver.cpp \
+    src/arcstorage-ui/arcfileelement.cpp \
+    src/arcstorage-ui/ftpfileserver.cpp \
+    src/arcstorage-ui/dragdropabletreewidget.cpp \
+    src/arcstorage-ui/fileserverfactory.cpp \
+    src/arcstorage-ui/filepropertiesdialog.cpp \
+    src/arcstorage-ui/srmfileserver.cpp \
+    src/arcstorage-ui/srmsettingsdialog.cpp \
+    src/arcstorage-ui/settings.cpp \
+    src/arcstorage-ui/filetransfer.cpp
 
-HEADERS  += mainwindow.h \
-    fileserver.h \
-    localfileserver.h \
-    arcfileelement.h \
-    ftpfileserver.h \
-    dragdropabletreewidget.h \
-    fileserverfactory.h \
-    filepropertiesdialog.h \
-    srmfileserver.h \
-    srmsettingsdialog.h \
-    settings.h \
-    filetransfer.h \
-    qdebugstream.h \
-    arcstorage.h
+HEADERS  += src/arcstorage-ui/mainwindow.h \
+    src/arcstorage-ui/fileserver.h \
+    src/arcstorage-ui/localfileserver.h \
+    src/arcstorage-ui/arcfileelement.h \
+    src/arcstorage-ui/ftpfileserver.h \
+    src/arcstorage-ui/dragdropabletreewidget.h \
+    src/arcstorage-ui/fileserverfactory.h \
+    src/arcstorage-ui/filepropertiesdialog.h \
+    src/arcstorage-ui/srmfileserver.h \
+    src/arcstorage-ui/srmsettingsdialog.h \
+    src/arcstorage-ui/settings.h \
+    src/arcstorage-ui/filetransfer.h \
+    src/arcstorage-ui/qdebugstream.h \
+    src/arcstorage-ui/arcstorage.h
 
-FORMS    += mainwindow.ui \
-    filepropertiesdialog.ui \
-    srmsettingsdialog.ui
+FORMS    += src/arcstorage-ui/mainwindow.ui \
+    src/arcstorage-ui/filepropertiesdialog.ui \
+    src/arcstorage-ui/srmsettingsdialog.ui
 

@@ -73,7 +73,7 @@ void SRMFileServer::updateFileList(QString URL)
         bool credentialsOk = true;
         if (arcUrl.IsSecureProtocol())
         {
-            usercfg->InitializeCredentials();
+            usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
             if (!Arc::Credential::IsCredentialsValid(*usercfg))
             {
                 logger.msg(Arc::ERROR, "Unable to list content of %s: No valid credentials found.", arcUrl.str());
@@ -359,7 +359,7 @@ bool SRMFileServer::deleteItem(QString URL)
         bool credentialsOk = true;
         if (arcUrl.IsSecureProtocol())
         {
-            usercfg->InitializeCredentials();
+            usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
             if (!Arc::Credential::IsCredentialsValid(*usercfg))
             {
                 logger.msg(Arc::ERROR, "Unable to list content of %s: No valid credentials found", arcUrl.str());
