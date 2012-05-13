@@ -4,7 +4,6 @@ include(${QT_USE_FILE})
 
 SET(arccertui_UIS
     mainwindow.ui
-    infodialog.ui
 )
 
 SET(arccertui_SRCS
@@ -14,7 +13,6 @@ SET(arccertui_SRCS
 
 SET(arccertui_MOC_HDRS
   mainwindow.h
-  infodialog.h
 )
 
 #SET(arccertui_RCS 

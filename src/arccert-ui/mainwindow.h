@@ -14,7 +14,6 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    ArcProxyController m_proxyController;
     QDebugStream* m_debugStream;
     QDebugStream* m_debugStream2;
 
