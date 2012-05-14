@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,3 +45,10 @@ void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     ui->logText->append(event->getOutputText());
 }
 
+
+void MainWindow::on_generateButton_clicked()
+{
+    QProcess p;
+    p.start("/bin/ls", "-la");
+    p.waitForFinished();
+}
