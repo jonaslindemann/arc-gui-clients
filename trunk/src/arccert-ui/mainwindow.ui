@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>566</width>
-    <height>414</height>
+    <height>307</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Generate Proxy</string>
+   <string>Certificate Conversion Utility</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -26,7 +26,7 @@
        </property>
        <widget class="QWidget" name="standardProxyTab">
         <attribute name="title">
-         <string>Standard</string>
+         <string>X509 to PKCS12</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -35,7 +35,7 @@
             <widget class="QLabel" name="identityLabel">
              <property name="minimumSize">
               <size>
-               <width>100</width>
+               <width>150</width>
                <height>0</height>
               </size>
              </property>
@@ -46,14 +46,30 @@
               </size>
              </property>
              <property name="text">
-              <string>Identity</string>
+              <string>Certificate PEM file</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="identityText">
+            <widget class="QLineEdit" name="usercertFileText">
+             <property name="frame">
+              <bool>true</bool>
+             </property>
              <property name="readOnly">
               <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="selectCertFileButton">
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
              </property>
             </widget>
            </item>
@@ -65,19 +81,35 @@
             <widget class="QLabel" name="passphraseLabel">
              <property name="minimumSize">
               <size>
-               <width>100</width>
+               <width>150</width>
                <height>0</height>
               </size>
              </property>
              <property name="text">
-              <string>Passphrase</string>
+              <string>Private key PEM file</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="passphraseText">
+            <widget class="QLineEdit" name="userkeyFileText">
              <property name="echoMode">
-              <enum>QLineEdit::Password</enum>
+              <enum>QLineEdit::Normal</enum>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="selectKeyButton">
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
              </property>
             </widget>
            </item>
@@ -89,128 +121,32 @@
             <widget class="QLabel" name="proxyLifeTimeLabel">
              <property name="minimumSize">
               <size>
-               <width>100</width>
+               <width>150</width>
                <height>0</height>
               </size>
              </property>
              <property name="text">
-              <string>Not valid after</string>
+              <string>PKCS12 Output file</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDateTimeEdit" name="proxyLifeTimeEdit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="calendarPopup">
+            <widget class="QLineEdit" name="pkcsFileText">
+             <property name="readOnly">
               <bool>true</bool>
              </property>
             </widget>
            </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
-            <widget class="QLabel" name="proxyTypeLabel">
-             <property name="minimumSize">
+            <widget class="QPushButton" name="selectPKCS12FileButton">
+             <property name="maximumSize">
               <size>
-               <width>100</width>
-               <height>0</height>
+               <width>40</width>
+               <height>16777215</height>
               </size>
              </property>
              <property name="text">
-              <string>Type</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="proxyTypeCombo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>220</width>
-               <height>0</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>RFC 3820 compliant proxy</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>GSI proxy</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <item>
-            <widget class="QLabel" name="vomsServerLabel">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>VOMS Server</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="vomsServerCombo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="editable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
-           <item>
-            <widget class="QLabel" name="vomsRoleLabel">
-             <property name="minimumSize">
-              <size>
-               <width>100</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>VOMS Role</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="vomsRoleCombo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="editable">
-              <bool>true</bool>
+              <string>...</string>
              </property>
             </widget>
            </item>
@@ -245,7 +181,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="generateButton">
+            <widget class="QPushButton" name="convertToPKCS12Button">
              <property name="text">
               <string>Convert</string>
              </property>
@@ -274,8 +210,172 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>PKCS12 to X509</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <item>
+            <widget class="QLabel" name="proxyLifeTimeLabel_2">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>PKCS12 Input file</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="pkcsImportFileText">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="selectPKCS12ImportFileButton">
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <widget class="QLabel" name="passphraseLabel_2">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Certificate/key output dir</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="certKeyDirText">
+             <property name="echoMode">
+              <enum>QLineEdit::Normal</enum>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="selectCertKeyOutputDirButton">
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="convertToX509Button">
+             <property name="text">
+              <string>Convert</string>
+             </property>
+             <property name="autoDefault">
+              <bool>true</bool>
+             </property>
+             <property name="default">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="About">
+        <attribute name="title">
+         <string>About</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Certificate Conversion Utility
+Copyright (C) 2012 Lunarc, Lund University</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QTextEdit" name="logText">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>80</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <family>Courier 10 Pitch</family>
@@ -295,12 +395,10 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>passphraseText</tabstop>
-  <tabstop>proxyLifeTimeEdit</tabstop>
-  <tabstop>proxyTypeCombo</tabstop>
-  <tabstop>generateButton</tabstop>
+  <tabstop>userkeyFileText</tabstop>
+  <tabstop>convertToPKCS12Button</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>identityText</tabstop>
+  <tabstop>usercertFileText</tabstop>
  </tabstops>
  <resources/>
  <connections/>
