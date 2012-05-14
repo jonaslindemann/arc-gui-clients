@@ -28,6 +28,8 @@ protected:
     
 private Q_SLOTS:
 
+    void on_generateButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
