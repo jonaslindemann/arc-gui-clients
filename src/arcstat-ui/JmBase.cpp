@@ -197,11 +197,6 @@ void JmJobListDisplay::paintEvent(QPaintEvent *event)
         int x4 = int((double)((waitingJobs+runningJobs+finishedJobs+otherJobs)/(double)totalJobs) * (double)this->width());
         int x5 = this->width() - 1;
 
-        qDebug() << x1;
-        qDebug() << x2;
-        qDebug() << x3;
-        qDebug() << x4;
-
         p.setBrush(Qt::yellow);
         p.drawRect(0, 0, x1, this->height()-1);
         p.setBrush(Qt::cyan);
