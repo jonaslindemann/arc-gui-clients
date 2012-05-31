@@ -30,8 +30,13 @@ protected:
     /** The current path (that is displayed in the gui) */
     QString currentPath;
 
+    bool m_notifyParent;
+
 public:
     FileServer(MainWindow *mw);
+
+    void setNotifyParent(bool flag);
+    bool getNotifyParent();
 
     /** Returns the column names in the file list (name, size, last change date...). Allows different protocols to display their own info */
     virtual QStringList getFileInfoLabels() = 0;

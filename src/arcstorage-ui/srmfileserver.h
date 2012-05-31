@@ -12,8 +12,8 @@ class SRMFileServer : public QObject, public FileServer
     Q_OBJECT
 
 private:
-    Arc::UserConfig *usercfg;
-    QString currentUrlString;
+    Arc::UserConfig* m_usercfg;
+    QString m_currentUrlString;
 
     bool initUserConfig();
 

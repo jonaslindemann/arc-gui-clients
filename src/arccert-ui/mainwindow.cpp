@@ -6,6 +6,9 @@
 #include <QFileDialog>
 #include <QInputDialog>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -344,4 +347,10 @@ void MainWindow::on_convertToX509Button_clicked()
 
     m_passin.clear();
     m_passout.clear();
+
+    // Change permissions
+
+    qDebug() << "chmod 400 '" + keyFilename + "'";
+    chmod(keyFilename.toAscii(), 0400);
+
 }

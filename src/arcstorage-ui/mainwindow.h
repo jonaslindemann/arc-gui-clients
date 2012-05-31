@@ -21,7 +21,9 @@ enum updateFileListsMode { CUFLM_noUpdate,
                            CUFLM_clickedBrowse,
                            CUFLM_clickedUp,
                            CUFLM_expandedFolder,
-                           CUFLM_clickedFolder };
+                           CUFLM_clickedFolder,
+                           CUFLM_doubleClickedFolder
+                         };
 
 class MainWindow : public QMainWindow
 {
@@ -39,10 +41,11 @@ public:
     void onDeleteFinished(bool error);
     void onMakeDirFinished(bool error);
     void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
-    void setBusyUI(bool busy);
 
+    void setBusyUI(bool busy);
     void copySelectedFiles();
     void deleteSelectedFiles();
+    void createDir();
 
 private:
     Ui::MainWindow *ui;
@@ -63,6 +66,7 @@ private:
 
     void updateFileTree();
     void updateFoldersTree();
+    void updateFoldersTreeBelow();
     void expandFolderTreeWidget(QTreeWidgetItem *folderWidget);
     QString getURLOfItem(QTreeWidgetItem *item);
     void setURLOfItem(QTreeWidgetItem *item, QString URL);
@@ -99,6 +103,10 @@ private Q_SLOTS:
     void on_actionNewWindow_triggered();
     void on_actionUploadFiles_triggered();
     void on_actionCopyTo_triggered();
+    void on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+    void on_actionClearSelection_triggered();
+    void on_actionSelectAllFiles_triggered();
+    void on_actionCreateDir_triggered();
 };
 
 #endif // MAINWINDOW_H

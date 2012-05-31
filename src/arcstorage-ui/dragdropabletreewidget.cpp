@@ -56,16 +56,22 @@ void DragDropableTreeWidget::mouseMoveEvent(QMouseEvent *event)
             QTreeWidgetItem *item = currentItem();
             if (item)
             {
-                qDebug() << "Drag start.";
-
                 mainWindow->setBusyUI(true);
 
                 QMimeData *mimeData = new QMimeData;
-
-                QVariant dataQV = item->data(0, Qt::ToolTipRole);
-                QUrl url = QUrl::fromLocalFile(dataQV.toString());
                 QList<QUrl> *urlList = new QList<QUrl>();
-                urlList->append(url);
+
+                item->setSelected(true);
+
+                for (int i=0; i<this->selectedItems().count(); i++)
+                {
+                    item = this->selectedItems().at(i);
+                    QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                    QUrl url = QUrl::fromLocalFile(dataQV.toString());
+                    qDebug() << "selectedFile = " << url;
+                    qDebug() << "item = " << item->text(0);
+                    urlList->append(url);
+                }
                 mimeData->setUrls(*urlList);
 
                 QDrag *drag = new QDrag(this);
