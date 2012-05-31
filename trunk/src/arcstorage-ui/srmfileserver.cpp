@@ -21,7 +21,7 @@
 SRMFileServer::SRMFileServer(MainWindow *mw, QObject *parent) :
     QObject(parent), FileServer(mw)
 {
-    usercfg = NULL;
+    m_usercfg = NULL;
 }
 
 
@@ -40,13 +40,13 @@ bool SRMFileServer::initUserConfig()
 {
     bool success = false;
 
-    if (usercfg == NULL)
+    if (m_usercfg == NULL)
     {
         QString configFilename = Settings::getStringValue("srmConfigFilename");
-        usercfg = new Arc::UserConfig(configFilename.toStdString(), Arc::initializeCredentialsType::SkipCredentials);
-        if (usercfg != NULL)
+        m_usercfg = new Arc::UserConfig(configFilename.toStdString(), Arc::initializeCredentialsType::SkipCredentials);
+        if (m_usercfg != NULL)
         {
-            usercfg->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
+            m_usercfg->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
 
             success = true;
         }
@@ -75,8 +75,8 @@ void SRMFileServer::updateFileList(QString URL)
         bool credentialsOk = true;
         if (arcUrl.IsSecureProtocol())
         {
-            usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
-            if (!Arc::Credential::IsCredentialsValid(*usercfg))
+            m_usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
+            if (!Arc::Credential::IsCredentialsValid(*m_usercfg))
             {
                 logger.msg(Arc::ERROR, "Unable to list content of %s: No valid credentials found.", arcUrl.str());
                 credentialsOk = false;
@@ -87,7 +87,7 @@ void SRMFileServer::updateFileList(QString URL)
 
         if (credentialsOk == true)
         {
-            Arc::DataHandle dataHandle(arcUrl, *usercfg);
+            Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
             if (!dataHandle)
             {
                 logger.msg(Arc::ERROR, "Unsupported URL given");
@@ -136,7 +136,7 @@ void SRMFileServer::updateFileList(QString URL)
                 }
                 else
                 {
-                    currentUrlString = URL;
+                    m_currentUrlString = URL;
 
                     fileList.clear();
                     currentPath = URL;
@@ -196,12 +196,13 @@ void SRMFileServer::updateFileList(QString URL)
         }
     }
 
-    mainWindow->onFileListFinished(false, "");
+    if (m_notifyParent)
+        mainWindow->onFileListFinished(false, "");
 }
 
 bool SRMFileServer::goUpOneFolder()
 {
-    QString url = currentUrlString.left(currentUrlString.lastIndexOf('/'));
+    QString url = m_currentUrlString.left(m_currentUrlString.lastIndexOf('/'));
     if (url.length() > (int)strlen("SRM://"))
     {
         updateFileList(url);
@@ -235,7 +236,7 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
     }
     else
     {
-        FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *usercfg);
+        FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
         if (xfr->execute() == TRUE) // Startar filöverföringen asynkront.
         {
             while (!xfr->isCompleted()) {
@@ -274,7 +275,7 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
     }
     else
     {
-        FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *usercfg);
+        FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
         if (xfr->execute() == TRUE) // Startar filöverföringen asynkront.
         {
             logger.msg(Arc::INFO, "Waiting for transfer to complete.");
@@ -326,7 +327,7 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
             QString sourceFilename = sourcePath.right(sourcePath.length() - sourcePath.lastIndexOf('/') - 1);
             QString destinationPath = destinationFolder + "/" + sourceFilename;
 
-            FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *usercfg);
+            FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
             xfr->execute(); // Startar filöverföringen asynkront.
 
             // Wait while still processing events.
@@ -366,8 +367,8 @@ bool SRMFileServer::deleteItem(QString URL)
         bool credentialsOk = true;
         if (arcUrl.IsSecureProtocol())
         {
-            usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
-            if (!Arc::Credential::IsCredentialsValid(*usercfg))
+            m_usercfg->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
+            if (!Arc::Credential::IsCredentialsValid(*m_usercfg))
             {
                 logger.msg(Arc::ERROR, "Unable to list content of %s: No valid credentials found", arcUrl.str());
                 credentialsOk = false;
@@ -378,7 +379,7 @@ bool SRMFileServer::deleteItem(QString URL)
 
         if (credentialsOk == true)
         {
-            Arc::DataHandle dataHandle(arcUrl, *usercfg);
+            Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
             if (!dataHandle)
             {
                 logger.msg(Arc::ERROR, "Unsupported URL given");
@@ -389,7 +390,7 @@ bool SRMFileServer::deleteItem(QString URL)
                 Arc::DataStatus status = dataHandle->Remove();
                 if (status.Passed())
                 {
-                    updateFileList(currentUrlString);
+                    updateFileList(m_currentUrlString);
                     mainWindow->onDeleteFinished(false);
                 }
                 else
@@ -405,22 +406,43 @@ bool SRMFileServer::deleteItem(QString URL)
 
 bool SRMFileServer::makeDir(QString path)
 {
+    qDebug() << "SRMFileServer::makeDir()";
     bool success = false;
-
-
-//    Arc::DataMover mover;
-
-
-    path = currentPath + "/" + path;
-//    std::string pathName = path.toStdString();
-//    std::string dirName = Glib::path_get_dirname(pathName);
-
+    path = currentPath + "/" + path + "/";
     std::string dirName = path.toStdString();
-    success = Arc::DirCreate(dirName, 0700, true);
+    qDebug() << path;
 
-    mainWindow->onMakeDirFinished(!success);
+    Arc::URL arcUrl = dirName;
 
-    return success;
+    if (arcUrl.IsSecureProtocol()) {
+      (*m_usercfg).InitializeCredentials(Arc::initializeCredentialsType::RequireCredentials);
+      if (!Arc::Credential::IsCredentialsValid(*m_usercfg)) {
+        logger.msg(Arc::ERROR, "Unable to create directory %s: No valid credentials found", arcUrl.str());
+        mainWindow->onMakeDirFinished(true);
+        return false;
+      }
+    }
+
+    Arc::DataHandle url(arcUrl, *m_usercfg);
+    if (!url) {
+      logger.msg(Arc::ERROR, "Unsupported URL given");
+      mainWindow->onMakeDirFinished(true);
+      return false;
+    }
+    url->SetSecure(false);
+    Arc::DataStatus res = url-> CreateDirectory(false);
+    if (!res.Passed()) {
+      logger.msg(Arc::ERROR, "%s%s", std::string(res), (res.GetDesc().empty() ? " " : ": "+res.GetDesc()));
+      if (res.Retryable())
+        logger.msg(Arc::ERROR, "This seems like a temporary error, please try again later");
+      mainWindow->onMakeDirFinished(true);
+      return false;
+    }
+
+    this->updateFileList(this->getCurrentURL());
+    mainWindow->onMakeDirFinished(false);
+
+    return true;
 }
 
 unsigned int SRMFileServer::getFilePermissions(QString path)
