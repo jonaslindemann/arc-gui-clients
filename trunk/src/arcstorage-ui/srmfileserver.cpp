@@ -28,8 +28,10 @@ SRMFileServer::SRMFileServer(MainWindow *mw, QObject *parent) :
 QStringList SRMFileServer::getFileInfoLabels()
 {
     QStringList labels;
-    labels << "File" << "Size" << "Owner" << "Group" << "Permissions" <<
-            "Last read" << "Last modified";
+    labels << "File" << "Size" << "Last modified" << "Owner" << "Group" << "Permissions" <<
+            "Last read";
+
+    //labels << "File" << "Size" << "Type" << "Last read" << "Last modified";
     return labels;
 }
 
@@ -172,19 +174,22 @@ void SRMFileServer::updateFileList(QString URL)
                         time_t timet = arcFile->GetCreated().GetTime();
                         timeCreated.setTime_t(timet);
 
-                        ARCFileElement *newAFE = new ARCFileElement(fileNameQS,
-                                                                    URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
-                                                                    ft,
-                                                                    QString("???"), //fileInfoList.at(i).group(),
-                                                                    false, //fileInfoList.at(i).isExecutable(),
-                                                                    false, // fileInfoList.at(i).isReadable(),
-                                                                    false, //fileInfoList.at(i).isWritable(),
-                                                                    timeCreated, // fileInfoList.at(i).lastModified(),
-                                                                    QDateTime(), // fileInfoList.at(i).lastRead(),
-                                                                    QString("???"), // fileInfoList.at(i).owner(),
-                                                                    0, // fileInfoList.at(i).permissions(),
-                                                                    arcFile->GetSize());
-                        fileList << (ARCFileElement)(*newAFE);
+                        if (!fileNameQS.indexOf(".")==0) // Don't show hidden files.
+                        {
+                            ARCFileElement *newAFE = new ARCFileElement(fileNameQS,
+                                                                        URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
+                                                                        ft,
+                                                                        QString("???"), //fileInfoList.at(i).group(),
+                                                                        false, //fileInfoList.at(i).isExecutable(),
+                                                                        false, // fileInfoList.at(i).isReadable(),
+                                                                        false, //fileInfoList.at(i).isWritable(),
+                                                                        timeCreated, // fileInfoList.at(i).lastModified(),
+                                                                        QDateTime(), // fileInfoList.at(i).lastRead(),
+                                                                        QString("???"), // fileInfoList.at(i).owner(),
+                                                                        0, // fileInfoList.at(i).permissions(),
+                                                                        arcFile->GetSize());
+                            fileList << (ARCFileElement)(*newAFE);
+                        }
                     }
                 }
             }
@@ -297,6 +302,8 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 
 bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder)
 {
+    logger.msg(Arc::DEBUG, "SRMServer::copyToServer(urlList)");
+
     bool success = false;
 
     if (initUserConfig() == FALSE)

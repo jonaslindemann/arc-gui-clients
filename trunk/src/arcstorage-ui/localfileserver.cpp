@@ -110,16 +110,24 @@ QString LocalFileServer::getCurrentPath()
 bool LocalFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 {
     bool success = false;
+    QList<QString> *failedFilesList = new QList<QString>;
 
     if (QFile::exists(sourcePath) == false)
     {
         success = false;
+        mainWindow->onCopyToServerFinished(!success, *failedFilesList);
     }
     else
     {
         QFile sourceFile(sourcePath);
 
-        success = sourceFile.copy(destinationPath);
+        if (sourceFile.copy(destinationPath) == false)
+        {
+            success = false;
+            (*failedFilesList) << sourcePath;
+        }
+
+        mainWindow->onCopyToServerFinished(!success, *failedFilesList);
     }
 
     return success;

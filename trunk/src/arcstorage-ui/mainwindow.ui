@@ -157,19 +157,6 @@
       </widget>
      </widget>
     </item>
-    <item>
-     <widget class="QLabel" name="statusLabel">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>ArcFTP loaded!</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -185,14 +172,19 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNewWindow"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionSRM_Preferences"/>
+    <addaction name="actionUploadFiles"/>
+    <addaction name="actionCopyTo"/>
     <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionSRM_Preferences"/>
    </widget>
    <widget class="QMenu" name="menuGo">
     <property name="title">
@@ -228,10 +220,16 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNewWindow"/>
    <addaction name="actionUp"/>
    <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="actionStop"/>
+   <addaction name="separator"/>
+   <addaction name="actionCopyTo"/>
+   <addaction name="actionUploadFiles"/>
+   <addaction name="actionDelete"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
@@ -316,6 +314,33 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionNewWindow">
+   <property name="text">
+    <string>New Window</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new file browser</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionCopyTo">
+   <property name="text">
+    <string>Download to...</string>
+   </property>
+   <property name="toolTip">
+    <string>Download selected files</string>
+   </property>
+  </action>
+  <action name="actionUploadFiles">
+   <property name="text">
+    <string>Upload files...</string>
+   </property>
+   <property name="toolTip">
+    <string>Upload files</string>
    </property>
   </action>
  </widget>
