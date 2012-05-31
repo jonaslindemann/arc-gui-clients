@@ -28,11 +28,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0, bool childWindow = false);
     ~MainWindow();
 
-    void filesDroppedInFileListWidget(QList<QUrl> &urlList);
-
+    void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);
     void onError(QString errorStr);
     void onNewStatus(QString errorStr);
@@ -42,13 +41,15 @@ public:
     void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
     void setBusyUI(bool busy);
 
+    void copySelectedFiles();
+    void deleteSelectedFiles();
 
 private:
     Ui::MainWindow *ui;
-    DragDropableTreeWidget filesTreeWidget;
-    QComboBox urlComboBox;
+    DragDropableTreeWidget m_filesTreeWidget;
+    QComboBox m_urlComboBox;
 
-    FileServer *currentFileServer;
+    FileServer *m_currentFileServer;
 
     static const QString COPY_TO_TEXT;
     static const QString COPY_TEXT;
@@ -57,8 +58,8 @@ private:
     static const QString MAKEDIR_TEXT;
     static const QString CHANGE_PERMISSIONS_TEXT;
 
-    enum updateFileListsMode currentUpdateFileListsMode;
-    QTreeWidgetItem *folderWidgetBeingUpdated;
+    enum updateFileListsMode m_currentUpdateFileListsMode;
+    QTreeWidgetItem *m_folderWidgetBeingUpdated;
 
     void updateFileTree();
     void updateFoldersTree();
@@ -74,6 +75,8 @@ private:
     Arc::LogStream* m_logStream;
     QDebugStream* m_debugStream;
     QDebugStream* m_debugStream2;
+
+    bool m_childWindow;
 
 protected:
     void closeEvent( QCloseEvent *e );
@@ -93,6 +96,9 @@ private Q_SLOTS:
     void on_actionAbout_ARC_File_Navigator_triggered();
     void on_actionUp_triggered();
     void on_urlComboBox_currentIndexChanged(int index);
+    void on_actionNewWindow_triggered();
+    void on_actionUploadFiles_triggered();
+    void on_actionCopyTo_triggered();
 };
 
 #endif // MAINWINDOW_H

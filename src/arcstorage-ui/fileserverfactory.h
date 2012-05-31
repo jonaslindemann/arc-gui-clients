@@ -29,6 +29,7 @@ public:
 
     /** This method takes the name of a protocol and returns a File Server object */
     static FileServer* getFileServer(QString type, MainWindow *mw);
+    static FileServer* getNewFileServer(QString type, MainWindow *mw);
 };
 
 #endif // FILESERVERFACTORY_H
