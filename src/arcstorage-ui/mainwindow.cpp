@@ -535,22 +535,16 @@ void MainWindow::setBusyUI(bool busy)
         qDebug() << "Disable UI.";
         setCursor(Qt::WaitCursor);
         ui->filesTreeWidget->setEnabled(false);
-//        ui->m_urlComboBox->setEnabled(false);
         m_urlComboBox.setEnabled(false);
         ui->foldersTreeWidget->setEnabled(false);
-//        ui->browseButton->setEnabled(false);
-//        ui->upButton->setEnabled(false);
     }
     else
     {
         qDebug() << "Enable UI.";
         setCursor(Qt::ArrowCursor);
         ui->filesTreeWidget->setEnabled(true);
-//        ui->m_urlComboBox->setEnabled(true);
         m_urlComboBox.setEnabled(true);
         ui->foldersTreeWidget->setEnabled(true);
-//        ui->browseButton->setEnabled(true);
-//        ui->upButton->setEnabled(true);
     }
 }
 
@@ -560,23 +554,44 @@ void MainWindow::updateFileTree()
     QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
 
     ui->filesTreeWidget->clear();
+    ui->filesTreeWidget->setSortingEnabled(false);
 
     for (int i = 0; i < fileList.size(); ++i)
     {
         ARCFileElement AFE = fileList.at(i);
         QTreeWidgetItem *item = new QTreeWidgetItem;
         item->setText(0, AFE.getFileName());
-        item->setText(1, QString::number(AFE.getSize()));
-        item->setText(2, AFE.getLastModfied().toString());
-        item->setText(3, AFE.getOwner());
-        item->setText(4, AFE.getGroup());
+        if (AFE.getFileType()==ARCDir)
+        {
+            item->setIcon(0,QIcon::fromTheme("folder"));
+            item->setText(1, "---");
+        }
+        else
+        {
+            item->setIcon(0,QIcon::fromTheme("document"));
+            item->setText(1, QString::number(AFE.getSize()));
+        }
+        if (AFE.getFileType()==ARCDir)
+            item->setText(2, "folder");
+        else
+            item->setText(2, "file");
+        item->setText(3, AFE.getLastModfied().toString());
+        item->setText(4, AFE.getOwner());
+        item->setText(5, AFE.getGroup());
         QString tmpStr;
         tmpStr.sprintf("%x", AFE.getPermissions());
-        item->setText(5, tmpStr);
-        item->setText(6, AFE.getLastRead().toString());
+        item->setText(6, tmpStr);
+        item->setText(7, AFE.getLastRead().toString());
         setURLOfItem(item, AFE.getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }
+
+    ui->filesTreeWidget->setSortingEnabled(true);
+    ui->filesTreeWidget->sortByColumn(2, Qt::DescendingOrder);
+    ui->filesTreeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
+
+    for (int i=0; i<8; i++)
+        ui->filesTreeWidget->resizeColumnToContents(i);
 }
 
 
@@ -594,6 +609,7 @@ void MainWindow::updateFoldersTree()
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE.getFileName());
+            item->setIcon(0, QIcon::fromTheme("folder"));
             setURLOfItem(item, AFE.getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
@@ -616,6 +632,7 @@ void MainWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE.getFileName());
+            item->setIcon(0, QIcon::fromTheme("folder"));
             setURLOfItem(item, AFE.getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
