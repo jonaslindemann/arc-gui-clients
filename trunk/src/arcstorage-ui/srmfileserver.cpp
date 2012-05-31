@@ -28,7 +28,7 @@ SRMFileServer::SRMFileServer(MainWindow *mw, QObject *parent) :
 QStringList SRMFileServer::getFileInfoLabels()
 {
     QStringList labels;
-    labels << "File" << "Size" << "Last modified" << "Owner" << "Group" << "Permissions" <<
+    labels << "File" << "Size" << "Type" << "Last modified" << "Owner" << "Group" << "Permissions" <<
             "Last read";
 
     //labels << "File" << "Size" << "Type" << "Last read" << "Last modified";
