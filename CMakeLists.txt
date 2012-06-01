@@ -40,7 +40,6 @@ set(CPACK_SOURCE_IGNORE_FILES
         .project
         ./LLNL-bin
         ./Makefile
-        README
         xcodeproj$
         ./builddir/
         ./bin/
