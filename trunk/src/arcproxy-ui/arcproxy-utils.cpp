@@ -539,7 +539,7 @@ int ArcProxyController::printInformation()
 
     Arc::VOMSTrustList voms_trust_dn;
     voms_trust_dn.AddRegex(".*");
-    res = parseVOMSAC(holder, m_ca_dir, "", voms_trust_dn, voms_attributes, true, true);
+    res = parseVOMSAC(holder, m_ca_dir, "", "", voms_trust_dn, voms_attributes, true, true);
     // Not printing error message because parseVOMSAC will print everything itself
     //if (!res) logger.msg(Arc::ERROR, "VOMS attribute parsing failed");
     for(int n = 0; n<voms_attributes.size(); ++n) {

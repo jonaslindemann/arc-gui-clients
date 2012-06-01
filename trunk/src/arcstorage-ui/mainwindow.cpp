@@ -150,15 +150,12 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     QList<QVariant> urlList;
-//    QComboBox *comboBox = ui->m_urlComboBox;
+
     for (int i = 0; i < m_urlComboBox.count(); ++i)
-    {
         urlList << m_urlComboBox.itemText(i);
-    }
+
     Settings::setValue("urlList", urlList);
-
     Settings::saveToDisk();
-
     QMainWindow::closeEvent(e);
 }
 
@@ -192,7 +189,32 @@ void MainWindow::copySelectedFiles()
 
 void MainWindow::deleteSelectedFiles()
 {
+    // Delete selected file
 
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.size() != 0)
+    {
+        // Make sure the user wants to delete the files.
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::critical(this, tr("Delete"),
+                                        "Are you sure you want to delete selected files ?",
+                                        QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            for (int i=0; i<selectedItems.length(); i++)
+            {
+                QTreeWidgetItem *selectedItem = selectedItems.at(i);
+                QString path = getURLOfItem(selectedItem);
+
+                qDebug() << "Deleting " << path;
+
+                setBusyUI(true);
+                m_currentFileServer->deleteItem(path);
+            }
+        }
+    }
 }
 
 void MainWindow::createDir()
@@ -489,7 +511,7 @@ void MainWindow::onCopyFromServerFinished(bool error)
 void MainWindow::onDeleteFinished(bool error)
 {
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
-    onFileListFinished(false, "");                      // ... so that the deleted file is removed
+    //onFileListFinished(false, "");                      // ... so that the deleted file is removed
 
     setBusyUI(false);
     if (error == true)
@@ -762,27 +784,8 @@ void MainWindow::on_actionQuit_triggered()
 }
 
 void MainWindow::on_actionDelete_triggered()
-{
-    // Delete selected file
-
-    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
-    if (selectedItems.size() != 0)
-    {
-        QTreeWidgetItem *selectedItem = selectedItems.at(0);  // Only one item selected hopefully  //ALEX
-        QString path = getURLOfItem(selectedItem);
-
-        // Make sure the user wants to delete the file.
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::critical(this, tr("Delete file"),
-                                        "Are you sure you want to delete, "+path+" ?",
-                                        QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            setBusyUI(true);
-            m_currentFileServer->deleteItem(path);
-        }
-    }
+{    
+    this->deleteSelectedFiles();
 }
 
 void MainWindow::on_urlComboBox_currentIndexChanged(int index)
