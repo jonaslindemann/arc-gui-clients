@@ -77,4 +77,5 @@ target_link_libraries (arccert-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBR
 
 #if(LINUX)
 install(TARGETS arccert-ui DESTINATION bin)
+install(FILES arccert-ui.desktop DESTINATION share/applications)
 #endif(LINUX)

@@ -82,4 +82,5 @@ target_link_libraries (arcproxy-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIB
 
 #if(LINUX)
 install(TARGETS arcproxy-ui DESTINATION bin)
+install(TARGETS arcproxy-ui.desktop DESTINATION share/applications)
 #endif(LINUX)
