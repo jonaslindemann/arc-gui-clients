@@ -92,4 +92,5 @@ target_link_libraries (arcstorage-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_L
 
 #if (LINUX)
 install(TARGETS arcstorage-ui DESTINATION bin)
+install(FILES arcstorage-ui.desktop DESTIONATION share/applications)
 #endif(LINUX)
