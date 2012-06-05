@@ -27,6 +27,8 @@ public:
     bool makeDir(QString path);
     unsigned int getFilePermissions(QString path);
     void setFilePermissions(QString path, unsigned int permissions);
+    bool deleteItems(QStringList& paths) {return false;}
+
 
 };
 

@@ -70,13 +70,18 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
 
     ui->filesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    //connect(ui->filesTreeWidget, SIGNAL(customContextMenuRequested(const QPoint&)),  // Right click on files to show context menu
-    //    this, SLOT(onContextMenu(const QPoint&)));
     connect(ui->actionSRM_Preferences, SIGNAL(triggered()), this, SLOT(onMenuItemSRMSettings()));
     connect(ui->actionUp, SIGNAL(triggered()), this, SLOT(on_upButton_clicked()));
     connect(ui->actionReload, SIGNAL(triggered()), this, SLOT(on_browseButton_clicked()));
 
     m_currentFileServer = FileServerFactory::getNewFileServer("", this);  // "" - default file server
+    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
+    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget
 
@@ -86,7 +91,6 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     ui->filesTreeWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 
     setBusyUI(true);
-    qDebug() << "updateFileList called.";
     m_currentFileServer->updateFileList(QDir::homePath());
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
@@ -161,6 +165,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::copySelectedFiles()
 {
+    logger.msg(Arc::INFO, "Copy selected files started.");
     QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
 
     if (selectedItems.size() != 0)
@@ -175,10 +180,7 @@ void MainWindow::copySelectedFiles()
             {
                 QTreeWidgetItem *selectedItem = selectedItems.at(i);
                 QString sourcePath = getURLOfItem(selectedItem);
-
                 QString destPath = destDir + "/"+ selectedItem->text(0);
-
-                qDebug() << "Copy from " << sourcePath << " to " << destPath;
 
                 setBusyUI(true);
                 m_currentFileServer->copyFromServer(sourcePath, destPath);
@@ -189,6 +191,8 @@ void MainWindow::copySelectedFiles()
 
 void MainWindow::deleteSelectedFiles()
 {
+    logger.msg(Arc::INFO, "Delete selected files started.");
+
     // Delete selected file
 
     QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
@@ -203,16 +207,16 @@ void MainWindow::deleteSelectedFiles()
                                         QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
+            QStringList deleteUrls;
+
             for (int i=0; i<selectedItems.length(); i++)
             {
                 QTreeWidgetItem *selectedItem = selectedItems.at(i);
                 QString path = getURLOfItem(selectedItem);
-
-                qDebug() << "Deleting " << path;
-
-                setBusyUI(true);
-                m_currentFileServer->deleteItem(path);
+                deleteUrls.append(path);
             }
+            setBusyUI(true);
+            m_currentFileServer->deleteItems(deleteUrls);
         }
     }
 }
@@ -265,7 +269,8 @@ void MainWindow::setBusyUI(bool busy)
 
 void MainWindow::updateFileTree()
 {
-    qDebug() << "updateFileTree()";
+    logger.msg(Arc::INFO, "Updating file list.");
+
     QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
 
     ui->filesTreeWidget->clear();
@@ -278,13 +283,11 @@ void MainWindow::updateFileTree()
         item->setText(0, AFE.getFileName());
         if (AFE.getFileType()==ARCDir)
         {
-            qDebug() << "Adding dir " << AFE.getFileName();
             item->setIcon(0,QIcon::fromTheme("folder"));
             item->setText(1, "---");
         }
         else
         {
-            qDebug() << "Adding file " << AFE.getFileName();
             item->setIcon(0,QIcon::fromTheme("document"));
             item->setText(1, QString::number(AFE.getSize()));
         }
@@ -309,12 +312,15 @@ void MainWindow::updateFileTree()
 
     for (int i=0; i<8; i++)
         ui->filesTreeWidget->resizeColumnToContents(i);
+
+    logger.msg(Arc::INFO, "File list update done.");
 }
 
 
 void MainWindow::updateFoldersTree()
 {
-    qDebug() << "Update folders tree-->";
+    logger.msg(Arc::INFO, "Updating folder tree.");
+
     QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
 
     ui->foldersTreeWidget->clear();
@@ -334,12 +340,12 @@ void MainWindow::updateFoldersTree()
             ui->foldersTreeWidget->addTopLevelItem(item);
         }
     }
-    qDebug() << "Update folders tree<--";
+    logger.msg(Arc::INFO, "Folder tree update done.");
 }
 
 void MainWindow::updateFoldersTreeBelow()
 {
-    qDebug() << "Update folders tree-->";
+    logger.msg(Arc::INFO, "Update folders tree below.");
 
     m_currentFileServer->setNotifyParent(false);
     QString currentURL = m_currentFileServer->getCurrentURL();
@@ -364,11 +370,10 @@ void MainWindow::updateFoldersTreeBelow()
             ui->foldersTreeWidget->addTopLevelItem(item);
         }
     }
-    qDebug() << "Update folders tree<--";
 
     m_currentFileServer->updateFileList(currentURL);
     m_currentFileServer->setNotifyParent(true);
-
+    logger.msg(Arc::INFO, "Folder tree update done.");
 }
 
 void MainWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
@@ -429,28 +434,24 @@ void MainWindow::onMenuItemSRMSettings()
 
 void MainWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 {
+    logger.msg(Arc::INFO, "Files dropped in window.");
     this->setBusyUI(true);
-    qDebug() << "filesDropped:";
-    qDebug() << "urlList length = " << urlList.length();
 
     int i;
 
     for (i=0; i<urlList.length(); i++)
-        qDebug() << "file: " << urlList[i];
+        logger.msg(Arc::INFO, "file:" + urlList[i].toString().toStdString());
 
     m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
-
-    this->setBusyUI(false);
 }
 
 void MainWindow::onFileListFinished(bool error, QString errorMsg)
 {
-    qDebug() << "onFileListFinished-->";
     setBusyUI(false);
 
     if (error == true)
     {
-        qDebug() << "FileListFinished error.";
+        logger.msg(Arc::ERROR, "Update of file list failed.");
         m_currentUpdateFileListsMode = CUFLM_noUpdate;
         QMessageBox::information(this, tr("ArcFTP"), errorMsg);
     }
@@ -459,29 +460,23 @@ void MainWindow::onFileListFinished(bool error, QString errorMsg)
        switch (m_currentUpdateFileListsMode)
        {
        case CUFLM_noUpdate:
-           qDebug() << "noUpdate";
            break;
        case CUFLM_clickedBrowse:
-           qDebug() << "clickedBrowse";
            updateFoldersTree();
            updateFileTree();
            break;
        case CUFLM_clickedFolder:
-           qDebug() << "clickedFolder";
            updateFileTree();
            break;
        case CUFLM_clickedUp:
-           qDebug() << "clickedUp";
            updateFoldersTree();
            updateFileTree();
            break;
        case CUFLM_expandedFolder:
-           qDebug() << "expandedFolder";
            expandFolderTreeWidget(m_folderWidgetBeingUpdated);
            m_folderWidgetBeingUpdated = NULL;
            break;
        case CUFLM_doubleClickedFolder:
-           qDebug() << "doubleclicked folder";
            updateFileTree();
            updateFoldersTreeBelow();
        default:
@@ -491,12 +486,11 @@ void MainWindow::onFileListFinished(bool error, QString errorMsg)
     }
 
     m_currentUpdateFileListsMode = CUFLM_noUpdate;
-    qDebug() << "onFileListFinished<--";
 }
 
 void MainWindow::onCopyFromServerFinished(bool error)
 {
-    qDebug() << "onCopyFromServerFinished";
+    logger.msg(Arc::INFO, "Copy from file server finished.");
     updateFileTree();
     setBusyUI(false);
     if (error == true)
@@ -511,11 +505,8 @@ void MainWindow::onCopyFromServerFinished(bool error)
 
 void MainWindow::onDeleteFinished(bool error)
 {
-    qDebug() << "onDeleteFinished()->";
-    m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
-    //onFileListFinished(false, "");                      // ... so that the deleted file is removed
-
-    //this->updateFileTree();
+    logger.msg(Arc::INFO, "File deletion finished.");
+    this->updateFileTree();
 
     setBusyUI(false);
     if (error == true)
@@ -531,6 +522,7 @@ void MainWindow::onDeleteFinished(bool error)
 
 void MainWindow::onMakeDirFinished(bool error)
 {
+    logger.msg(Arc::INFO, "Make dir finished.");
     //m_currentUpdateFileListsMode = CUFLM_clickedBrowse;   // Update the listview displaying the folder...
     //onFileListFinished(false, "");                      // ... so that the deleted file is removed
 
@@ -548,6 +540,7 @@ void MainWindow::onMakeDirFinished(bool error)
 
 void MainWindow::onCopyToServerFinished(bool error, QList<QString> &failedFiles)
 {
+    logger.msg(Arc::INFO, "Copy to server finished.");
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
     onFileListFinished(false, "");                      // ... so that the deleted file is removed
 
@@ -710,6 +703,13 @@ void MainWindow::on_browseButton_clicked()
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
 
     m_currentFileServer = FileServerFactory::getNewFileServer(url, this);
+    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
+    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget (in case it's a new file server)
     fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
