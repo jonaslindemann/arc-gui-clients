@@ -497,6 +497,7 @@ void MainWindow::onFileListFinished(bool error, QString errorMsg)
 void MainWindow::onCopyFromServerFinished(bool error)
 {
     qDebug() << "onCopyFromServerFinished";
+    updateFileTree();
     setBusyUI(false);
     if (error == true)
     {
@@ -510,8 +511,11 @@ void MainWindow::onCopyFromServerFinished(bool error)
 
 void MainWindow::onDeleteFinished(bool error)
 {
+    qDebug() << "onDeleteFinished()->";
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
     //onFileListFinished(false, "");                      // ... so that the deleted file is removed
+
+    //this->updateFileTree();
 
     setBusyUI(false);
     if (error == true)

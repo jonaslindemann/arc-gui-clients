@@ -237,14 +237,19 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
     else
     {
         FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+        m_transferList.append(xfr);
+        connect(xfr, SIGNAL(onCompleted(FileTransfer*, Arc::DataStatus, QString)), this, SLOT(onCompleted(FileTransfer*, Arc::DataStatus, QString)));
+
         if (xfr->execute() == TRUE) // Startar filöverföringen asynkront.
         {
+            /*
             while (!xfr->isCompleted()) {
                 QApplication::processEvents();
             }
             //xfr->wait(); // Blockerande vänterutin. Behövs inte i GUI kod.
             delete xfr;
             mainWindow->onCopyFromServerFinished(false);
+            */
         }
         else
         {
@@ -264,7 +269,7 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 
 bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 {
-    logger.msg(Arc::DEBUG, "SRMServer::copyToServer()");
+    logger.msg(Arc::INFO, "SRMServer::copyToServer()");
 
     bool success = false;
 
@@ -276,8 +281,11 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
     else
     {
         FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+        m_transferList.append(xfr);
+        connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
         if (xfr->execute() == TRUE) // Startar filöverföringen asynkront.
         {
+            /*
             logger.msg(Arc::INFO, "Waiting for transfer to complete.");
             while (!xfr->isCompleted()) {
                 QApplication::processEvents();
@@ -286,6 +294,7 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
             //xfr->wait(); // Blockerande vänterutin. Behövs inte i GUI kod.
             delete xfr;
             mainWindow->onCopyFromServerFinished(false);
+            */
         }
         else
         {
@@ -303,7 +312,7 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 
 bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder)
 {
-    logger.msg(Arc::DEBUG, "SRMServer::copyToServer(urlList)");
+    logger.msg(Arc::INFO, "SRMServer::copyToServer(urlList)");
 
     bool success = false;
 
@@ -328,8 +337,11 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
             QString destinationPath = destinationFolder + "/" + sourceFilename;
 
             FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+            m_transferList.append(xfr);
+            connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
             xfr->execute(); // Startar filöverföringen asynkront.
 
+            /*
             // Wait while still processing events.
 
             while (!xfr->isCompleted()) {
@@ -338,11 +350,14 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
 
             //xfr->wait(); // Blockerande vänterutin. Behövs inte i GUI kod.
             delete xfr;
+            */
         }
 
+        /*
         updateFileList(currentPath);
 
         mainWindow->onCopyToServerFinished(!success, *failedFilesList);
+        */
     }
 
     return success;
@@ -456,3 +471,17 @@ void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 {
 
 }
+
+void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
+{
+    logger.msg(Arc::INFO, "SRMFileServer::onCompleted.");
+    m_transferList.removeOne(fileTransfer);
+    delete fileTransfer;
+
+    if (m_transferList.length()==0)
+    {
+        this->updateFileList(currentPath);
+        mainWindow->onCopyFromServerFinished(false);
+    }
+}
+

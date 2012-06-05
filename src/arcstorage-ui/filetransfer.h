@@ -20,11 +20,14 @@
 #include <arc/data/URLMap.h>
 #include <arc/OptionParser.h>
 
+#include <QObject>
+
 /** Jonas Lindemann should document this class :)
   *
   */
-class FileTransfer
+class FileTransfer : public QObject
 {
+    Q_OBJECT
 private:
     Arc::URL m_sourceUrl;
     Arc::URL m_destUrl;
@@ -53,9 +56,13 @@ public:
     bool execute();
     void wait();
     Arc::DataStatus status();
-    void completed();
+    void completed(Arc::DataStatus res, std::string error);
 
     bool isCompleted();
+
+Q_SIGNALS:
+    void onProgress(FileTransfer* fileTransfer, unsigned long long bytesTransferred, unsigned long long bytesTotal);
+    void onCompleted(FileTransfer* fileTransfer, bool success, QString error);
 };
 
 #endif // FILETRANSFER_H
