@@ -79,4 +79,5 @@ target_link_libraries (arcstat-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBR
 
 #if (LINUX)
 install(TARGETS arcstat-ui DESTINATION bin)
+install(FILES arcstat-ui DESTINATION share/applications)
 #endif(LINUX)
