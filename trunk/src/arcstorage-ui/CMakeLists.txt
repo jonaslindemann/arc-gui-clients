@@ -6,6 +6,7 @@ set(arcstorageui_UIS
     mainwindow.ui
     filepropertiesdialog.ui
     srmsettingsdialog.ui
+    transferlistwindow.ui
 )
 
 set(arcstorageui_SRCS
@@ -22,6 +23,8 @@ set(arcstorageui_SRCS
     srmsettingsdialog.cpp
     settings.cpp
     filetransfer.cpp
+    filetransferlist.cpp
+    transferlistwindow.cpp
 )
 
 set(arcstorageui_MOC_HDRS
@@ -31,6 +34,8 @@ set(arcstorageui_MOC_HDRS
     srmfileserver.h
     srmsettingsdialog.h
     filetransfer.h
+    filetransferlist.h
+    transferlistwindow.h
 )
 
 #SET(arcexplorerui_RCS 

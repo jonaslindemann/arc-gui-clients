@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "filetransfer.h"
 #include "arcstorage.h"
+#include "filetransferlist.h"
 
 #include <qurl.h>
 
@@ -42,8 +43,9 @@ bool SRMFileServer::initUserConfig()
 
     if (m_usercfg == NULL)
     {
-        QString configFilename = Settings::getStringValue("srmConfigFilename");
-        m_usercfg = new Arc::UserConfig(configFilename.toStdString(), Arc::initializeCredentialsType::SkipCredentials);
+        //QString configFilename = Settings::getStringValue("srmConfigFilename");
+        m_usercfg = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+        //m_usercfg = new Arc::UserConfig(configFilename.toStdString(), Arc::initializeCredentialsType::SkipCredentials);
         if (m_usercfg != NULL)
         {
             m_usercfg->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
@@ -237,7 +239,8 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
     else
     {
         FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
-        m_transferList.append(xfr);
+        FileTransferList::instance()->addTransfer(xfr);
+        //m_transferList.append(xfr);
         connect(xfr, SIGNAL(onCompleted(FileTransfer*, Arc::DataStatus, QString)), this, SLOT(onCompleted(FileTransfer*, Arc::DataStatus, QString)));
 
         if (!xfr->execute()) // Startar filöverföringen asynkront.
@@ -265,7 +268,8 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
     else
     {
         FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
-        m_transferList.append(xfr);
+        FileTransferList::instance()->addTransfer(xfr);
+        //m_transferList.append(xfr);
         connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
         if (!xfr->execute()) // Startar filöverföringen asynkront.
         {
@@ -308,7 +312,8 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
 
             logger.msg(Arc::INFO, "Adding filertransfer : "+sourcePath.toStdString()+" -> " + destinationPath.toStdString());
             FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
-            m_transferList.append(xfr);
+            FileTransferList::instance()->addTransfer(xfr);
+
             connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
             xfr->execute();
         }
@@ -485,10 +490,11 @@ void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
 {
     logger.msg(Arc::INFO, "SRMFileServer::onCompleted.");
-    m_transferList.removeOne(fileTransfer);
+
+    FileTransferList::instance()->removeTransfer(fileTransfer);
     delete fileTransfer;
 
-    if (m_transferList.length()==0)
+    if (FileTransferList::instance()->getTransferCount()==0)
     {
         this->updateFileList(currentPath);
         Q_EMIT onCopyFromServerFinished(false);
