@@ -4,6 +4,7 @@
 #include <QObject>
 #include <arc/UserConfig.h>
 #include "fileserver.h"
+#include "filetransfer.h"
 
 class MainWindow;
 
@@ -14,6 +15,8 @@ class SRMFileServer : public QObject, public FileServer
 private:
     Arc::UserConfig* m_usercfg;
     QString m_currentUrlString;
+
+    QList<FileTransfer*> m_transferList;
 
     bool initUserConfig();
 
@@ -33,7 +36,8 @@ public:
     bool makeDir(QString path);
     unsigned int getFilePermissions(QString path);
     void setFilePermissions(QString path, unsigned int permissions);
-
+public Q_SLOTS:
+    void onCompleted(FileTransfer* fileTransfer, bool success, QString error);
 
 };
 

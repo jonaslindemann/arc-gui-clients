@@ -2,14 +2,14 @@
 
 #include "arcstorage.h"
 
-static void onProgress(FILE *o, const char*, unsigned int,
+static void _onProgress(FILE *o, const char*, unsigned int,
                      unsigned long long int all, unsigned long long int max,
                      double, double)
 {
     logger.msg(Arc::INFO, "Transferred: %llu kB", all / 1024);
 }
 
-static void onDataMoveCompleted(Arc::DataMover* mover, Arc::DataStatus res, void* args)
+static void _onDataMoveCompleted(Arc::DataMover* mover, Arc::DataStatus res, void* args)
 {
     using namespace std;
 
@@ -28,7 +28,7 @@ static void onDataMoveCompleted(Arc::DataMover* mover, Arc::DataStatus res, void
         logger.msg(Arc::INFO, "Transfer completed ok");
 
     FileTransfer* xfr = (FileTransfer*)args;
-    xfr->completed();
+    xfr->completed(res, res.GetDesc());
 }
 
 FileTransfer::FileTransfer(const std::string& source_str, const std::string& destination_str, Arc::UserConfig& usercfg)
@@ -143,13 +143,13 @@ bool FileTransfer::execute()
     // Add callback for progress information.
 
     if (m_verbose)
-        m_mover->set_progress_indicator(&onProgress);
+        m_mover->set_progress_indicator(&_onProgress);
 
     // Do the actual transfer. Attach callback onDataMoveCompleted for notification of completion.
 
     logger.msg(Arc::INFO, "Transfer process started.");
 
-    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &onDataMoveCompleted, this);
+    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this);
     return true;
 }
 
@@ -160,12 +160,19 @@ void FileTransfer::wait()
     m_cond.wait();
 }
 
-void FileTransfer::completed()
+void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
+    logger.msg(Arc::INFO, "FileTransfer::completed.");
+
     // Release waiting signal
 
     m_cond.signal();
     m_completed = true;
+
+    QString errorMessage = error.c_str();
+
+    logger.msg(Arc::INFO, "FileTransfer::completed -> sending signal onCompleted().");
+    Q_EMIT onCompleted(this, true, errorMessage);
 }
 
 Arc::DataStatus FileTransfer::status()

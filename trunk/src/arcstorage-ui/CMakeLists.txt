@@ -30,6 +30,7 @@ set(arcstorageui_MOC_HDRS
     filepropertiesdialog.h
     srmfileserver.h
     srmsettingsdialog.h
+    filetransfer.h
 )
 
 #SET(arcexplorerui_RCS 
@@ -92,5 +93,5 @@ target_link_libraries (arcstorage-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_L
 
 #if (LINUX)
 install(TARGETS arcstorage-ui DESTINATION bin)
-install(FILES arcstorage-ui.desktop DESTIONATION share/applications)
+install(FILES arcstorage-ui.desktop DESTINATION share/applications)
 #endif(LINUX)
