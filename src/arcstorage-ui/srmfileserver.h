@@ -20,6 +20,8 @@ private:
 
     bool initUserConfig();
 
+    void updateFileListSilent(QString URL);
+
 public:
     explicit SRMFileServer(MainWindow *mw, QObject *parent = 0);
 
@@ -32,10 +34,20 @@ public:
     bool copyFromServer(QString sourcePath, QString destinationPath);
     bool copyToServer(QString sourcePath, QString destinationPath);
     bool copyToServer(QList<QUrl> &urlList, QString destinationPath);
-    bool deleteItem(QString path);
+    bool deleteItem(QString URL);
+    bool deleteItems(QStringList& URLs);
     bool makeDir(QString path);
     unsigned int getFilePermissions(QString path);
     void setFilePermissions(QString path, unsigned int permissions);
+
+Q_SIGNALS:
+    void onFileListFinished(bool error, QString errorMsg);
+    void onError(QString errorStr);
+    void onCopyFromServerFinished(bool error);
+    void onDeleteFinished(bool error);
+    void onMakeDirFinished(bool error);
+    void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
+
 public Q_SLOTS:
     void onCompleted(FileTransfer* fileTransfer, bool success, QString error);
 

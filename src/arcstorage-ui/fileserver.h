@@ -74,6 +74,9 @@ public:
     /** Delete a file from the server */
     virtual bool deleteItem(QString path) = 0;
 
+    /** Delete several files from the server */
+    virtual bool deleteItems(QStringList& paths) = 0;
+
     /** Create a folder on the server */
     virtual bool makeDir(QString path) = 0;
 };

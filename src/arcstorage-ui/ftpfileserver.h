@@ -64,6 +64,9 @@ public:
 
     /** Described in the abstract class FileServer */
     void setFilePermissions(QString path, unsigned int permissions);
+
+    virtual bool deleteItems(QStringList& paths) {return false;}
+
 };
 
 #endif // FTPFILESERVER_H

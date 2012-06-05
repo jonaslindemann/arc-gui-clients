@@ -33,14 +33,7 @@ public:
     explicit MainWindow(QWidget *parent = 0, bool childWindow = false);
     ~MainWindow();
 
-    void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
-    void onFileListFinished(bool error, QString errorMsg);
-    void onError(QString errorStr);
     void onNewStatus(QString errorStr);
-    void onCopyFromServerFinished(bool error);
-    void onDeleteFinished(bool error);
-    void onMakeDirFinished(bool error);
-    void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
 
     void setBusyUI(bool busy);
     void copySelectedFiles();
@@ -107,6 +100,15 @@ private Q_SLOTS:
     void on_actionClearSelection_triggered();
     void on_actionSelectAllFiles_triggered();
     void on_actionCreateDir_triggered();
+public Q_SLOTS:
+    void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
+    void onFileListFinished(bool error, QString errorMsg);
+    void onError(QString errorStr);
+    void onCopyFromServerFinished(bool error);
+    void onDeleteFinished(bool error);
+    void onMakeDirFinished(bool error);
+    void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
+
 };
 
 #endif // MAINWINDOW_H
