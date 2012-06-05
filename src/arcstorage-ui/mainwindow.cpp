@@ -17,8 +17,11 @@
 #include "srmsettingsdialog.h"
 #include "settings.h"
 #include "qdebugstream.h"
+#include "transferlistwindow.h"
 
 #include "arcstorage.h"
+
+#include "filetransferlist.h"
 
 #include <arc/Logger.h>
 
@@ -42,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
 
     m_folderWidgetBeingUpdated = NULL;
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
+    m_transferWindow = 0;
 
     ui->setupUi(this);
 
@@ -74,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     connect(ui->actionUp, SIGNAL(triggered()), this, SLOT(on_upButton_clicked()));
     connect(ui->actionReload, SIGNAL(triggered()), this, SLOT(on_browseButton_clicked()));
 
+    // Get fileserver and wire it up
+
     m_currentFileServer = FileServerFactory::getNewFileServer("", this);  // "" - default file server
     SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
@@ -82,6 +88,12 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
     connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
     connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+
+    // Connect FileTransferList
+
+    if (!m_childWindow)
+    {
+    }
 
     // Setup the headers in the file tree widget
 
@@ -570,7 +582,6 @@ void MainWindow::onError(QString errorStr)
     QMessageBox::information(this, tr("ArcFTP"), errorStr);
 }
 
-
 void MainWindow::onNewStatus(QString statusStr)
 {
     //ui->statusLabel->setText(statusStr);
@@ -856,4 +867,13 @@ void MainWindow::on_actionSelectAllFiles_triggered()
 void MainWindow::on_actionCreateDir_triggered()
 {
     this->createDir();
+}
+
+
+void MainWindow::on_actionShowTransferList_triggered()
+{
+    if (m_transferWindow == 0)
+        m_transferWindow = new TransferListWindow(this);
+
+    m_transferWindow->show();
 }

@@ -21,6 +21,7 @@
 #include <arc/OptionParser.h>
 
 #include <QObject>
+#include <QString>
 
 /** Jonas Lindemann should document this class :)
   *
@@ -49,6 +50,9 @@ private:
     Arc::DataStatus m_status;
     Arc::SimpleCondition m_cond;
     bool m_completed;
+    std::string m_id;
+    unsigned long m_transferred;
+    unsigned long m_totalSize;
 public:
     FileTransfer(const std::string& source_str, const std::string& destination_str, Arc::UserConfig& usercfg);
     virtual ~FileTransfer();
@@ -59,6 +63,11 @@ public:
     void completed(Arc::DataStatus res, std::string error);
 
     bool isCompleted();
+
+    QString id();
+
+    void updateTransferStatus(unsigned long transferred, unsigned long totalSize);
+    void getTransferStatus(unsigned long& transferred, unsigned long& totalSize);
 
 Q_SIGNALS:
     void onProgress(FileTransfer* fileTransfer, unsigned long long bytesTransferred, unsigned long long bytesTotal);

@@ -9,6 +9,7 @@
 #include <arc/Logger.h>
 #include <QComboBox>
 #include "qdebugstream.h"
+#include "transferlistwindow.h"
 
 
 class FileServer;
@@ -75,6 +76,8 @@ private:
 
     bool m_childWindow;
 
+    TransferListWindow* m_transferWindow;
+
 protected:
     void closeEvent( QCloseEvent *e );
 
@@ -100,6 +103,8 @@ private Q_SLOTS:
     void on_actionClearSelection_triggered();
     void on_actionSelectAllFiles_triggered();
     void on_actionCreateDir_triggered();
+    void on_actionShowTransferList_triggered();
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);

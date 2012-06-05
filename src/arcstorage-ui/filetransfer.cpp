@@ -2,11 +2,29 @@
 
 #include "arcstorage.h"
 
-static void _onProgress(FILE *o, const char*, unsigned int,
+#include "filetransferlist.h"
+
+#include <iostream>
+#include <string>
+#include <sstream>
+
+template <typename T>
+std::string convertPointerToStringAddress(const T* obj)
+{
+  int address(reinterpret_cast<int>(obj));
+  std::stringstream ss;
+  ss << address;
+  return ss.str();
+}
+
+static void _onProgress(FILE *o, const char* prefix, unsigned int,
                      unsigned long long int all, unsigned long long int max,
                      double, double)
 {
-    logger.msg(Arc::INFO, "Transferred: %llu kB", all / 1024);
+    logger.msg(Arc::INFO, "ID%s: Transferred: %llu kB of %llu", prefix, all / 1024, max / 1024);
+
+    QString id = prefix;
+    FileTransferList::instance()->updateStatus(id, all / 1024, max / 1024);
 }
 
 static void _onDataMoveCompleted(Arc::DataMover* mover, Arc::DataStatus res, void* args)
@@ -38,7 +56,7 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
       m_destHandle(m_destUrl, usercfg)
 {
     m_config = &usercfg;
-    m_retries = 1;
+    m_retries = 3;
     m_timeout = 300;
 
     m_passive = false;
@@ -53,6 +71,9 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
     m_cache = 0;
     m_urlMap = 0;
 
+    m_id = convertPointerToStringAddress(this);
+    m_transferred = 0;
+    m_totalSize = 0;
 }
 
 FileTransfer::~FileTransfer()
@@ -65,6 +86,25 @@ FileTransfer::~FileTransfer()
 
     if (m_urlMap!=0)
         delete m_urlMap;
+}
+
+QString FileTransfer::id()
+{
+    QString id = m_id.c_str();
+    return id;
+}
+
+void FileTransfer::updateTransferStatus(unsigned long transferred, unsigned long totalSize)
+{
+    //logger.msg(Arc::INFO, "ID"+m_id + " updated transfer status.");
+    m_transferred = transferred;
+    m_totalSize = totalSize;
+}
+
+void FileTransfer::getTransferStatus(unsigned long& transferred, unsigned long& totalSize)
+{
+    transferred = m_transferred;
+    totalSize = m_totalSize;
 }
 
 bool FileTransfer::execute()
@@ -149,7 +189,7 @@ bool FileTransfer::execute()
 
     logger.msg(Arc::INFO, "Transfer process started.");
 
-    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this);
+    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this, m_id.c_str());
     return true;
 }
 

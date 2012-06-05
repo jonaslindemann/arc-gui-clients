@@ -205,9 +205,16 @@
     </property>
     <addaction name="actionAbout_ARC_File_Navigator"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShowTransferList"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
    <addaction name="menuGo"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -364,6 +371,11 @@
   <action name="actionCreateDir">
    <property name="text">
     <string>Create directory</string>
+   </property>
+  </action>
+  <action name="actionShowTransferList">
+   <property name="text">
+    <string>Show current transfers...</string>
    </property>
   </action>
  </widget>
