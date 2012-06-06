@@ -21,7 +21,7 @@ static void _onProgress(FILE *o, const char* prefix, unsigned int,
                      unsigned long long int all, unsigned long long int max,
                      double, double)
 {
-    logger.msg(Arc::INFO, "ID%s: Transferred: %llu kB of %llu", prefix, all / 1024, max / 1024);
+    logger.msg(Arc::DEBUG, "ID%s: Transferred: %llu kB of %llu", prefix, all / 1024, max / 1024);
 
     QString id = prefix;
     FileTransferList::instance()->updateStatus(id, all / 1024, max / 1024);
@@ -92,6 +92,18 @@ QString FileTransfer::id()
 {
     QString id = m_id.c_str();
     return id;
+}
+
+QString FileTransfer::sourceUrl()
+{
+    QString sourceUrl = m_sourceUrl.str().c_str();
+    return sourceUrl;
+}
+
+QString FileTransfer::destUrl()
+{
+    QString destUrl = m_destUrl.str().c_str();
+    return destUrl;
 }
 
 void FileTransfer::updateTransferStatus(unsigned long transferred, unsigned long totalSize)
@@ -170,7 +182,7 @@ bool FileTransfer::execute()
 
     if (m_retries)   // 0 means default behavior
     {
-        m_mover->retry(true); // go through all locations
+        m_mover->retry(true); // go th/home/jonasrough all locations
         m_sourceHandle->SetTries(m_retries); // try all locations "tries" times
         m_destHandle->SetTries(m_retries);
     }
@@ -202,7 +214,7 @@ void FileTransfer::wait()
 
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
-    logger.msg(Arc::INFO, "FileTransfer::completed.");
+    logger.msg(Arc::INFO, "FileTransfer completed.");
 
     // Release waiting signal
 
@@ -211,7 +223,7 @@ void FileTransfer::completed(Arc::DataStatus res, std::string error)
 
     QString errorMessage = error.c_str();
 
-    logger.msg(Arc::INFO, "FileTransfer::completed -> sending signal onCompleted().");
+    logger.msg(Arc::DEBUG, "FileTransfer::completed -> sending signal onCompleted().");
     Q_EMIT onCompleted(this, true, errorMessage);
 }
 

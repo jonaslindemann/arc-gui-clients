@@ -51,28 +51,28 @@ FileTransfer* FileTransferList::getTransfer(int i)
 
 int FileTransferList::getTransferCount()
 {
-    m_accessMutex.lock();
+    //m_accessMutex.lock();
     int count = m_transferList.count();
-    m_accessMutex.unlock();
+    //m_accessMutex.unlock();
     return count;
 }
 
 FileTransfer* FileTransferList::getTransfer(QString id)
 {
-    m_accessMutex.lock();
+    //m_accessMutex.lock();
     FileTransfer* xfr = 0;
     if (m_transferDict.contains(id))
         xfr = m_transferDict[id];
-    m_accessMutex.unlock();
+    //m_accessMutex.unlock();
     return xfr;
 }
 
 void FileTransferList::updateStatus(QString id, unsigned long transferred, unsigned long totalSize)
 {
     FileTransfer* xfr = this->getTransfer(id);
-    m_accessMutex.lock();
+    //m_accessMutex.lock();
     xfr->updateTransferStatus(transferred, totalSize);
     Q_EMIT onUpdateStatus(id);
-    m_accessMutex.unlock();
+    //m_accessMutex.unlock();
 }
 

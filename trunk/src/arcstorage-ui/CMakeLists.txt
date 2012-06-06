@@ -25,6 +25,7 @@ set(arcstorageui_SRCS
     filetransfer.cpp
     filetransferlist.cpp
     transferlistwindow.cpp
+    globalstateinfo.cpp
 )
 
 set(arcstorageui_MOC_HDRS
@@ -36,6 +37,7 @@ set(arcstorageui_MOC_HDRS
     filetransfer.h
     filetransferlist.h
     transferlistwindow.h
+    globalstateinfo.h
 )
 
 #SET(arcexplorerui_RCS 
