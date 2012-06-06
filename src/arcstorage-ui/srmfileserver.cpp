@@ -256,7 +256,7 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 
 bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 {
-    logger.msg(Arc::INFO, "SRMServer::copyToServer()");
+    logger.msg(Arc::DEBUG, "SRMServer::copyToServer()");
 
     bool success = false;
 
@@ -383,7 +383,7 @@ bool SRMFileServer::deleteItem(QString URL)
 {
     bool success = false;
 
-    std::cout << "SRMFileServer::deleteItem(): URL = " + URL.toStdString() << std::endl;
+    //std::cout << "SRMFileServer::deleteItem(): URL = " + URL.toStdString() << std::endl;
 
     if (initUserConfig() == FALSE)
     {
@@ -489,7 +489,7 @@ void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 
 void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
 {
-    logger.msg(Arc::INFO, "SRMFileServer::onCompleted.");
+    logger.msg(Arc::DEBUG, "SRMFileServer::onCompleted.");
 
     FileTransferList::instance()->removeTransfer(fileTransfer);
     delete fileTransfer;

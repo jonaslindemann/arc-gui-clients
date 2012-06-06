@@ -18,6 +18,7 @@
 #include "settings.h"
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
+#include "globalstateinfo.h"
 
 #include "arcstorage.h"
 
@@ -38,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    GlobalStateInfo::instance()->setMainWindow(this);
+
     m_childWindow = childWindow;
     Settings::loadFromDisk();
     QVariant qvar = Settings::getValue("urlList");
@@ -147,6 +150,14 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     ui->actionUploadFiles->setIcon(QIcon::fromTheme("document-send"));
     ui->actionCreateDir->setIcon(QIcon::fromTheme("folder-new"));
 #endif
+
+    this->setGeometry(
+        QStyle::alignedRect(
+            Qt::LeftToRight,
+            Qt::AlignCenter,
+            this->size(),
+            qApp->desktop()->availableGeometry()
+        ));
 }
 
 MainWindow::~MainWindow()
@@ -173,6 +184,9 @@ void MainWindow::closeEvent(QCloseEvent *e)
     Settings::setValue("urlList", urlList);
     Settings::saveToDisk();
     QMainWindow::closeEvent(e);
+
+    if (!m_childWindow)
+        GlobalStateInfo::instance()->closeChildWindows();
 }
 
 void MainWindow::copySelectedFiles()
@@ -447,6 +461,9 @@ void MainWindow::onMenuItemSRMSettings()
 void MainWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 {
     logger.msg(Arc::INFO, "Files dropped in window.");
+
+    GlobalStateInfo::instance()->showTransferWindow();
+
     this->setBusyUI(true);
 
     int i;
@@ -808,7 +825,6 @@ void MainWindow::on_urlComboBox_currentIndexChanged(int index)
     logger.msg(Arc::DEBUG, "textEditChanged.");
 }
 
-
 void MainWindow::on_actionNewWindow_triggered()
 {
     MainWindow* window = new MainWindow(0, true);
@@ -821,6 +837,8 @@ void MainWindow::on_actionNewWindow_triggered()
     qDebug() << r;
     window->setGeometry(r);
     window->show();
+
+    GlobalStateInfo::instance()->addChildWindow(window);
 }
 
 void MainWindow::on_actionUploadFiles_triggered()
@@ -872,8 +890,5 @@ void MainWindow::on_actionCreateDir_triggered()
 
 void MainWindow::on_actionShowTransferList_triggered()
 {
-    if (m_transferWindow == 0)
-        m_transferWindow = new TransferListWindow(this);
-
-    m_transferWindow->show();
+    GlobalStateInfo::instance()->showTransferWindow();
 }

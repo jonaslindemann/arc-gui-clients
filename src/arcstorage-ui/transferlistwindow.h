@@ -2,6 +2,7 @@
 #define TRANSFERLISTWINDOW_H
 
 #include <QMainWindow>
+#include <QHash>
 
 namespace Ui {
 class TransferListWindow;
@@ -17,6 +18,8 @@ public:
     
 private:
     Ui::TransferListWindow *ui;
+
+    QHash<QString, int> m_idToRowDict;
 
 public Q_SLOTS:
     void onUpdateStatus(QString id);

@@ -65,6 +65,8 @@ public:
     bool isCompleted();
 
     QString id();
+    QString sourceUrl();
+    QString destUrl();
 
     void updateTransferStatus(unsigned long transferred, unsigned long totalSize);
     void getTransferStatus(unsigned long& transferred, unsigned long& totalSize);
