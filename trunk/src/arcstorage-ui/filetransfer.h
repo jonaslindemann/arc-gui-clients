@@ -23,6 +23,12 @@
 #include <QObject>
 #include <QString>
 
+enum TTransferState { TS_IDLE,
+                       TS_EXECUTED,
+                       TS_FAILED,
+                       TS_COMPLETED
+                         };
+
 /** Jonas Lindemann should document this class :)
   *
   */
@@ -53,9 +59,12 @@ private:
     std::string m_id;
     unsigned long m_transferred;
     unsigned long m_totalSize;
+    TTransferState m_transferState;
 public:
     FileTransfer(const std::string& source_str, const std::string& destination_str, Arc::UserConfig& usercfg);
     virtual ~FileTransfer();
+
+    TTransferState transferState();
 
     bool execute();
     void wait();

@@ -4,16 +4,34 @@
 #include <QMutex>
 #include <QList>
 #include <QHash>
+#include <QThread>
 
 #include "filetransfer.h"
+
+class FileTransferProcessingThread : public QThread
+{
+    Q_OBJECT
+private:
+    bool m_terminate;
+public:
+    FileTransferProcessingThread();
+
+    void shutdown();
+
+private:
+    void run();
+};
 
 class FileTransferList : public QObject
 {
     Q_OBJECT
 private:
     QList<FileTransfer*> m_transferList;
+    QList<FileTransfer*> m_activeTransferList;
     QHash<QString, FileTransfer*> m_transferDict;
+    QHash<QString, FileTransfer*> m_activeTransferDict;
     QMutex m_accessMutex;
+    int m_maxTransfers;
 public:
     static FileTransferList* instance()
     {
@@ -39,6 +57,8 @@ public:
         m_instance = 0;
         mutex.unlock();
     }
+
+    void processTransfers();
 
     void addTransfer(FileTransfer* fileTransfer);
     void removeTransfer(FileTransfer* fileTransfer);
