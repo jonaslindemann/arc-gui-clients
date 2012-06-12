@@ -6,6 +6,34 @@
 #include <string>
 #include <sstream>
 
+#include <QDebug>
+
+FileTransferProcessingThread::FileTransferProcessingThread()
+    :QThread()
+{
+    m_terminate = false;
+}
+
+void FileTransferProcessingThread::shutdown()
+{
+    m_terminate = true;
+}
+
+void FileTransferProcessingThread::run()
+{
+    qDebug() << "File processing thread starting.";
+
+    while(!m_terminate)
+    {
+        qDebug() << "Processing file transfers...";
+        FileTransferList::instance()->processTransfers();
+        qDebug() << "Sleeping for 5 s";
+        sleep(5);
+    }
+
+    qDebug() << "File processing thread shutting down.";
+}
+
 FileTransferList* FileTransferList::m_instance = 0;
 
 template <typename T>
@@ -19,6 +47,27 @@ std::string convertPointerToStringAddress(const T* obj)
 
 FileTransferList::FileTransferList()
 {
+    m_maxTransfers = 5;
+}
+
+void FileTransferList::processTransfers()
+{
+    m_accessMutex.lock();
+    for (int i=0; i<m_transferList.length(); i++)
+    {
+        FileTransfer* xfr = m_transferList.at(i);
+        if (xfr->transferState()==TS_IDLE)
+        {
+            if (m_activeTransferList.length()<m_maxTransfers)
+            {
+                qDebug() << "Starting file transfer id = " << xfr->id();
+                m_activeTransferList.append(xfr);
+                m_activeTransferDict[xfr->id()] = xfr;
+                xfr->execute();
+            }
+        }
+    }
+    m_accessMutex.unlock();
 }
 
 void FileTransferList::addTransfer(FileTransfer* fileTransfer)
@@ -37,6 +86,8 @@ void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
     m_accessMutex.lock();
     m_transferList.removeOne(fileTransfer);
     m_transferDict.remove(fileTransfer->id());
+    m_activeTransferList.removeOne(fileTransfer);
+    m_activeTransferDict.remove(fileTransfer->id());
     Q_EMIT onRemoveTransfer(fileTransfer->id());
     m_accessMutex.unlock();
 }

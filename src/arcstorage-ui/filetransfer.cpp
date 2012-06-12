@@ -74,6 +74,7 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
     m_id = convertPointerToStringAddress(this);
     m_transferred = 0;
     m_totalSize = 0;
+    m_transferState = TS_IDLE;
 }
 
 FileTransfer::~FileTransfer()
@@ -87,6 +88,12 @@ FileTransfer::~FileTransfer()
     if (m_urlMap!=0)
         delete m_urlMap;
 }
+
+TTransferState FileTransfer::transferState()
+{
+    return m_transferState;
+}
+
 
 QString FileTransfer::id()
 {
@@ -123,6 +130,8 @@ bool FileTransfer::execute()
 {
     using namespace std;
 
+    m_transferState = TS_EXECUTED;
+
     logger.msg(Arc::INFO, "File transfer initiating.");
 
     m_completed = false;
@@ -132,12 +141,14 @@ bool FileTransfer::execute()
 
     if (!m_sourceUrl)
     {
+        m_transferState = TS_FAILED;
         logger.msg(Arc::ERROR, "Invalid URL: %s", m_sourceUrl.str());
         return false;
     }
 
     if (!m_destUrl)
     {
+        m_transferState = TS_FAILED;
         logger.msg(Arc::ERROR, "Invalid URL: %s", m_destUrl.str());
         return false;
     }
@@ -149,6 +160,7 @@ bool FileTransfer::execute()
         m_config->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
         if (!Arc::Credential::IsCredentialsValid(*m_config))
         {
+            m_transferState = TS_FAILED;
             logger.msg(Arc::ERROR, "Unable to copy file %s: No valid credentials found", m_sourceUrl.str());
             return false;
         }
@@ -156,11 +168,13 @@ bool FileTransfer::execute()
 
     if (!m_sourceHandle)
     {
+        m_transferState = TS_FAILED;
         logger.msg(Arc::ERROR, "Unsupported source url: %s", m_sourceUrl.str());
         return false;
     }
     if (!m_destHandle)
     {
+        m_transferState = TS_FAILED;
         logger.msg(Arc::ERROR, "Unsupported destination url: %s", m_destUrl.str());
         return false;
     }
@@ -214,6 +228,7 @@ void FileTransfer::wait()
 
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
+    m_transferState = TS_COMPLETED;
     logger.msg(Arc::INFO, "FileTransfer completed.");
 
     // Release waiting signal

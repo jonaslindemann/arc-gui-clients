@@ -315,7 +315,7 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
             FileTransferList::instance()->addTransfer(xfr);
 
             connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
-            xfr->execute();
+            //xfr->execute();
         }
     }
     return success;

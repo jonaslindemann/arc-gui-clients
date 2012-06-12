@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
+#include "filetransferlist.h"
 
 
 class FileServer;
@@ -77,6 +78,8 @@ private:
     bool m_childWindow;
 
     TransferListWindow* m_transferWindow;
+
+    FileTransferProcessingThread* m_fileProcessingThread;
 
 protected:
     void closeEvent( QCloseEvent *e );

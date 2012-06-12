@@ -19,7 +19,7 @@ TransferListWindow::TransferListWindow(QWidget *parent) :
     ui->transferTable->clear();
 
     QStringList labels;
-    labels << "ID" << "Transfer" << "Status";
+    labels << "ID" << "Transfer" << "State" << "Status";
     ui->transferTable->setHorizontalHeaderLabels(labels);
     ui->transferTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
     ui->transferTable->verticalHeader()->hide();
@@ -45,8 +45,20 @@ void TransferListWindow::onUpdateStatus(QString id)
         unsigned long transferred, totalSize;
         xfr->getTransferStatus(transferred, totalSize);
 
+        if (xfr->transferState()==TS_IDLE)
+            ui->transferTable->item(row, 2)->setText("Idle");
+
+        if (xfr->transferState()==TS_EXECUTED)
+            ui->transferTable->item(row, 2)->setText("Running");
+
+        if (xfr->transferState()==TS_FAILED)
+            ui->transferTable->item(row, 2)->setText("Failed");
+
+        if (xfr->transferState()==TS_COMPLETED)
+            ui->transferTable->item(row, 2)->setText("Completed");
+
         QString status = QString::number(transferred) + "kB / " + QString::number(totalSize) + " kB";
-        ui->transferTable->item(row, 2)->setText(status);
+        ui->transferTable->item(row, 3)->setText(status);
     }
 }
 
@@ -67,7 +79,20 @@ void TransferListWindow::onAddTransfer(QString id)
 
     ui->transferTable->setItem(row, 0, new QTableWidgetItem(id));
     ui->transferTable->setItem(row, 1, new QTableWidgetItem(transfer));
-    ui->transferTable->setItem(row, 2, new QTableWidgetItem(status));
+    ui->transferTable->setItem(row, 2, new QTableWidgetItem());
+    ui->transferTable->setItem(row, 3, new QTableWidgetItem(status));
+
+    if (xfr->transferState()==TS_IDLE)
+        ui->transferTable->item(row, 2)->setText("Idle");
+
+    if (xfr->transferState()==TS_EXECUTED)
+        ui->transferTable->item(row, 2)->setText("Running");
+
+    if (xfr->transferState()==TS_FAILED)
+        ui->transferTable->item(row, 2)->setText("Failed");
+
+    if (xfr->transferState()==TS_COMPLETED)
+        ui->transferTable->item(row, 2)->setText("Completed");
 
     //ui->transferTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
     ui->transferTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);

@@ -158,10 +158,21 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
             this->size(),
             qApp->desktop()->availableGeometry()
         ));
+
+    if (!m_childWindow)
+    {
+        m_fileProcessingThread = new FileTransferProcessingThread();
+        m_fileProcessingThread->start();
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    // Shut down file transfer process thread
+
+    if (!m_childWindow)
+        m_fileProcessingThread->shutdown();
+
     // Disconnect log streams
 
     Arc::Logger::getRootLogger().removeDestinations();
