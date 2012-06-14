@@ -45,3 +45,9 @@ void GlobalStateInfo::showTransferWindow()
         ));
     m_transferListWindow->show();
 }
+
+void GlobalStateInfo::hideTransferWindow()
+{
+    if (m_transferListWindow!=0)
+        m_transferListWindow->hide();
+}

@@ -43,6 +43,7 @@ public:
     void addChildWindow(MainWindow* window);
     void closeChildWindows();
     void showTransferWindow();
+    void hideTransferWindow();
 
 private:
 

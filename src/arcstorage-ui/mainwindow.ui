@@ -107,6 +107,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::ContiguousSelection</enum>
+        </property>
         <column>
          <property name="text">
           <string notr="true">1</string>
