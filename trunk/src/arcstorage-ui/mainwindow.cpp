@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
     ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
     ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
-    ui->filesTreeWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+    ui->filesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     setBusyUI(true);
     m_currentFileServer->updateFileList(QDir::homePath());
@@ -532,6 +532,7 @@ void MainWindow::onCopyFromServerFinished(bool error)
 {
     logger.msg(Arc::INFO, "Copy from file server finished.");
     updateFileTree();
+    GlobalStateInfo::instance()->hideTransferWindow();
     setBusyUI(false);
     if (error == true)
     {
@@ -585,6 +586,8 @@ void MainWindow::onCopyToServerFinished(bool error, QList<QString> &failedFiles)
     onFileListFinished(false, "");                      // ... so that the deleted file is removed
 
     setBusyUI(false);
+
+    GlobalStateInfo::instance()->hideTransferWindow();
 
     if (error == true)
     {

@@ -3,6 +3,7 @@
 
 #include <QTreeWidget>
 #include <QtGui>
+#include <QList>
 
 class MainWindow;
 
@@ -19,9 +20,12 @@ public:
     ~DragDropableTreeWidget();
     void setMainWindow(MainWindow *mw) { mainWindow = mw; }
 
+    void resetSelection();
+
 private:
     MainWindow *mainWindow;
     QPoint dragStartPos;
+    QList<QTreeWidgetItem*> m_selectedItems;
 
 
 protected:
@@ -31,6 +35,7 @@ protected:
     void dropEvent(QDropEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent* event);
 };
 
 #endif // DRAGDROPABLETREEWIDGET_H

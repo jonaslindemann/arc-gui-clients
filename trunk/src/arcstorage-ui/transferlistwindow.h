@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QHash>
+#include <QMutex>
 
 namespace Ui {
 class TransferListWindow;
@@ -20,6 +21,7 @@ private:
     Ui::TransferListWindow *ui;
 
     QHash<QString, int> m_idToRowDict;
+    QMutex m_accessLock;
 
 public Q_SLOTS:
     void onUpdateStatus(QString id);
