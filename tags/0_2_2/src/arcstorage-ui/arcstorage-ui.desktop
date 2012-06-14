@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=ARC Storage Explorer
+GenericName=Remote File Browser
+Comment=Browse Grid storage resources
+Exec=arcstorage-ui
+Icon=system-file-manager
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;

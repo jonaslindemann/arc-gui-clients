@@ -1,0 +1,8 @@
+#!/bin/env python
+
+import os
+
+jobList = "myjob2.xml"
+
+for i in range(20):
+	os.system("arctest -J 1 --joblist=/home/jonas/.arc/%s" % jobList)
