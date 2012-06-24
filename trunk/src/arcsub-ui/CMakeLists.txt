@@ -2,16 +2,18 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 include(${QT_USE_FILE})
 
-SET(arccertui_UIS
+SET(arcsubui_UIS
     mainwindow.ui
 )
 
-SET(arccertui_SRCS
+SET(arcsubui_SRCS
   mainwindow.cpp
+  jobdefinitions.cpp
   main.cpp
 )
 
-SET(arccertui_MOC_HDRS
+SET(arcsubui_MOC_HDRS
+  jobdefinitions.h
   mainwindow.h
 )
 
@@ -20,24 +22,24 @@ SET(arccertui_MOC_HDRS
 #)
 
 # After this call, foo_MOC_SRCS = moc_Class1.cxx moc_Class2.cxx moc_Class3.cxx.
-QT4_WRAP_CPP(arccertui_MOC_SRCS ${arccertui_MOC_HDRS} )
-QT4_WRAP_UI(arccertui_UIS_H ${arccertui_UIS} )
-QT4_ADD_RESOURCES( arccertui_RC_SRCS ${arccertui_RCS} )
+QT4_WRAP_CPP(arcsubui_MOC_SRCS ${arcsubui_MOC_HDRS} )
+QT4_WRAP_UI(arcsubui_UIS_H ${arcsubui_UIS} )
+QT4_ADD_RESOURCES( arcsubui_RC_SRCS ${arcsubui_RCS} )
 
 IF(APPLE)
 ADD_EXECUTABLE(
-	arccert-ui 
+	arcsub-ui 
 	MACOSX_BUNDLE
 	${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H}
     ../../images/arccert_icon.icns
 )
 
-install(TARGETS arccert-ui
+install(TARGETS arcsub-ui
    BUNDLE
    DESTINATION .
 )
 
-SET( MACOSX_BUNDLE_ICON_FILE arccert_icon.icns )
+SET( MACOSX_BUNDLE_ICON_FILE arcsub_icon.icns )
 SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
 SET( MACOSX_BUNDLE_VERSION 0.1 )
 SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
@@ -63,19 +65,19 @@ SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
 #	MACOSX_PACKAGE_LOCATION MacOS/colormaps
 #)
 SET_SOURCE_FILES_PROPERTIES(
-        ../../images/arcproxy_icon.icns
+        ../../images/arcsub_icon.icns
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
 ELSE(APPLE)
-	add_executable(arccert-ui ${arccertui_SRCS} ${arccertui_MOC_SRCS} ${arccertui_RC_SRCS} ${arccertui_UIS_H} )
+	add_executable(arcsub-ui ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H} )
 ENDIF(APPLE)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
-target_link_libraries (arccert-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
+target_link_libraries (arcsub-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
 
 #if(LINUX)
-install(TARGETS arccert-ui DESTINATION bin)
-install(FILES arccert-ui.desktop DESTINATION share/applications)
+install(TARGETS arcsub-ui DESTINATION bin)
+install(FILES arcsub-ui.desktop DESTINATION share/applications)
 #endif(LINUX)

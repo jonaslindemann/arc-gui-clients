@@ -10,11 +10,12 @@ QT4 user interface toolkit and the ARC C++ libraries
 Requirements
 ------------
 
+cmake
 QT4
 glib
 glibmm
 sigc++
-ARC client libraries (1.1)
+ARC client libraries (2.x)
 
 ------------
 Installation

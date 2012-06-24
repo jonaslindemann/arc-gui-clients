@@ -3,8 +3,11 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include <arc/client/JobDescription.h>
 
 #include "qdebugstream.h"
+
+#include "jobdefinitions.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,13 +20,10 @@ private:
     QDebugStream* m_debugStream;
     QDebugStream* m_debugStream2;
 
-    QString m_certificateFilename;
-    QString m_keyFilename;
-    QString m_pkcs12Filename;
-    QString m_pkcs12ImportFilename;
-    QString m_certOutputDir;
-    QString m_passin;
-    QString m_passout;
+    Arc::JobDescription m_jobDescription;
+    Arc::LogStream m_logStream;
+
+    JobDefinitionBase* m_jobDefinition;
 
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
@@ -36,19 +36,9 @@ protected:
     
 private Q_SLOTS:
 
-    void on_convertToPKCS12Button_clicked();
+    void on_actionSaveJobDefinition_triggered();
 
-    void on_selectCertFileButton_clicked();
-
-    void on_selectKeyButton_clicked();
-
-    void on_selectPKCS12FileButton_clicked();
-
-    void on_selectPKCS12ImportFileButton_clicked();
-
-    void on_selectCertKeyOutputDirButton_clicked();
-
-    void on_convertToX509Button_clicked();
+    void on_scriptTab_currentChanged(QWidget *arg1);
 
 private:
     Ui::MainWindow *ui;

@@ -11,8 +11,10 @@ TEMPLATE = app
 
 
 SOURCES += src/arcsub-ui/main.cpp\
-        src/arcsub-ui/mainwindow.cpp 
+        src/arcsub-ui/mainwindow.cpp \ 
+    src/arcsub-ui/jobdefinitions.cpp
 
-HEADERS  += src/arcsub-ui/mainwindow.h 
+HEADERS  += src/arcsub-ui/mainwindow.h \ 
+    src/arcsub-ui/jobdefinitions.h
 
 FORMS    += src/arcsub-ui/mainwindow.ui 
