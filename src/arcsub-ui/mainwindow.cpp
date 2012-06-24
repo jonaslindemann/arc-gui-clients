@@ -9,9 +9,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <arc/Logger.h>
+#include <arc/ArcLocation.h>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_logStream(std::cerr)
 {
     ui->setupUi(this);
 
@@ -20,24 +24,26 @@ MainWindow::MainWindow(QWidget *parent) :
     m_debugStream = new QDebugStream(std::cout, this);
     m_debugStream2 = new QDebugStream(std::cerr, this);
 
-    // Set default values
+    ui->memoryEdit->setValidator(new QIntValidator(ui->memoryEdit));
+    ui->notificationEmailEdit->setValidator(new QRegExpValidator(QRegExp(".*@.*"), this));
 
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
 
-    QFileInfo userCertFile(globusDir.absolutePath()+"/"+"usercert.pem");
-    if (userCertFile.exists())
-        m_certificateFilename = userCertFile.absoluteFilePath();
+    m_logStream.setFormat(Arc::ShortFormat);
+    Arc::Logger::getRootLogger().addDestination(m_logStream);
+    Arc::Logger::getRootLogger().setThreshold(Arc::INFO);
 
-    QFileInfo userKeyFile(globusDir.absolutePath()+"/"+"userkey.pem");
-    if (userKeyFile.exists())
-        m_keyFilename = userKeyFile.absoluteFilePath();
+    Arc::ArcLocation::Init("/usr");
 
-    m_pkcs12Filename = globusDir.absolutePath()+"/"+"usercert.p12";
+    m_jobDefinition = new JobDefinitionBase(this, "Test");
+    m_jobDefinition->setExecutable("matlab");
+    m_jobDefinition->addArgument("main.m");
+    m_jobDefinition->setWalltime(3600);
+    m_jobDefinition->setMemory(2000);
+    m_jobDefinition->addInputFile("test1.dat");
 
-    ui->usercertFileText->setText(m_certificateFilename);
-    ui->userkeyFileText->setText(m_keyFilename);
-    ui->pkcsFileText->setText(m_pkcs12Filename);
+    ui->jobNameEdit->setText(m_jobDefinition->getName());
+    ui->walltimeEdit->setText(QString::number(m_jobDefinition->getWalltime()));
+    ui->memoryEdit->setText(QString::number(m_jobDefinition->getMemory()));
 
 }
 
@@ -46,6 +52,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete m_debugStream;
     delete m_debugStream2;
+    delete m_jobDefinition;
 }
 
 void MainWindow::customEvent(QEvent * event)
@@ -69,288 +76,66 @@ void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     ui->logText->append(event->getOutputText());
 }
 
-void MainWindow::on_convertToPKCS12Button_clicked()
+
+void MainWindow::on_actionSaveJobDefinition_triggered()
 {
-    // Check for existing files
+    qDebug() << "printing job description...";
 
-    QFileInfo pkcs12FilenameInfo(m_pkcs12Filename);
+    // nordugrid:xrsl
+    // egee:jdl
+    // nordugrid:jsdl
+    // emies:adl
 
-    if (pkcs12FilenameInfo.exists())
+
+    //m_jobDescription.Identification.JobName = "Hello";
+
+    /*
+    m_jobDescription.Identification.JobName = "myjob";
+    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
+    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
+    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
+    m_jobDescription.Application.Executable.Path = "executable";
+    m_jobDescription.Application.Executable.Argument.push_back("arg1");
+    m_jobDescription.Application.Executable.Argument.push_back("arg2");
+    m_jobDescription.Application.Executable.Argument.push_back("arg3");
+    m_jobDescription.DataStaging.OutputFiles.push_back(Arc::OutputFileType());
+    m_jobDescription.Resources.TotalWallTime.range = 2400;
+    m_jobDescription.Resources.RunTimeEnvironment.add(Arc::Software("SOFTWARE/HELLOWORLD-1.0.0"), Arc::Software::GREATERTHAN);
+
+    // Needed by the XRSLParser.
+    std::ofstream f("executable", std::ifstream::trunc);
+    f << "executable";
+    f.close();
+
+    //m_jobDescription.SaveToStream(std::cout, "userlong");
+
+    std::string xrsl;
+    m_jobDescription.UnParse(xrsl, "nordugrid:xrsl");
+    std::cout << xrsl << std::endl;
+    */
+
+    m_jobDefinition->print();
+}
+
+void MainWindow::on_scriptTab_currentChanged(QWidget *arg1)
+{
+    qDebug() << "currentChanged";
+    if (arg1 == ui->generalTab)
     {
-        int ret = QMessageBox::question(this, "Convert", m_pkcs12Filename+" already exists. Overwrite?", QMessageBox::Yes|QMessageBox::No);
-        if (ret == QMessageBox::No)
-            return;
+        ui->jobNameEdit->setText(m_jobDefinition->getName());
+        ui->walltimeEdit->setText(QString::number(m_jobDefinition->getWalltime()));
+        ui->memoryEdit->setText(QString::number(m_jobDefinition->getMemory()));
     }
-
-    bool ok;
-
-    m_passin = "";
-    m_passout = "";
-
-    // Get private key passphrase
-
-    m_passin = QInputDialog::getText(this, "Passphrase", "Private key passphrase", QLineEdit::Password, "", &ok);
-
-    if (!ok)
-        return;
-
-    if (m_passin.isEmpty())
-    {
-        QMessageBox::warning(this, "Convert", "Empty private key passphrase given.");
-        return;
-    };
-
-    // Get export passhprase
-
-    m_passout = QInputDialog::getText(this, "Passphrase", "Export passphrase", QLineEdit::Password, "", &ok);
-
-    if (!ok)
-        return;
-
-    if (m_passout.isEmpty())
-    {
-        QMessageBox::warning(this, "Convert", "Empty export passphrase given.");
-        return;
-    };
-
-    // Construct command line
-
-    QString opensslCmd = "openssl pkcs12 -export -in \"" + m_certificateFilename + "\" -inkey \"" + m_keyFilename + "\" -out \"" + m_pkcs12Filename + "\" -passout stdin -passin stdin";
-    qDebug() << opensslCmd;
-
-    // Execute OpenSSL command line
-
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-    p.start(opensslCmd);
-
-    m_passin = m_passin + "\n";
-    m_passout = m_passout + "\n";
-
-    // Send passphrases as standard input
-
-    p.write(m_passin.toAscii());
-    p.write(m_passout.toAscii());
-    p.waitForFinished();
-
-    // Process output
-
-    QString p_stdout = p.readAllStandardOutput();
-
-    std::cout << "Exporting to PKCS12 format: " << p_stdout.toStdString() << std::endl;
-
-    if (p.exitCode()==0)
-        QMessageBox::information(this, "Convert", "Succesfully exported to PKCS12 format.");
     else
     {
-        QMessageBox::information(this, "Convert", "Failed to export certificate to PKCS12 format.");
-        return;
+        m_jobDefinition->setName(ui->jobNameEdit->text());
+        m_jobDefinition->setWalltime(ui->walltimeEdit->text().toInt());
+        m_jobDefinition->setMemory(ui->memoryEdit->text().toInt());
     }
 
-    // Clear passphrases
-
-    m_passin.clear();
-    m_passout.clear();
-}
-
-void MainWindow::on_selectCertFileButton_clicked()
-{
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
-    qDebug() << globusDir.absolutePath();
-
-    m_certificateFilename = QFileDialog::getOpenFileName(this,
-        tr("Open certificate"), globusDir.absolutePath(), tr("PEM Files (*.pem)"));
-
-    ui->usercertFileText->setText(m_certificateFilename);
-}
-
-void MainWindow::on_selectKeyButton_clicked()
-{
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
-    qDebug() << globusDir.absolutePath();
-
-    m_keyFilename = QFileDialog::getOpenFileName(this,
-        tr("Open private key"), globusDir.absolutePath(), tr("PEM Files (*.pem)"));
-
-    ui->userkeyFileText->setText(m_keyFilename);
-}
-
-void MainWindow::on_selectPKCS12FileButton_clicked()
-{
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
-    qDebug() << globusDir.absolutePath();
-
-    QFileDialog dlg(this);
-    dlg.setDefaultSuffix("p12");
-    dlg.setNameFilter("*.p12");
-    dlg.setDirectory(globusDir.absolutePath());
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-
-    if (dlg.exec())
-        ui->pkcsFileText->setText(dlg.selectedFiles()[0]);
-}
-
-void MainWindow::on_selectPKCS12ImportFileButton_clicked()
-{
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
-    qDebug() << globusDir.absolutePath();
-
-    m_pkcs12ImportFilename = QFileDialog::getOpenFileName(this,
-        tr("Open PKCS12 file"), globusDir.absolutePath(), tr("PKCS12 Files (*.p12)"));
-
-    ui->pkcsImportFileText->setText(m_pkcs12ImportFilename);
-}
-
-void MainWindow::on_selectCertKeyOutputDirButton_clicked()
-{
-    QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
-    qDebug() << globusDir.absolutePath();
-
-    m_certOutputDir = QFileDialog::getExistingDirectory(this, "Convert", globusDir.absolutePath());
-
-    ui->certKeyDirText->setText(m_certOutputDir);
-}
-
-void MainWindow::on_convertToX509Button_clicked()
-{
-    bool ok;
-
-    m_passin = "";
-    m_passout = "";
-
-    // Get private key passphrase
-
-    m_passin = QInputDialog::getText(this, "Passphrase", "Import passphrase", QLineEdit::Password, "", &ok);
-
-    if (!ok)
-        return;
-
-    if (m_passin.isEmpty())
+    if (arg1 == ui->descriptionTab)
     {
-        QMessageBox::warning(this, "Convert", "Empty import passphrase given.");
-        return;
-    };
-
-    // Get export passhprase
-
-    m_passout = QInputDialog::getText(this, "Ppassphrase", "Private key passphrase", QLineEdit::Password, "", &ok);
-
-    if (!ok)
-        return;
-
-    if (m_passout.isEmpty())
-    {
-        QMessageBox::warning(this, "Convert", "Empty private key passphrase given.");
-        return;
-    };
-
-    // Construct command line
-
-    // openssl pkcs12 -nocerts -in cert.p12 -out userkey.pem
-    // openssl pkcs12 -clcerts -nokeys -in cert.p12 -out usercert.pem
-
-    QString certFilename = m_certOutputDir + "/usercert.pem";
-    QString keyFilename = m_certOutputDir + "/userkey.pem";
-
-    // Check for existing files
-
-    QFileInfo certFilenameInfo(certFilename);
-    QFileInfo keyFilenameInfo(keyFilename);
-
-    if (certFilenameInfo.exists())
-    {
-        int ret = QMessageBox::question(this, "Convert", "usercert.pem already exists. Overwrite?", QMessageBox::Yes|QMessageBox::No);
-        if (ret == QMessageBox::No)
-            return;
+        ui->descriptionText->clear();
+        ui->descriptionText->setText(m_jobDefinition->xrslString());
     }
-
-    if (keyFilenameInfo.exists())
-    {
-        int ret = QMessageBox::question(this, "Convert", "userkey.pem already exists. Overwrite?", QMessageBox::Yes|QMessageBox::No);
-        if (ret == QMessageBox::No)
-            return;
-    }
-
-    QString opensslCmd1 = "openssl pkcs12 -nocerts -in \"" + m_pkcs12ImportFilename + "\" -out \"" + keyFilename + "\" -passin stdin -passout stdin";
-    QString opensslCmd2 = "openssl pkcs12 -clcerts -nokeys -in \"" + m_pkcs12ImportFilename + "\" -out \"" + certFilename + "\" -passin stdin";
-
-    qDebug() << opensslCmd1;
-    qDebug() << opensslCmd2;
-
-    QString p_stdout;
-
-    m_passin = m_passin + "\n";
-    m_passout = m_passout + "\n";
-
-    // Execute OpenSSL command line
-
-    QProcess p1;
-    p1.setProcessChannelMode(QProcess::MergedChannels);
-    p1.start(opensslCmd1);
-
-    // Send passphrases as standard input
-
-    p1.write(m_passin.toAscii());
-    p1.write(m_passout.toAscii());
-    p1.waitForFinished(-1);
-
-    // Process output
-
-    p_stdout = p1.readAllStandardOutput();
-
-    if (p1.exitCode()==0)
-        QMessageBox::information(this, "Convert", "Succesfully imported userkey.pem");
-    else
-    {
-        QMessageBox::information(this, "Convert", "Failed to import userkey.pem.");
-        return;
-    }
-
-    p1.close();
-
-    std::cout << "Extracting private key: " << p_stdout.toStdString();
-
-    // Execute OpenSSL command line 2
-
-    QProcess p2;
-    p2.setProcessChannelMode(QProcess::MergedChannels);
-    p2.start(opensslCmd2);
-
-    // Send passphrases as standard input
-
-    p2.write(m_passin.toAscii());
-    p2.waitForFinished(-1);
-
-    // Process output
-
-    p_stdout = p2.readAllStandardOutput();
-
-    std::cout << "Extracting public key: " << p_stdout.toStdString();
-
-    if (p2.exitCode()==0)
-        QMessageBox::information(this, "Convert", "Succesfully imported usercert.pem");
-    else
-    {
-        QMessageBox::information(this, "Convert", "Failed to import usercert.pem.");
-        return;
-    }
-
-
-    p2.close();
-
-    // Clear passphrases
-
-    m_passin.clear();
-    m_passout.clear();
-
-    // Change permissions
-
-    qDebug() << "chmod 400 '" + keyFilename + "'";
-    chmod(keyFilename.toAscii(), 0400);
-
 }

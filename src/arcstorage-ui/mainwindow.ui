@@ -176,6 +176,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionNewWindow"/>
+    <addaction name="actionOpenNewLocation"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -186,8 +187,6 @@
     <addaction name="actionSelectAllFiles"/>
     <addaction name="actionClearSelection"/>
     <addaction name="separator"/>
-    <addaction name="actionUploadFiles"/>
-    <addaction name="actionCopyTo"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionSRM_Preferences"/>
@@ -234,6 +233,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNewWindow"/>
+   <addaction name="actionOpenNewLocation"/>
    <addaction name="separator"/>
    <addaction name="actionUp"/>
    <addaction name="actionReload"/>
@@ -338,6 +338,9 @@
    <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionCopyTo">
    <property name="text">
@@ -379,6 +382,17 @@
   <action name="actionShowTransferList">
    <property name="text">
     <string>Show current transfers...</string>
+   </property>
+  </action>
+  <action name="actionOpenNewLocation">
+   <property name="text">
+    <string>Open new location....</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

@@ -32,13 +32,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, bool childWindow = false);
+    explicit MainWindow(QWidget *parent = 0, bool childWindow = false, QString Url="");
     ~MainWindow();
 
     void onNewStatus(QString errorStr);
 
     void setBusyUI(bool busy);
-    void copySelectedFiles();
     void deleteSelectedFiles();
     void createDir();
 
@@ -85,28 +84,27 @@ protected:
     void closeEvent( QCloseEvent *e );
 
 private Q_SLOTS:
+    void onURLEditReturnPressed();
+    void onContextMenu(const QPoint& pos);
+    void onUrlComboBoxCurrentIndexChanged(int index);
+
     void on_actionDelete_triggered();
     void on_actionQuit_triggered();
-    void on_upButton_clicked();
     void on_foldersTreeWidget_itemExpanded(QTreeWidgetItem* item);
-    void on_URLEdit_returnPressed();
     void on_foldersTreeWidget_clicked(QModelIndex index);
     void on_foldersTreeWidget_itemClicked(QTreeWidgetItem* item, int column);
     void on_foldersTreeWidget_expanded(QModelIndex index);
-    void on_browseButton_clicked();
-    void onContextMenu(const QPoint& pos);
-    void onMenuItemSRMSettings();
     void on_actionAbout_ARC_File_Navigator_triggered();
     void on_actionUp_triggered();
-    void on_urlComboBox_currentIndexChanged(int index);
     void on_actionNewWindow_triggered();
-    void on_actionUploadFiles_triggered();
-    void on_actionCopyTo_triggered();
     void on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
     void on_actionClearSelection_triggered();
     void on_actionSelectAllFiles_triggered();
     void on_actionCreateDir_triggered();
     void on_actionShowTransferList_triggered();
+    void on_actionOpenNewLocation_triggered();
+    void on_actionSRM_Preferences_triggered();
+    void on_actionReload_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);

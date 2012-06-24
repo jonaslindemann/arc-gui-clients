@@ -274,7 +274,7 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
         if (!xfr->execute()) // Startar filöverföringen asynkront.
         {
             logger.msg(Arc::INFO, "SRM file copy failed.");
-            mainWindow->onError("SRM file copy failed");
+            //mainWindow->onError("SRM file copy failed");
             m_transferList.removeOne(xfr);
             delete xfr;
             Q_EMIT onError("SRM file transfer failed.");
@@ -293,7 +293,8 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
     if (initUserConfig() == FALSE)
     {
         logger.msg(Arc::ERROR, "Failed SRM configuration initialization");
-        mainWindow->onError("Failed SRM configuration initialization");
+        //mainWindow->onError("Failed SRM configuration initialization");
+        Q_EMIT onError("Failed SRM configuration initialization");
     }
     else
     {
@@ -355,7 +356,8 @@ bool SRMFileServer::deleteItems(QStringList& URLs)
                 if (!dataHandle)
                 {
                     logger.msg(Arc::ERROR, "Unsupported URL given");
-                    mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
+                    //mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
+                    Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
                     Q_EMIT onDeleteFinished(true);
                     return false;
                 }
@@ -412,7 +414,8 @@ bool SRMFileServer::deleteItem(QString URL)
             if (!dataHandle)
             {
                 logger.msg(Arc::ERROR, "Unsupported URL given");
-                mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
+                //mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
+                Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
             }
             else
             {

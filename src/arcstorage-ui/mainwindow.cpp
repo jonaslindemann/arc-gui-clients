@@ -35,7 +35,7 @@ const QString MainWindow::MAKEDIR_TEXT            = QString("Make dir...");
 const QString MainWindow::CHANGE_PERMISSIONS_TEXT = QString("Change permissions...");
 
 
-MainWindow::MainWindow(QWidget *parent, bool childWindow):
+MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -58,14 +58,12 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     m_urlComboBox.setMaxVisibleItems(10);
     m_urlComboBox.setMaxCount(10);
     for (int i = 0; i < urlList.size(); ++i)
-    {
         m_urlComboBox.addItem(urlList.at(i).toString());
-    }
     m_urlComboBox.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_urlComboBox.repaint();
     ui->mainToolBar->addWidget(&m_urlComboBox);
-    connect(m_urlComboBox.lineEdit(), SIGNAL(returnPressed()), this, SLOT(on_URLEdit_returnPressed()));  // When someone presses return in the url combobox...
-    connect(&m_urlComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(on_m_urlComboBox_currentIndexChanged(int)));
+    connect(m_urlComboBox.lineEdit(), SIGNAL(returnPressed()), this, SLOT(onURLEditReturnPressed()));  // When someone presses return in the url combobox...
+    connect(&m_urlComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onUrlComboBoxCurrentIndexChanged(int)));
 
     // Can't add empty space in toolbar, so we add a dummy widget instead.
 
@@ -77,13 +75,12 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
 
     ui->filesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(ui->actionSRM_Preferences, SIGNAL(triggered()), this, SLOT(onMenuItemSRMSettings()));
-    connect(ui->actionUp, SIGNAL(triggered()), this, SLOT(on_upButton_clicked()));
-    connect(ui->actionReload, SIGNAL(triggered()), this, SLOT(on_browseButton_clicked()));
-
     // Get fileserver and wire it up
 
     m_currentFileServer = FileServerFactory::getNewFileServer("", this);  // "" - default file server
+
+    // So basically we handle everything using a SRMFileServer (...)
+
     SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
     connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
@@ -91,12 +88,6 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
     connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
     connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
-
-    // Connect FileTransferList
-
-    if (!m_childWindow)
-    {
-    }
 
     // Setup the headers in the file tree widget
 
@@ -106,7 +97,12 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     ui->filesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     setBusyUI(true);
-    m_currentFileServer->updateFileList(QDir::homePath());
+
+    if (Url=="")
+        m_currentFileServer->updateFileList(QDir::homePath());
+    else
+        m_currentFileServer->updateFileList(Url);
+
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
     ui->filesTreeWidget->setMainWindow(this);
@@ -118,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
 
     ui->textOutput->clear();
 
-    // Redirect ARC logging to std::cout
+    // Redirect ARC logging to std::cout (in main window)
 
     if (!m_childWindow) {
         m_logStream = new Arc::LogStream(std::cout);
@@ -132,6 +128,8 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     ui->splitterHorisontal->setStretchFactor(1,1);
     ui->splitterVertical->setStretchFactor(0,1);
     ui->splitterVertical->setStretchFactor(1,0);
+
+    // Only show log output in main window
 
     if (m_childWindow)
         ui->textOutput->hide();
@@ -149,15 +147,20 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow):
     ui->actionCopyTo->setIcon(QIcon::fromTheme("document-save"));
     ui->actionUploadFiles->setIcon(QIcon::fromTheme("document-send"));
     ui->actionCreateDir->setIcon(QIcon::fromTheme("folder-new"));
+    ui->actionOpenNewLocation->setIcon(QIcon::fromTheme("computer"));
 #endif
 
+    // Center main window
+
     this->setGeometry(
-        QStyle::alignedRect(
-            Qt::LeftToRight,
-            Qt::AlignCenter,
-            this->size(),
-            qApp->desktop()->availableGeometry()
-        ));
+                QStyle::alignedRect(
+                    Qt::LeftToRight,
+                    Qt::AlignCenter,
+                    this->size(),
+                    qApp->desktop()->availableGeometry()
+                    ));
+
+    // Start file processing thread from main window
 
     if (!m_childWindow)
     {
@@ -200,32 +203,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
         GlobalStateInfo::instance()->closeChildWindows();
 }
 
-void MainWindow::copySelectedFiles()
-{
-    logger.msg(Arc::INFO, "Copy selected files started.");
-    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
-
-    if (selectedItems.size() != 0)
-    {
-        QString destDir = QFileDialog::getExistingDirectory(this, "Select destination", "");
-
-        if (destDir != NULL)
-        {
-            int i;
-
-            for (i=0; i<selectedItems.length(); i++)
-            {
-                QTreeWidgetItem *selectedItem = selectedItems.at(i);
-                QString sourcePath = getURLOfItem(selectedItem);
-                QString destPath = destDir + "/"+ selectedItem->text(0);
-
-                setBusyUI(true);
-                m_currentFileServer->copyFromServer(sourcePath, destPath);
-            }
-        }
-    }
-}
-
 void MainWindow::deleteSelectedFiles()
 {
     logger.msg(Arc::INFO, "Delete selected files started.");
@@ -240,8 +217,8 @@ void MainWindow::deleteSelectedFiles()
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::critical(this, tr("Delete"),
-                                        "Are you sure you want to delete selected files ?",
-                                        QMessageBox::Yes | QMessageBox::No);
+                                      "Are you sure you want to delete selected files ?",
+                                      QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
             QStringList deleteUrls;
@@ -457,18 +434,6 @@ void MainWindow::setCurrentComboBoxURL(QString url)
     }
 }
 
-void MainWindow::onMenuItemSRMSettings()
-{
-    SRMSettingsDialog dialog(this);
-    dialog.setConfigFilename(Settings::getStringValue("srmConfigFilename"));
-    dialog.setModal(true);
-    int dialogReturnValue = dialog.exec();
-    if (dialogReturnValue != 0)
-    {
-        Settings::setValue("srmConfigFilename", dialog.getConfigFilename());
-    }
-}
-
 void MainWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 {
     logger.msg(Arc::INFO, "Files dropped in window.");
@@ -497,32 +462,32 @@ void MainWindow::onFileListFinished(bool error, QString errorMsg)
     }
     else
     {
-       switch (m_currentUpdateFileListsMode)
-       {
-       case CUFLM_noUpdate:
-           break;
-       case CUFLM_clickedBrowse:
-           updateFoldersTree();
-           updateFileTree();
-           break;
-       case CUFLM_clickedFolder:
-           updateFileTree();
-           break;
-       case CUFLM_clickedUp:
-           updateFoldersTree();
-           updateFileTree();
-           break;
-       case CUFLM_expandedFolder:
-           expandFolderTreeWidget(m_folderWidgetBeingUpdated);
-           m_folderWidgetBeingUpdated = NULL;
-           break;
-       case CUFLM_doubleClickedFolder:
-           updateFileTree();
-           updateFoldersTreeBelow();
-       default:
-           qDebug() << "shouldn't happen.";
-           break;
-       }
+        switch (m_currentUpdateFileListsMode)
+        {
+        case CUFLM_noUpdate:
+            break;
+        case CUFLM_clickedBrowse:
+            updateFoldersTree();
+            updateFileTree();
+            break;
+        case CUFLM_clickedFolder:
+            updateFileTree();
+            break;
+        case CUFLM_clickedUp:
+            updateFoldersTree();
+            updateFileTree();
+            break;
+        case CUFLM_expandedFolder:
+            expandFolderTreeWidget(m_folderWidgetBeingUpdated);
+            m_folderWidgetBeingUpdated = NULL;
+            break;
+        case CUFLM_doubleClickedFolder:
+            updateFileTree();
+            updateFoldersTreeBelow();
+        default:
+            qDebug() << "shouldn't happen.";
+            break;
+        }
     }
 
     m_currentUpdateFileListsMode = CUFLM_noUpdate;
@@ -687,8 +652,8 @@ void MainWindow::onContextMenu(const QPoint& pos)
 
                 QMessageBox::StandardButton reply;
                 reply = QMessageBox::critical(this, tr("Delete file"),
-                                                "Are you sure you want to delete, "+path+" ?",
-                                                QMessageBox::Yes | QMessageBox::No);
+                                              "Are you sure you want to delete, "+path+" ?",
+                                              QMessageBox::Yes | QMessageBox::No);
                 if (reply == QMessageBox::Yes)
                 {
                     setBusyUI(true);
@@ -721,50 +686,15 @@ void MainWindow::onContextMenu(const QPoint& pos)
     }
 }
 
-void MainWindow::on_upButton_clicked()
+void MainWindow::onURLEditReturnPressed()
 {
-    setBusyUI(true);
-    m_currentUpdateFileListsMode = CUFLM_clickedUp;
-    if (m_currentFileServer->goUpOneFolder() == true)
-    {
-        setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
-    }
-    else
-    {
-        //ui->statusLabel->setText("Canot go up any further. Top of the tree!");
-        setBusyUI(false);
-    }
+    on_actionReload_triggered();
 }
 
-
-void MainWindow::on_browseButton_clicked()
+void MainWindow::onUrlComboBoxCurrentIndexChanged(int index)
 {
-    QString url = getCurrentComboBoxURL();
-
-    setBusyUI(true);
-    m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
-
-    m_currentFileServer = FileServerFactory::getNewFileServer(url, this);
-    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
-    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
-    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
-    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
-    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
-    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
-    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
-
-    // Setup the headers in the file tree widget (in case it's a new file server)
-    fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
-    ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
-    ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
-
-    while (url.endsWith('/')) { url = url.left(url.length() - 1); }  // Get rid of trailing /
-
-    m_currentFileServer->updateFileList(url);
-
-    setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+    logger.msg(Arc::DEBUG, "textEditChanged.");
 }
-
 
 void MainWindow::on_foldersTreeWidget_expanded(QModelIndex index)
 {
@@ -787,7 +717,7 @@ void MainWindow::on_foldersTreeWidget_itemExpanded(QTreeWidgetItem* item)
     m_folderWidgetBeingUpdated = item;
     m_currentFileServer->updateFileList(newURL);
 
-//    ui->URLEdit->setText(m_currentFileServer->getCurrentURL());
+    //    ui->URLEdit->setText(m_currentFileServer->getCurrentURL());
 }
 
 void MainWindow::on_foldersTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
@@ -807,11 +737,6 @@ void MainWindow::on_foldersTreeWidget_clicked(QModelIndex index)
 {
 }
 
-void MainWindow::on_URLEdit_returnPressed()
-{
-    on_browseButton_clicked();  // Pressing Return in URL should have same effect as clicking Browse button
-}
-
 void MainWindow::on_actionAbout_ARC_File_Navigator_triggered()
 {
     QMessageBox msgBox;
@@ -821,7 +746,17 @@ void MainWindow::on_actionAbout_ARC_File_Navigator_triggered()
 
 void MainWindow::on_actionUp_triggered()
 {
-
+    setBusyUI(true);
+    m_currentUpdateFileListsMode = CUFLM_clickedUp;
+    if (m_currentFileServer->goUpOneFolder() == true)
+    {
+        setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+    }
+    else
+    {
+        //ui->statusLabel->setText("Canot go up any further. Top of the tree!");
+        setBusyUI(false);
+    }
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -832,11 +767,6 @@ void MainWindow::on_actionQuit_triggered()
 void MainWindow::on_actionDelete_triggered()
 {    
     this->deleteSelectedFiles();
-}
-
-void MainWindow::on_urlComboBox_currentIndexChanged(int index)
-{
-    logger.msg(Arc::DEBUG, "textEditChanged.");
 }
 
 void MainWindow::on_actionNewWindow_triggered()
@@ -853,16 +783,6 @@ void MainWindow::on_actionNewWindow_triggered()
     window->show();
 
     GlobalStateInfo::instance()->addChildWindow(window);
-}
-
-void MainWindow::on_actionUploadFiles_triggered()
-{
-
-}
-
-void MainWindow::on_actionCopyTo_triggered()
-{
-    this->copySelectedFiles();
 }
 
 void MainWindow::on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
@@ -888,12 +808,42 @@ void MainWindow::on_actionClearSelection_triggered()
 
 void MainWindow::on_actionSelectAllFiles_triggered()
 {
+    qDebug() << "on_actionSelectAllFiles_triggered()";
+
+    ui->filesTreeWidget->selectAll();
+    /*
     for (int i; i<ui->filesTreeWidget->topLevelItemCount(); i++)
     {
         QTreeWidgetItem* item = ui->filesTreeWidget->topLevelItem(i);
+        qDebug() << item->text(2);
         if (item->text(2) == "file")
+        {
+            qDebug() << "Selecting file";
             ui->filesTreeWidget->topLevelItem(i)->setSelected(true);
+        }
     }
+    */
+
+    /*
+    QList<QTreeWidgetItem*> removeItems;
+
+    for (int i; i<ui->filesTreeWidget->selectedItems().count(); i++)
+    {
+        QTreeWidgetItem* item = ui->filesTreeWidget->selectedItems().at(i);
+        qDebug() << item->text(2);
+        if (item->text(2) == "file")
+        {
+            qDebug() << "Selecting file";
+        }
+        else
+        {
+            removeItems.append(item);
+        }
+    }
+
+    for (int i=0; i<removeItems.count(); i++)
+        ui->filesTreeWidget
+    */
 }
 
 void MainWindow::on_actionCreateDir_triggered()
@@ -905,4 +855,67 @@ void MainWindow::on_actionCreateDir_triggered()
 void MainWindow::on_actionShowTransferList_triggered()
 {
     GlobalStateInfo::instance()->showTransferWindow();
+}
+
+void MainWindow::on_actionOpenNewLocation_triggered()
+{
+    bool ok;
+    QString url = QInputDialog::getText(this, tr("Open location"),
+                                        tr("Url"), QLineEdit::Normal,
+                                        "", &ok);
+    if (ok && !url.isEmpty())
+    {
+        MainWindow* window = new MainWindow(0, true, url);
+        QRect r = this->geometry();
+        r.setLeft(this->geometry().left()+150);
+        r.setTop(this->geometry().top()+150);
+        r.setRight(this->geometry().right()+150);
+        r.setBottom(this->geometry().bottom()+150);
+
+        qDebug() << r;
+        window->setGeometry(r);
+        window->show();
+
+        GlobalStateInfo::instance()->addChildWindow(window);
+    }
+}
+
+void MainWindow::on_actionSRM_Preferences_triggered()
+{
+    SRMSettingsDialog dialog(this);
+    dialog.setConfigFilename(Settings::getStringValue("srmConfigFilename"));
+    dialog.setModal(true);
+    int dialogReturnValue = dialog.exec();
+    if (dialogReturnValue != 0)
+    {
+        Settings::setValue("srmConfigFilename", dialog.getConfigFilename());
+    }
+}
+
+void MainWindow::on_actionReload_triggered()
+{
+    QString url = getCurrentComboBoxURL();
+
+    setBusyUI(true);
+    m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
+
+    m_currentFileServer = FileServerFactory::getNewFileServer(url, this);
+    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
+    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+
+    // Setup the headers in the file tree widget (in case it's a new file server)
+    fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
+    ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
+    ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
+
+    while (url.endsWith('/')) { url = url.left(url.length() - 1); }  // Get rid of trailing /
+
+    m_currentFileServer->updateFileList(url);
+
+    setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 }
