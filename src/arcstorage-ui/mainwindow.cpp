@@ -19,8 +19,8 @@
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
 #include "globalstateinfo.h"
-
 #include "arcstorage.h"
+#include "arctools.h"
 
 #include "filetransferlist.h"
 
@@ -148,6 +148,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     ui->actionUploadFiles->setIcon(QIcon::fromTheme("document-send"));
     ui->actionCreateDir->setIcon(QIcon::fromTheme("folder-new"));
     ui->actionOpenNewLocation->setIcon(QIcon::fromTheme("computer"));
+    ui->actionCreateProxyCert->setIcon(QIcon::fromTheme("security-high"));
 #endif
 
     // Center main window
@@ -201,6 +202,8 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
     if (!m_childWindow)
         GlobalStateInfo::instance()->closeChildWindows();
+    else
+        GlobalStateInfo::instance()->removeChildWindow(this);
 }
 
 void MainWindow::deleteSelectedFiles()
@@ -279,6 +282,17 @@ void MainWindow::setBusyUI(bool busy)
         ui->foldersTreeWidget->setEnabled(true);
     }
 }
+
+QString MainWindow::getCurrentURL()
+{
+    return m_currentFileServer->getCurrentURL();
+}
+
+QMenu* MainWindow::getWindowListMenu()
+{
+    return ui->menuWindow;
+}
+
 
 
 void MainWindow::updateFileTree()
@@ -918,4 +932,24 @@ void MainWindow::on_actionReload_triggered()
     m_currentFileServer->updateFileList(url);
 
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+}
+
+void MainWindow::on_actionCreateProxyCert_triggered()
+{
+    ARCTools::instance()->proxyCertificateTool();
+}
+
+void MainWindow::on_actionConvertCertificates_triggered()
+{
+    ARCTools::instance()->certConversionTool();
+}
+
+void MainWindow::on_actionJobManager_triggered()
+{
+    ARCTools::instance()->jobManagerTool();
+}
+
+void MainWindow::on_actionJobSubmissionTool_triggered()
+{
+    ARCTools::instance()->submissionTool();
 }

@@ -40,6 +40,8 @@ public:
     void setBusyUI(bool busy);
     void deleteSelectedFiles();
     void createDir();
+    QString getCurrentURL();
+    QMenu* getWindowListMenu();
 
 private:
     Ui::MainWindow *ui;
@@ -105,6 +107,14 @@ private Q_SLOTS:
     void on_actionOpenNewLocation_triggered();
     void on_actionSRM_Preferences_triggered();
     void on_actionReload_triggered();
+
+    void on_actionCreateProxyCert_triggered();
+
+    void on_actionConvertCertificates_triggered();
+
+    void on_actionJobManager_triggered();
+
+    void on_actionJobSubmissionTool_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
