@@ -27,7 +27,8 @@ SOURCES += src/arcstorage-ui/main.cpp\
     src/arcstorage-ui/filetransfer.cpp \
     src/arcstorage-ui/filetransferlist.cpp \
     src/arcstorage-ui/transferlistwindow.cpp \
-    src/arcstorage-ui/globalstateinfo.cpp
+    src/arcstorage-ui/globalstateinfo.cpp \
+    src/common/arctools.cpp
 
 HEADERS  += src/arcstorage-ui/mainwindow.h \
     src/arcstorage-ui/fileserver.h \
@@ -45,7 +46,8 @@ HEADERS  += src/arcstorage-ui/mainwindow.h \
     src/arcstorage-ui/arcstorage.h \
     src/arcstorage-ui/filetransferlist.h \
     src/arcstorage-ui/transferlistwindow.h \
-    src/arcstorage-ui/globalstateinfo.h
+    src/arcstorage-ui/globalstateinfo.h \
+    src/common/arctools.h
 
 FORMS    += src/arcstorage-ui/mainwindow.ui \
     src/arcstorage-ui/filepropertiesdialog.ui \

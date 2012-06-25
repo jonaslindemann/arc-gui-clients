@@ -26,6 +26,7 @@ set(arcstorageui_SRCS
     filetransferlist.cpp
     transferlistwindow.cpp
     globalstateinfo.cpp
+    ../common/arctools.cpp
 )
 
 set(arcstorageui_MOC_HDRS
@@ -38,6 +39,7 @@ set(arcstorageui_MOC_HDRS
     filetransferlist.h
     transferlistwindow.h
     globalstateinfo.h
+    ../common/arctools.h
 )
 
 #SET(arcexplorerui_RCS 
@@ -94,7 +96,7 @@ ELSE(APPLE)
 ENDIF(APPLE)
 
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
 target_link_libraries (arcstorage-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES})
 

@@ -41,18 +41,18 @@ public:
 
     void setMainWindow(MainWindow* window);
     void addChildWindow(MainWindow* window);
+    void removeChildWindow(MainWindow* window);
     void closeChildWindows();
     void showTransferWindow();
     void hideTransferWindow();
+    int childWindowCount();
+    MainWindow* getChildWindow(int idx);
+
+    void updateWindowList(QMenu* menu);
 
 private:
 
     GlobalStateInfo();
-
-    GlobalStateInfo(const GlobalStateInfo &); // hide copy constructor
-    GlobalStateInfo& operator=(const GlobalStateInfo &); // hide assign op
-    // we leave just the declarations, so the compiler will warn us
-    // if we try to use those two functions by accident
 
     static GlobalStateInfo* m_instance;
 };
