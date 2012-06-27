@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=ARC Job Manager
+GenericName=Job Manager
+Comment=Manage running Grid jobs
+Exec=arcstat-ui
+Icon=utilities-system-monitor
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
