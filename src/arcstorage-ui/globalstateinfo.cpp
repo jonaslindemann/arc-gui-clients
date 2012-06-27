@@ -60,10 +60,12 @@ MainWindow* GlobalStateInfo::getChildWindow(int idx)
 
 void GlobalStateInfo::updateWindowList(QMenu* menu)
 {
+    /*
     menu->clear();
     menu->addMenu(m_mainWindow->getCurrentURL());
     for (int i=0; i<m_childWindows.count(); i++)
         menu->addMenu(m_childWindows.at(i)->getCurrentURL());
+    */
 }
 
 void GlobalStateInfo::showTransferWindow()
