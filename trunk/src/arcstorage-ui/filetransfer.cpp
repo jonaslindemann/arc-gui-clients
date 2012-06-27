@@ -11,7 +11,7 @@
 template <typename T>
 std::string convertPointerToStringAddress(const T* obj)
 {
-  int address(reinterpret_cast<long>(obj));
+  int address(reinterpret_cast<size_t>(obj));
   std::stringstream ss;
   ss << address;
   return ss.str();
