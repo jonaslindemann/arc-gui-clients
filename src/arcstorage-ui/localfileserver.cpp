@@ -7,7 +7,7 @@
 #include "mainwindow.h"
 
 
-LocalFileServer::LocalFileServer(MainWindow *mw) : FileServer(mw)
+LocalFileServer::LocalFileServer() : FileServer()
 {
     currentPath = "";
 }

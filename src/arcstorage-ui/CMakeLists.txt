@@ -13,9 +13,7 @@ set(arcstorageui_SRCS
     main.cpp
     mainwindow.cpp
     fileserver.cpp
-    localfileserver.cpp
     arcfileelement.cpp
-    ftpfileserver.cpp
     dragdropabletreewidget.cpp
     fileserverfactory.cpp
     filepropertiesdialog.cpp
@@ -31,7 +29,6 @@ set(arcstorageui_SRCS
 
 set(arcstorageui_MOC_HDRS
     mainwindow.h
-    ftpfileserver.h
     filepropertiesdialog.h
     srmfileserver.h
     srmsettingsdialog.h

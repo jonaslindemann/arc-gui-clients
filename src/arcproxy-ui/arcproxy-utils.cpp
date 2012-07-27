@@ -344,9 +344,11 @@ ArcProxyController::ArcProxyController()
     m_use_empty_passphrase = false; //if use empty passphrase to myproxy server
     m_timeout = -1;
     m_version = false;
+    m_use_http_comm = false;
 
     m_debug = "WARNING";
 
+    // This ensure command line args overwrite all other options
     if(!m_cert_path.empty())Arc::SetEnv("X509_USER_CERT", m_cert_path);
     if(!m_key_path.empty())Arc::SetEnv("X509_USER_KEY", m_key_path);
     if(!m_proxy_path.empty())Arc::SetEnv("X509_USER_PROXY", m_proxy_path);
@@ -390,83 +392,132 @@ int ArcProxyController::initialize()
 
     Arc::ArcLocation::Init("");
 
-#ifdef ARC_VERSION_1
-    Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
-#endif
+#ifdef HAVE_NSS
+    //Using nss db dominate other option
+    if(use_nssdb) {
+        std::string nssdb_path = get_nssdb_path();
+        if(nssdb_path.empty()) {
+            std::cout << Arc::IString("The nss db can not be detected under firefox profile") << std::endl;
+            return EXIT_FAILURE;
+        }
+        bool res;
+        std::string configdir = nssdb_path;
+        res = AuthN::nssInit(configdir);
+        std::cout<< Arc::IString("nss db to be accesses: %s\n", configdir.c_str());
 
-#ifdef ARC_VERSION_2
-    Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
-#endif
-    if (!usercfg) {
-        logger.msg(Arc::ERROR, "Failed configuration initialization");
-        return EXIT_FAILURE;
+        char* slotpw = NULL; //"secretpw";  //TODO: Input passphrase to nss db
+        //The nss db under firefox profile seems to not be protected by any passphrase by default
+        bool ascii = true;
+        const char* trusts = "p,p,p";
+
+        std::string proxy_csrfile = "proxy.csr";
+        std::string proxy_keyname = "proxykey";
+        std::string proxy_privk_str;
+        res = AuthN::nssGenerateCSR(proxy_keyname, "CN=Test,OU=ARC,O=EMI", slotpw, proxy_csrfile, proxy_privk_str, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        std::string proxy_certfile = "myproxy.pem";
+        std::string issuername = "Imported Certificate";
+        //The name of the certificate imported in firefox is
+        //normally "Imported Certificate" by default, if name is not specified
+        int duration = 12;
+        res = AuthN::nssCreateCert(proxy_csrfile, issuername, "", duration, proxy_certfile, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        const char* proxy_certname = "proxycert";
+        res = AuthN::nssImportCert(slotpw, proxy_certfile, proxy_certname, trusts, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        //Compose the proxy certificate
+        if(!proxy_path.empty())Arc::SetEnv("X509_USER_PROXY", proxy_path);
+        Arc::UserConfig usercfg(conffile,
+                                Arc::initializeCredentialsType(Arc::initializeCredentialsType::NotTryCredentials));
+        if (!usercfg) {
+            logger.msg(Arc::ERROR, "Failed configuration initialization.");
+            return EXIT_FAILURE;
+        }
+        if(proxy_path.empty()) proxy_path = usercfg.ProxyPath();
+        usercfg.ProxyPath(proxy_path);
+        std::string cert_file = "cert.pem";
+        res = AuthN::nssExportCertificate(issuername, cert_file);
+        if(!res) return EXIT_FAILURE;
+
+        std::string proxy_cred_str;
+        std::ifstream proxy_s(proxy_certfile.c_str());
+        std::getline(proxy_s, proxy_cred_str,'\0');
+        proxy_s.close();
+
+        std::string eec_cert_str;
+        std::ifstream eec_s(cert_file.c_str());
+        std::getline(eec_s, eec_cert_str,'\0');
+        eec_s.close();
+
+        proxy_cred_str.append(proxy_privk_str).append(eec_cert_str);
+        write_proxy_file(proxy_path, proxy_cred_str);
+
+        Arc::Credential proxy_cred(proxy_path, proxy_path, "", "");
+        Arc::Time left = proxy_cred.GetEndTime();
+        std::cout << Arc::IString("Proxy generation succeeded") << std::endl;
+        std::cout << Arc::IString("Your proxy is valid until: %s", left.str(Arc::UserTime)) << std::endl;
+
+        return EXIT_SUCCESS;
     }
+#endif
 
-    // If m_debug is specified as argument, it should be set before loading the configuration.
+    // If debug is specified as argument, it should be set before loading the configuration.
+
     if (!m_debug.empty())
         Arc::Logger::getRootLogger().setThreshold(Arc::string_to_level(m_debug));
 
+    // Set default, predefined or guessed credentials. Also check if they exist.
 
+    Arc::UserConfig usercfg(m_conffile,
+                            Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+    if (!usercfg) {
+        logger.msg(Arc::ERROR, "Failed configuration initialization.");
+        return EXIT_FAILURE;
+    }
+    // Check for needed credentials objects
+    // Can proxy be used for? Could not find it in documentation.
+    // Key and certificate not needed if only printing proxy information
+    if((usercfg.CertificatePath().empty() || (usercfg.KeyPath().empty() && (usercfg.CertificatePath().find(".p12") == std::string::npos))) && !m_info) {
+        logger.msg(Arc::ERROR, "Failed to find certificate and/or private key or files have improper permissions or ownership.");
+        logger.msg(Arc::ERROR, "You may try to increase verbosity to get more information.");
+        return EXIT_FAILURE;
+    }
+    if(!m_vomslist.empty() || !m_myproxy_command.empty()) {
+        // For external communication CAs are needed
+        if(usercfg.CACertificatesDirectory().empty()) {
+            logger.msg(Arc::ERROR, "Failed to find CA certificates");
+            logger.msg(Arc::ERROR, "Cannot find the CA certificates directory path, "
+                       "please set environment variable X509_CERT_DIR, "
+                       "or cacertificatesdirectory in a configuration file.");
+            logger.msg(Arc::ERROR, "You may try to increase verbosity to get more information.");
+            logger.msg(Arc::ERROR, "The CA certificates directory is required for "
+                       "contacting VOMS and MyProxy servers.");
+            return EXIT_FAILURE;
+        }
+    }
+    // Proxy is special case. We either need default or predefined path.
+    // No guessing or testing is needed.
+    // By running credentials initialization once more all set values
+    // won't change. But proxy will get default value if not set.
+    {
+        Arc::UserConfig tmpcfg(m_conffile,
+                               Arc::initializeCredentialsType(Arc::initializeCredentialsType::NotTryCredentials));
+        if(m_proxy_path.empty()) m_proxy_path = tmpcfg.ProxyPath();
+        usercfg.ProxyPath(m_proxy_path);
+    }
+    // Get back all paths
+    if(m_key_path.empty()) m_key_path = usercfg.KeyPath();
+    if(m_cert_path.empty()) m_cert_path = usercfg.CertificatePath();
+    if(m_ca_dir.empty()) m_ca_dir = usercfg.CACertificatesDirectory();
+    if(m_voms_dir.empty()) m_voms_dir = Arc::GetEnv("X509_VOMS_DIR");
 
     if (m_debug.empty() && !usercfg.Verbosity().empty())
         Arc::Logger::getRootLogger().setThreshold(Arc::string_to_level(usercfg.Verbosity()));
 
-    if (m_timeout > 0)
-        usercfg.Timeout(m_timeout);
-
-    Arc::User user;
-
-    try {
-        if (m_key_path.empty())
-            m_key_path = usercfg.KeyPath();
-
-        if (m_cert_path.empty())
-            m_cert_path = usercfg.CertificatePath();
-
-        if (m_proxy_path.empty())
-            m_proxy_path = usercfg.ProxyPath();
-
-        if ((m_cert_path.empty() ||m_key_path.empty()) && m_proxy_path.empty()) {
-            logger.msg(Arc::ERROR, "Cannot find the path of the certificate/key file, and proxy file, "
-                         "please setup environment X509_USER_CERT/X509_USER_KEY, or X509_USER_PROXY,"
-                         "or setup certificatepath/keypath, or proxypath in a configuration file");
-            return EXIT_FAILURE;
-        }
-
-        if (m_ca_dir.empty())
-            m_ca_dir = usercfg.CACertificatesDirectory();
-        if (m_ca_dir.empty()) {
-            //The usercfg could be created with SkipCACredentials,
-            //then X509_CERT_DIR will not been got by UserConfig.
-            //There are two cases like the following:
-            //for the case "arcproxy -I -P /where/is/your/vomsproxy", m_ca_dir is required;
-            //for the case "arcproxy -I -P /where/is/your/normalproxy", m_ca_dir is not required.
-            //but we can not distinguish them, and then we can not give different argument
-            //for UserConfig to differentiate them.
-            //So here we get X509_CERT_DIR anyway if it exists,
-            //but the getting is not forced.
-            if (!Arc::GetEnv("X509_CERT_DIR").empty()) {
-                if (!Glib::file_test(m_ca_dir = Arc::GetEnv("X509_CERT_DIR"), Glib::FILE_TEST_IS_DIR)) {
-                    logger.msg(Arc::WARNING, "CA certificate directory: %s is given by X509_CERT_DIR, but it can't been accessed.", m_ca_dir);
-                    m_ca_dir.clear();
-                }
-            }
-        }
-    } catch (std::exception& err) {
-        logger.msg(Arc::ERROR, err.what());
-        tls_process_error(logger);
-        return EXIT_FAILURE;
-    }
-
-    if (m_ca_dir.empty() && (!m_vomslist.empty() || !m_myproxy_command.empty())) {
-        logger.msg(Arc::ERROR, "Cannot find the CA certificates directory path, "
-                     "please set environment variable X509_CERT_DIR, "
-                     "or cacertificatesdirectory in a configuration file");
-        logger.msg(Arc::ERROR, "The CA certificates directory is required by voms or myproxy functionality"
-                     "when contacting voms or myproxy server");
-        return EXIT_FAILURE;
-    }
-
+    if (m_timeout > 0) usercfg.Timeout(m_timeout);
 }
 
 QString ArcProxyController::getIdentity()
@@ -493,34 +544,19 @@ void ArcProxyController::setValidityPeriod(int seconds)
 
 int ArcProxyController::printInformation()
 {
-#ifdef ARC_VERSION_1
-    Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
-#endif
-
-#ifdef ARC_VERSION_2
-    Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
-#endif
-
-    if (!usercfg) {
-        logger.msg(Arc::ERROR, "Failed configuration initialization");
-        return EXIT_FAILURE;
-    }
-
-
     const Arc::Time now;
-
     std::vector<Arc::VOMSACInfo> voms_attributes;
     bool res = false;
 
     if (m_proxy_path.empty()) {
         logger.msg(Arc::ERROR, "Cannot find the path of the proxy file, "
-                     "please setup environment X509_USER_PROXY, "
-                     "or proxypath in a configuration file");
+                   "please setup environment X509_USER_PROXY, "
+                   "or proxypath in a configuration file");
         return EXIT_FAILURE;
     }
     else if (!(Glib::file_test(m_proxy_path, Glib::FILE_TEST_EXISTS))) {
         logger.msg(Arc::ERROR, "Cannot find file at %s for getting the proxy. "
-                     "Please make sure this file exists.", m_proxy_path);
+                   "Please make sure this file exists.", m_proxy_path);
         return EXIT_FAILURE;
     }
 
@@ -539,12 +575,12 @@ int ArcProxyController::printInformation()
 
     Arc::VOMSTrustList voms_trust_dn;
     voms_trust_dn.AddRegex(".*");
-    res = parseVOMSAC(holder, m_ca_dir, "", "", voms_trust_dn, voms_attributes, true, true);
+    res = parseVOMSAC(holder, m_ca_dir, "", m_voms_dir, voms_trust_dn, voms_attributes, true, true);
     // Not printing error message because parseVOMSAC will print everything itself
     //if (!res) logger.msg(Arc::ERROR, "VOMS attribute parsing failed");
     for(int n = 0; n<voms_attributes.size(); ++n) {
         if(voms_attributes[n].attributes.size() > 0) {
-            std::cout<<"====== "<<Arc::IString("AC extension m_information for VO ")<<
+            std::cout<<"====== "<<Arc::IString("AC extension information for VO ")<<
                        voms_attributes[n].voname<<" ======"<<std::endl;
             if(voms_attributes[n].status & Arc::VOMSACInfo::ParsingError) {
                 std::cout << Arc::IString("Error detected while parsing this AC")<<std::endl;
@@ -609,28 +645,14 @@ int ArcProxyController::printInformation()
             }
         }
         /*
-        Arc::Time now;
-        Arc::Time till = voms_attributes[n].till;
-        if(now < till)
-          std::cout << Arc::IString("Timeleft for AC: %s", (till-now).istr())<<std::endl;
-        else
-          std::cout << Arc::IString("AC has been expired for: %s", (now-till).istr())<<std::endl;
-  */
+      Arc::Time now;
+      Arc::Time till = voms_attributes[n].till;
+      if(now < till)
+        std::cout << Arc::IString("Timeleft for AC: %s", (till-now).istr())<<std::endl;
+      else
+        std::cout << Arc::IString("AC has been expired for: %s", (now-till).istr())<<std::endl;
+*/
     }
-
-    if ((m_cert_path.empty() || m_key_path.empty()) &&
-            ((m_myproxy_command == "PUT") || (m_myproxy_command == "put") || (m_myproxy_command == "Put"))) {
-        if (m_cert_path.empty())
-            logger.msg(Arc::ERROR, "Cannot find the user certificate path, "
-                         "please setup environment X509_USER_CERT, "
-                         "or certificatepath in a configuration file");
-        if (m_key_path.empty())
-            logger.msg(Arc::ERROR, "Cannot find the user private key path, "
-                         "please setup environment X509_USER_KEY, "
-                         "or keypath in a configuration file");
-        return EXIT_FAILURE;
-    }
-
     return EXIT_SUCCESS;
 }
 
@@ -638,8 +660,8 @@ int ArcProxyController::removeProxy()
 {
     if (m_proxy_path.empty()) {
         logger.msg(Arc::ERROR, "Cannot find the path of the proxy file, "
-                     "please setup environment X509_USER_PROXY, "
-                     "or proxypath in a configuration file");
+                   "please setup environment X509_USER_PROXY, "
+                   "or proxypath in a configuration file");
         return EXIT_FAILURE;
     } else if (!(Glib::file_test(m_proxy_path, Glib::FILE_TEST_EXISTS))) {
         logger.msg(Arc::ERROR, "Cannot remove proxy file at %s, because it's not there", m_proxy_path);
@@ -654,13 +676,7 @@ int ArcProxyController::removeProxy()
 
 int ArcProxyController::generateProxy()
 {
-#ifdef ARC_VERSION_1
-    Arc::UserConfig usercfg(m_conffile, Arc::initializeCredentialsType((!m_vomslist.empty() || !m_myproxy_command.empty()) ? Arc::initializeCredentialsType::TryCredentials : Arc::initializeCredentialsType::SkipCACredentials));
-#endif
-
-#ifdef ARC_VERSION_2
     Arc::UserConfig usercfg("", Arc::initializeCredentialsType( Arc::initializeCredentialsType::TryCredentials));
-#endif
 
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization");
@@ -669,6 +685,19 @@ int ArcProxyController::generateProxy()
 
     const Arc::Time now;
     Arc::User user;
+
+    if ((m_cert_path.empty() || m_key_path.empty()) &&
+            ((m_myproxy_command == "PUT") || (m_myproxy_command == "put") || (m_myproxy_command == "Put"))) {
+        if (m_cert_path.empty())
+            logger.msg(Arc::ERROR, "Cannot find the user certificate path, "
+                       "please setup environment X509_USER_CERT, "
+                       "or certificatepath in a configuration file");
+        if (m_key_path.empty())
+            logger.msg(Arc::ERROR, "Cannot find the user private key path, "
+                       "please setup environment X509_USER_KEY, "
+                       "or keypath in a configuration file");
+        return EXIT_FAILURE;
+    }
 
     std::map<std::string, std::string> constraints;
     for (std::list<std::string>::iterator it = m_constraintlist.begin();
@@ -701,12 +730,10 @@ int ArcProxyController::generateProxy()
     }
     if(!constraints["validityStart"].empty()) {
         validityStart = Arc::Time(constraints["validityStart"]);
-        /*
-      if (validityStart == Arc::Time(Arc::Time::UNDEFINED)) {
-      std::cerr << Arc::IString("The start time that you set: %s can't be recognized.", (std::string)constraints["validityStart"]) << std::endl;
-        return EXIT_FAILURE;
-      }
-      */
+        if (validityStart == Arc::Time(Arc::Time::UNDEFINED)) {
+            std::cerr << Arc::IString("The start time that you set: %s can't be recognized.", (std::string)constraints["validityStart"]) << std::endl;
+            return EXIT_FAILURE;
+        }
     }
     if(!constraints["validityPeriod"].empty()) {
         validityPeriod = Arc::Period(constraints["validityPeriod"]);
@@ -717,12 +744,10 @@ int ArcProxyController::generateProxy()
     }
     if(!constraints["validityEnd"].empty()) {
         Arc::Time validityEnd = Arc::Time(constraints["validityEnd"]);
-        /*
-      if (validityEnd == Arc::Time(Arc::Time::UNDEFINED)) {
-        std::cerr << Arc::IString("The end time that you set: %s can't be recognized.", (std::string)constraints["validityEnd"]) << std::endl;
-        return EXIT_FAILURE;
-      }
-      */
+        if (validityEnd == Arc::Time(Arc::Time::UNDEFINED)) {
+            std::cerr << Arc::IString("The end time that you set: %s can't be recognized.", (std::string)constraints["validityEnd"]) << std::endl;
+            return EXIT_FAILURE;
+        }
         if(!constraints["validityPeriod"].empty()) {
             // If period is explicitely set then start is derived from end and period
             validityStart = validityEnd - validityPeriod;
@@ -783,8 +808,8 @@ int ArcProxyController::generateProxy()
 
     Arc::OpenSSLInit();
 
-    //If the "m_info" myproxy command is given, try to get the
-    //m_information about the existence of stored credentials
+    //If the "INFO" myproxy command is given, try to get the
+    //information about the existence of stored credentials
     //on the myproxy server.
     try {
         if (m_myproxy_command == "info" || m_myproxy_command == "INFO" || m_myproxy_command == "Info") {
@@ -801,8 +826,8 @@ int ArcProxyController::generateProxy()
 
             std::string respinfo;
 
-            //if(usercfg.CertificatePath().empty()) usercfg.CertificatePath(m_cert_path);
-            //if(usercfg.KeyPath().empty()) usercfg.KeyPath(m_key_path);
+            //if(usercfg.CertificatePath().empty()) usercfg.CertificatePath(cert_path);
+            //if(usercfg.KeyPath().empty()) usercfg.KeyPath(key_path);
             if(usercfg.ProxyPath().empty() && !m_proxy_path.empty()) usercfg.ProxyPath(m_proxy_path);
             else {
                 if(usercfg.CertificatePath().empty() && !m_cert_path.empty()) usercfg.CertificatePath(m_cert_path);
@@ -814,9 +839,9 @@ int ArcProxyController::generateProxy()
             std::map<std::string,std::string> myproxyopt;
             myproxyopt["username"] = m_user_name;
             if(!cstore.Info(myproxyopt,respinfo))
-                throw std::invalid_argument("Failed to get m_info from MyProxy service");
+                throw std::invalid_argument("Failed to get info from MyProxy service");
 
-            std::cout << Arc::IString("Succeeded to get m_info from MyProxy server") << std::endl;
+            std::cout << Arc::IString("Succeeded to get info from MyProxy server") << std::endl;
             std::cout << respinfo << std::endl;
             return EXIT_SUCCESS;
         }
@@ -828,7 +853,7 @@ int ArcProxyController::generateProxy()
     }
 
     //If the "NEWPASS" myproxy command is given, try to get the
-    //m_information about the existence of stored credentials
+    //information about the existence of stored credentials
     //on the myproxy server.
     try {
         if (m_myproxy_command == "newpass" || m_myproxy_command == "NEWPASS" || m_myproxy_command == "Newpass" || m_myproxy_command == "NewPass") {
@@ -886,7 +911,7 @@ int ArcProxyController::generateProxy()
     }
 
     //If the "DESTROY" myproxy command is given, try to get the
-    //m_information about the existence of stored credentials
+    //information about the existence of stored credentials
     //on the myproxy server.
     try {
         if (m_myproxy_command == "destroy" || m_myproxy_command == "DESTROY" || m_myproxy_command == "Destroy") {
@@ -909,7 +934,7 @@ int ArcProxyController::generateProxy()
                 throw std::invalid_argument("Error entering passphrase");
             passphrase = password;
 
-            std::string respm_info;
+            std::string respinfo;
 
             if(usercfg.ProxyPath().empty() && !m_proxy_path.empty()) usercfg.ProxyPath(m_proxy_path);
             else {
@@ -978,8 +1003,8 @@ int ArcProxyController::generateProxy()
                 throw std::invalid_argument("Failed to retrieve proxy from MyProxy service");
             write_proxy_file(m_proxy_path,proxy_cred_str_pem);
 
-            //Assign m_proxy_path to m_cert_path and m_key_path,
-            //so the later voms functionality can use the m_proxy_path
+            //Assign proxy_path to cert_path and key_path,
+            //so the later voms functionality can use the proxy_path
             //to create proxy with voms AC extension. In this
             //case, "--cert" and "--key" is not needed.
             m_cert_path = m_proxy_path;
@@ -1005,10 +1030,7 @@ int ArcProxyController::generateProxy()
 
     //Create proxy or voms proxy
     try {
-
-        Arc::Credential signer(m_cert_path, m_key_path, "", "", m_passphrase.toStdString());
-        m_passphrase.fill(0);
-        m_passphrase.clear();
+        Arc::Credential signer(m_cert_path, m_key_path, "", "");
         if (signer.GetIdentityName().empty()) {
             std::cerr << Arc::IString("Proxy generation failed: No valid certificate found.") << std::endl;
             return EXIT_FAILURE;
@@ -1019,7 +1041,7 @@ int ArcProxyController::generateProxy()
             return EXIT_FAILURE;
         }
         if(pkey) EVP_PKEY_free(pkey);
-        std::cout << Arc::IString("Your identity: %s", Arc::Credential(m_cert_path, "", "", "").GetIdentityName()) << std::endl;
+        std::cout << Arc::IString("Your identity: %s", signer.GetIdentityName()) << std::endl;
         if (now > signer.GetEndTime()) {
             std::cerr << Arc::IString("Proxy generation failed: Certificate has expired.") << std::endl;
             return EXIT_FAILURE;
@@ -1066,11 +1088,11 @@ int ArcProxyController::generateProxy()
             }
 
             //Parse the 'vomses' file to find configure lines corresponding to
-            //the m_information from the command line
+            //the information from the command line
             if (m_vomses_path.empty())
                 m_vomses_path = usercfg.VOMSESPath();
             if (m_vomses_path.empty()) {
-                logger.msg(Arc::ERROR, "$X509_VOMS_FILE, and $X509_VOMSES are not set;\nUser has not specify the location for vomses m_information;\nThere is also not vomses location m_information in user's configuration file;\nCannot find vomses in default locations: ~/.arc/vomses, ~/.voms/vomses, $ARC_LOCATION/etc/vomses, $ARC_LOCATION/etc/grid-security/vomses, $PWD/vomses, /etc/vomses, /etc/grid-security/vomses, and the location at the corresponding sub-directory");
+                logger.msg(Arc::ERROR, "$X509_VOMS_FILE, and $X509_VOMSES are not set;\nUser has not specify the location for vomses information;\nThere is also not vomses location information in user's configuration file;\nCannot find vomses in default locations: ~/.arc/vomses, ~/.voms/vomses, $ARC_LOCATION/etc/vomses, $ARC_LOCATION/etc/grid-security/vomses, $PWD/vomses, /etc/vomses, /etc/grid-security/vomses, and the location at the corresponding sub-directory");
                 return EXIT_FAILURE;
             }
 
@@ -1083,7 +1105,7 @@ int ArcProxyController::generateProxy()
             //If the location is a file
             if(is_file(m_vomses_path)) vomses_files.push_back(m_vomses_path);
             //If the locaton is a directory, all the files and directories will be scanned
-            //to find the vomses m_information. The scanning will not stop until all of the
+            //to find the vomses information. The scanning will not stop until all of the
             //files and directories are all scanned.
             else {
                 std::vector<std::string> files;
@@ -1105,7 +1127,7 @@ int ArcProxyController::generateProxy()
                     if((voms_line.size() >= 1) && (voms_line[0] == '#')) continue;
 
                     bool has_find = false;
-                    //boolean value to record if the vomses server m_information has been found in this vomses line
+                    //boolean value to record if the vomses server information has been found in this vomses line
                     std::vector<std::string> voms_tokens;
                     Arc::tokenize(voms_line,voms_tokens," \t","\"");
 #define VOMS_LINE_NICKNAME (0)
@@ -1151,15 +1173,15 @@ int ArcProxyController::generateProxy()
 
             //Judge if we can not find any of the voms server in the command line from 'vomses' file
             //if(matched_voms_line.empty()) {
-            //  logger.msg(Arc::ERROR, "Cannot get voms server m_information from file: %s", m_vomses_path);
-            // throw std::runtime_error("Cannot get voms server m_information from file: " + m_vomses_path);
+            //  logger.msg(Arc::ERROR, "Cannot get voms server information from file: %s", vomses_path);
+            // throw std::runtime_error("Cannot get voms server information from file: " + vomses_path);
             //}
             //if (matched_voms_line.size() != server_command_map.size())
             for (std::multimap<std::string, std::string>::iterator it = server_command_map.begin();
                  it != server_command_map.end(); it++)
                 if (matched_voms_line.find((*it).first) == matched_voms_line.end())
-                    logger.msg(Arc::ERROR, "Cannot get VOMS server %s m_information from the vomses files",
-                                 (*it).first);
+                    logger.msg(Arc::ERROR, "Cannot get VOMS server %s information from the vomses files",
+                               (*it).first);
 
             //Contact the voms server to retrieve attribute certificate
             ArcCredential::AC **aclist = NULL;
@@ -1189,8 +1211,8 @@ int ArcProxyController::generateProxy()
                     std::string address;
                     if(voms_line.size() > VOMS_LINE_HOST) address = voms_line[VOMS_LINE_HOST];
                     if(address.empty()) {
-                        logger.msg(Arc::ERROR, "Cannot get VOMS server address m_information from vomses line: \"%s\"", tokens_to_string(voms_line));
-                        throw std::runtime_error("Cannot get VOMS server address m_information from vomses line: \"" + tokens_to_string(voms_line) + "\"");
+                        logger.msg(Arc::ERROR, "Cannot get VOMS server address information from vomses line: \"%s\"", tokens_to_string(voms_line));
+                        throw std::runtime_error("Cannot get VOMS server address information from vomses line: \"" + tokens_to_string(voms_line) + "\"");
                     }
 
                     std::string port;
@@ -1200,7 +1222,7 @@ int ArcProxyController::generateProxy()
                     if(voms_line.size() > VOMS_LINE_NAME) voms_name = voms_line[VOMS_LINE_NAME];
 
                     logger.msg(Arc::INFO, "Contacting VOMS server (named %s): %s on port: %s",
-                                 voms_name, address, port);
+                               voms_name, address, port);
                     std::cout << Arc::IString("Contacting VOMS server (named %s): %s on port: %s", voms_name, address, port) << std::endl;
 
                     std::string send_msg;
@@ -1237,46 +1259,78 @@ int ArcProxyController::generateProxy()
                     send_msg.append("<lifetime>").append(voms_period).append("</lifetime></voms>");
                     logger.msg(Arc::VERBOSE, "Message sent to VOMS server %s is: %s", voms_name, send_msg);
 
-                    Arc::ClientTCP client(cfg, address, atoi(port.c_str()), m_use_gsi_comm ? Arc::GSISec : Arc::SSL3Sec, usercfg.Timeout());
-                    Arc::PayloadRaw request;
-                    request.Insert(send_msg.c_str(), 0, send_msg.length());
-                    Arc::PayloadStreamInterface *response = NULL;
-                    Arc::MCC_Status status = client.process(&request, &response, true);
-                    if (!status) {
-                        //logger.msg(Arc::ERROR, (std::string)status);
-                        if (response)
-                            delete response;
-                        std::cout << Arc::IString("The VOMS server with the m_information:\n%s\"\ncan not be reached, please make sure it is available", tokens_to_string(voms_line)) << std::endl;
-                        continue; //There could be another voms replicated server with the same name exists
-                    }
-                    if (!response) {
-                        logger.msg(Arc::ERROR, "No stream response from VOMS server");
-                        continue;
-                    }
-                    Arc::XMLNode node;
                     std::string ret_str;
-                    char ret_buf[1024];
-                    int len = sizeof(ret_buf);
-                    while(response->Get(ret_buf, len)) {
-                        ret_str.append(ret_buf, len);
-                        len = sizeof(ret_buf);
-                    };
-                    logger.msg(Arc::VERBOSE, "Returned message from VOMS server: %s", ret_str);
+                    if(m_use_http_comm) {
+                        // Use http to contact voms server, for the RESRful interface provided by voms server
+                        // The format of the URL: https://moldyngrid.org:15112/generate-ac?fqans=/testbed.univ.kiev.ua/blabla/Role=test-role&lifetime=86400
+                        // fqans is composed of the voname, group name and role, i.e., the "command" for voms.
+                        std::string url_str;
+                        if(!command.empty()) url_str = "https://" + address + ":" + port + "/generate-ac?" + "fqans=" + command + "&lifetime=" + voms_period;
+                        else url_str = "https://" + address + ":" + port + "/generate-ac?" + "lifetime=" + voms_period;
+                        Arc::URL voms_url(url_str);
+                        Arc::ClientHTTP client(cfg, voms_url, usercfg.Timeout());
+                        client.RelativeURI(true);
+                        Arc::PayloadRaw request;
+                        Arc::PayloadRawInterface* response;
+                        Arc::HTTPClientInfo info;
+                        Arc::MCC_Status status = client.process("GET", &request, &info, &response);
+                        if (!status) {
+                            if (response) delete response;
+                            std::cout << Arc::IString("The VOMS server with the information:\n\t%s\"\ncan not be reached, please make sure it is available", tokens_to_string(voms_line)) << std::endl;
+                            continue; //There could be another voms replicated server with the same name exists
+                        }
+                        if (!response) {
+                            logger.msg(Arc::ERROR, "No http response from VOMS server");
+                            continue;
+                        }
+                        if(response->Content() != NULL) ret_str.append(response->Content());
+                        if (response) delete response;
+                        logger.msg(Arc::VERBOSE, "Returned message from VOMS server: %s", ret_str);
+                    }
+                    else {
+                        // Use GSI or TLS to contact voms server
+                        Arc::ClientTCP client(cfg, address, atoi(port.c_str()), m_use_gsi_comm ? Arc::GSISec : Arc::SSL3Sec, usercfg.Timeout());
+                        Arc::PayloadRaw request;
+                        request.Insert(send_msg.c_str(), 0, send_msg.length());
+                        Arc::PayloadStreamInterface *response = NULL;
+                        Arc::MCC_Status status = client.process(&request, &response, true);
+                        if (!status) {
+                            //logger.msg(Arc::ERROR, (std::string)status);
+                            if (response) delete response;
+                            std::cout << Arc::IString("The VOMS server with the information:\n\t%s\"\ncan not be reached, please make sure it is available", tokens_to_string(voms_line)) << std::endl;
+                            continue; //There could be another voms replicated server with the same name exists
+                        }
+                        if (!response) {
+                            logger.msg(Arc::ERROR, "No stream response from VOMS server");
+                            continue;
+                        }
+                        char ret_buf[1024];
+                        int len = sizeof(ret_buf);
+                        while(response->Get(ret_buf, len)) {
+                            ret_str.append(ret_buf, len);
+                            len = sizeof(ret_buf);
+                        };
+                        if (response) delete response;
+                        logger.msg(Arc::VERBOSE, "Returned message from VOMS server: %s", ret_str);
+                    }
+
+                    Arc::XMLNode node;
                     Arc::XMLNode(ret_str).Exchange(node);
                     if((!node) || ((bool)(node["error"]))) {
                         if((bool)(node["error"])) {
                             std::string str = node["error"]["item"]["message"];
                             std::string::size_type pos;
-                            if((pos = str.find("The validity of this VOMS AC in your proxy is shortened to"))!= std::string::npos) {
-                                std::string tmp = str.substr(pos + 59);
+                            std::string tmp_str = "The validity of this VOMS AC in your proxy is shortened to";
+                            if((pos = str.find(tmp_str))!= std::string::npos) {
+                                std::string tmp = str.substr(pos + tmp_str.size() + 1);
                                 std::cout << Arc::IString("The validity duration of VOMS AC is shortened from %s to %s, due to the validity constraint on voms server side.\n", voms_period, tmp);
                             }
                             else
-                                std::cout << Arc::IString("Cannot get any AC or attributes m_info from VOMS server: %s;\n       Returned message from VOMS server: %s\n", voms_server, str);
+                                std::cout << Arc::IString("Cannot get any AC or attributes info from VOMS server: %s;\n       Returned message from VOMS server: %s\n", voms_server, str);
                             break; //since the voms servers with the same name should be looked as the same for robust reason, the other voms server should that can be reached could returned the same message. So we exists the loop, even if there are other backup voms server exist.
                         }
                         else
-                            std::cout << Arc::IString("Returned message from VOMS server %s is: s%\n", voms_server, ret_str);
+                            std::cout << Arc::IString("Returned message from VOMS server %s is: %s\n", voms_server, ret_str);
                         break;
                     }
 
@@ -1297,16 +1351,11 @@ int ArcProxyController::generateProxy()
                     }
 
                     if (command == "list") {
-                        //logger.msg(Arc::m_info, "The attribute m_information from voms server: %s is list as following:\n%s",
+                        //logger.msg(Arc::INFO, "The attribute information from voms server: %s is list as following:\n%s",
                         //           voms_server, decodedac);
-                        std::cout << Arc::IString("The attribute m_information from VOMS server: %s is list as following:", voms_server) << std::endl << decodedac << std::endl;
-                        if (response)
-                            delete response;
+                        std::cout << Arc::IString("The attribute information from VOMS server: %s is list as following:", voms_server) << std::endl << decodedac << std::endl;
                         return EXIT_SUCCESS;
                     }
-
-                    if (response)
-                        delete response;
 
                     Arc::addVOMSAC(aclist, acorder, decodedac);
                     succeeded = true; break;
@@ -1320,6 +1369,7 @@ int ArcProxyController::generateProxy()
             //Put the returned attribute certificate into proxy certificate
             if (aclist != NULL)
                 cred_request.AddExtension("acseq", (char**)aclist);
+            else std::cout << Arc::IString("Failed to add voms AC extension. Your proxy may be incomplete.") << std::endl;
             if (!acorder.empty())
                 cred_request.AddExtension("order", acorder);
         }
@@ -1350,7 +1400,7 @@ int ArcProxyController::generateProxy()
         //If myproxy command is "Put", then the proxy path is set to /tmp/myproxy-proxy.uid.pid
         if (m_myproxy_command == "put" || m_myproxy_command == "PUT" || m_myproxy_command == "Put")
             m_proxy_path = Glib::build_filename(Glib::get_tmp_dir(), "myproxy-proxy."
-                                                + Arc::tostring(user.get_uid()) + Arc::tostring((int)(getpid())));
+                                              + Arc::tostring(user.get_uid()) + Arc::tostring((int)(getpid())));
         write_proxy_file(m_proxy_path,proxy_cert);
 
         Arc::Credential proxy_cred(m_proxy_path, m_proxy_path, "", "");

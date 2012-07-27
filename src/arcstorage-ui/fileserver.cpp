@@ -1,8 +1,7 @@
 #include "fileserver.h"
 
-FileServer::FileServer(MainWindow *mw)
+FileServer::FileServer()
 {
-    mainWindow = mw;
     m_notifyParent = true;
 }
 

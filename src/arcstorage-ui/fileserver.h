@@ -22,7 +22,7 @@ private:
 
 protected:
     /** Pointer to main window needed for callbacks (get files done, delete file done, copy file done... */
-    MainWindow *mainWindow;
+    //MainWindow *mainWindow;
 
     /** A list of the files that were last browsed (and are currently displayed in the gui) */
     QVector<ARCFileElement> fileList;
@@ -33,7 +33,7 @@ protected:
     bool m_notifyParent;
 
 public:
-    FileServer(MainWindow *mw);
+    FileServer();
 
     void setNotifyParent(bool flag);
     bool getNotifyParent();

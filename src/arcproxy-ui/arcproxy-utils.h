@@ -61,6 +61,7 @@ private:
     std::string m_key_path;
     std::string m_ca_dir;
     std::string m_vomses_path;
+    std::string m_voms_dir;
     std::list<std::string> m_vomslist;
     std::list<std::string> m_orderlist;
     std::string m_user_name; //user name to MyProxy server
@@ -78,6 +79,7 @@ private:
     bool m_use_empty_passphrase; //if use empty passphrase to myproxy server
     int m_timeout;
     bool m_version;
+    bool m_use_http_comm;
 
     Arc::Logger logger;
     Arc::LogStream logCerr;
