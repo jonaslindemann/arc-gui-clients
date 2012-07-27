@@ -19,12 +19,11 @@
 #include <arc/OptionParser.h>
 #include <arc/FileUtils.h>
 
-SRMFileServer::SRMFileServer(MainWindow *mw, QObject *parent) :
-    QObject(parent), FileServer(mw)
+SRMFileServer::SRMFileServer(QObject *parent) :
+    QObject(parent), FileServer()
 {
     m_usercfg = NULL;
 }
-
 
 QStringList SRMFileServer::getFileInfoLabels()
 {

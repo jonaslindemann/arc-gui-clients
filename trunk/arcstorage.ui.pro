@@ -15,9 +15,7 @@ TEMPLATE = app
 SOURCES += src/arcstorage-ui/main.cpp\
         src/arcstorage-ui/mainwindow.cpp \
     src/arcstorage-ui/fileserver.cpp \
-    src/arcstorage-ui/localfileserver.cpp \
     src/arcstorage-ui/arcfileelement.cpp \
-    src/arcstorage-ui/ftpfileserver.cpp \
     src/arcstorage-ui/dragdropabletreewidget.cpp \
     src/arcstorage-ui/fileserverfactory.cpp \
     src/arcstorage-ui/filepropertiesdialog.cpp \
@@ -32,9 +30,7 @@ SOURCES += src/arcstorage-ui/main.cpp\
 
 HEADERS  += src/arcstorage-ui/mainwindow.h \
     src/arcstorage-ui/fileserver.h \
-    src/arcstorage-ui/localfileserver.h \
     src/arcstorage-ui/arcfileelement.h \
-    src/arcstorage-ui/ftpfileserver.h \
     src/arcstorage-ui/dragdropabletreewidget.h \
     src/arcstorage-ui/fileserverfactory.h \
     src/arcstorage-ui/filepropertiesdialog.h \

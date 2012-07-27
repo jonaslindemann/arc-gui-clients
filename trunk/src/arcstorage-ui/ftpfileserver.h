@@ -11,7 +11,7 @@ class FTPFileServer : public QObject, public FileServer
 {
     Q_OBJECT
 public:
-    explicit FTPFileServer(MainWindow *mw, QObject *parent = 0);
+    explicit FTPFileServer(QObject *parent = 0);
     ~FTPFileServer();
 
 private:

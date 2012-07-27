@@ -6,8 +6,8 @@
 #include "ftpfileserver.h"
 #include "mainwindow.h"
 
-FTPFileServer::FTPFileServer(MainWindow *mw, QObject *parent) :
-    QObject(parent), FileServer(mw)
+FTPFileServer::FTPFileServer(QObject *parent) :
+    QObject(parent), FileServer()
 {
     ftp = new QFtp(this);
 

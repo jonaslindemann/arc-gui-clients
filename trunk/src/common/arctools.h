@@ -4,11 +4,13 @@
 #include <QObject>
 #include <QMutex>
 
+#include <arc/UserConfig.h>
+
 class ARCTools : public QObject
 {
     Q_OBJECT
 private:
-
+    Arc::UserConfig* m_userConfig;
 public:
     static ARCTools* instance()
     {
@@ -34,6 +36,10 @@ public:
         m_instance = 0;
         mutex.unlock();
     }
+
+    void initUserConfig();
+    Arc::UserConfig* currentUserConfig();
+
 
     void proxyCertificateTool();
     void certConversionTool();

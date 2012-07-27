@@ -9,7 +9,7 @@ class MainWindow;
 class LocalFileServer : public FileServer
 {
 public:
-    LocalFileServer(MainWindow *mw);
+    LocalFileServer();
 
 private:
 

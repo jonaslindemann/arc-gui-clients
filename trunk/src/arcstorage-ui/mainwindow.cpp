@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     ui(new Ui::MainWindow)
 {
     GlobalStateInfo::instance()->setMainWindow(this);
+    ARCTools::instance()->initUserConfig();
 
     m_childWindow = childWindow;
     Settings::loadFromDisk();
@@ -77,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
 
     // Get fileserver and wire it up
 
-    m_currentFileServer = FileServerFactory::getNewFileServer("", this);  // "" - default file server
+    m_currentFileServer = FileServerFactory::createFileServer("");  // "" - default file server
 
     // So basically we handle everything using a SRMFileServer (...)
 
@@ -913,7 +914,7 @@ void MainWindow::on_actionReload_triggered()
     setBusyUI(true);
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
 
-    m_currentFileServer = FileServerFactory::getNewFileServer(url, this);
+    m_currentFileServer = FileServerFactory::createFileServer(url);
     SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
     connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));

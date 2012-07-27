@@ -18,12 +18,17 @@ private:
 
     QList<FileTransfer*> m_transferList;
 
+    bool m_notifyParent;
+
     bool initUserConfig();
 
     void updateFileListSilent(QString URL);
 
 public:
-    explicit SRMFileServer(MainWindow *mw, QObject *parent = 0);
+    explicit SRMFileServer(QObject *parent = 0);
+
+    void setNotifyParent(bool flag);
+    bool getNotifyParent();
 
     QStringList getFileInfoLabels();
     void updateFileList(QString URL);
