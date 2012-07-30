@@ -54,6 +54,9 @@ public:
 class ArcProxyController : public QObject
 {
     Q_OBJECT
+public:
+    enum TCertStatus { CS_PATH_EMPTY, CS_NOT_FOUND, CS_INVALID_CONFIG, CS_CADIR_NOT_FOUND, CS_VALID };
+    enum TProxyStatus { PS_PATH_EMPTY, PS_NOT_FOUND, PS_EXPIRED, PS_NOT_VALID, PS_VALID };
 private:
 
     std::string m_proxy_path;
@@ -80,6 +83,7 @@ private:
     int m_timeout;
     bool m_version;
     bool m_use_http_comm;
+    bool m_use_nssdb;
 
     Arc::Logger logger;
     Arc::LogStream logCerr;
@@ -87,7 +91,7 @@ private:
     QString m_passphrase;
 
     VomsList m_vomsList;
-public:
+public:   
     ArcProxyController();
     virtual ~ArcProxyController();
 
@@ -95,6 +99,10 @@ public:
     int printInformation();
     int generateProxy();
     int removeProxy();
+
+
+    TCertStatus checkCert();
+    TProxyStatus checkProxy();
 
     void setPassphrase(const QString& passphrase);
     void setValidityPeriod(int seconds);
