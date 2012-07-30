@@ -3,21 +3,21 @@ add_definitions(-DQT_NO_KEYWORDS)
 include(${QT_USE_FILE})
 
 SET(arcproxyui_UIS
-    mainwindow.ui
-    infodialog.ui
+    ../common/proxywindow.ui
+    ../common/infodialog.ui
 )
 
 SET(arcproxyui_SRCS
-  arcproxy-utils.cpp
-  infodialog.cpp
-  mainwindow.cpp
+  ../common/arcproxy-utils.cpp
+  ../common/infodialog.cpp
+  ../common/proxywindow.cpp
   main.cpp
 )
 
 SET(arcproxyui_MOC_HDRS
-  arcproxy-utils.h
-  mainwindow.h
-  infodialog.h
+  ../common/arcproxy-utils.h
+  ../common/proxywindow.h
+  ../common/infodialog.h
 )
 
 SET(arcproxyui_RCS 
@@ -76,7 +76,7 @@ ELSE(APPLE)
 	add_executable(arcproxy-ui ${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H} )
 ENDIF(APPLE)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
 target_link_libraries (arcproxy-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
 

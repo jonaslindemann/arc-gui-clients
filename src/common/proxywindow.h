@@ -8,10 +8,10 @@
 #include "qdebugstream.h"
 
 namespace Ui {
-class MainWindow;
+class ProxyWindow;
 }
 
-class MainWindow : public QMainWindow
+class ProxyWindow : public QMainWindow
 {
     Q_OBJECT
 private:
@@ -22,8 +22,8 @@ private:
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit ProxyWindow(QWidget *parent = 0);
+    ~ProxyWindow();
 
 protected:
     void customEvent(QEvent * event);
@@ -40,7 +40,7 @@ private Q_SLOTS:
     void on_infoButton_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::ProxyWindow *ui;
 };
 
 #endif // MAINWINDOW_H

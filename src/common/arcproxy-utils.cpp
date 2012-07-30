@@ -39,6 +39,12 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+#undef HAVE_NSS
+
+#ifdef HAVE_NSS
+#include <arc/credential/NSSUtil.h>
+#endif
+
 VomsListEntry::VomsListEntry()
 {
     m_alias = "";
@@ -382,6 +388,30 @@ bool ArcProxyController::getUseGSIProxy()
     return m_use_gsi_proxy;
 }
 
+ArcProxyController::TCertStatus ArcProxyController::checkCert()
+{
+    Arc::ArcLocation::Init("");
+
+    Arc::UserConfig usercfg(m_conffile,
+                            Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+    if (!usercfg) {
+        return CS_INVALID_CONFIG;
+    }
+    // Check for needed credentials objects
+    // Can proxy be used for? Could not find it in documentation.
+    // Key and certificate not needed if only printing proxy information
+    if((usercfg.CertificatePath().empty() || (usercfg.KeyPath().empty() && (usercfg.CertificatePath().find(".p12") == std::string::npos))) && !m_info) {
+        return CS_NOT_FOUND;
+    }
+    if(!m_vomslist.empty() || !m_myproxy_command.empty()) {
+        // For external communication CAs are needed
+        if(usercfg.CACertificatesDirectory().empty()) {
+            logger.msg(Arc::ERROR, "Failed to find CA certificates");
+            return CS_CADIR_NOT_FOUND;
+        }
+    }
+    return CS_VALID;
+}
 
 int ArcProxyController::initialize()
 {
@@ -394,7 +424,7 @@ int ArcProxyController::initialize()
 
 #ifdef HAVE_NSS
     //Using nss db dominate other option
-    if(use_nssdb) {
+    if(m_use_nssdb) {
         std::string nssdb_path = get_nssdb_path();
         if(nssdb_path.empty()) {
             std::cout << Arc::IString("The nss db can not be detected under firefox profile") << std::endl;
@@ -541,6 +571,33 @@ void ArcProxyController::setValidityPeriod(int seconds)
     m_constraintlist.push_back(constraintString);
 }
 
+ArcProxyController::TProxyStatus ArcProxyController::checkProxy()
+{
+    const Arc::Time now;
+
+    if (m_proxy_path.empty()) {
+        return PS_PATH_EMPTY;
+    }
+    else if (!(Glib::file_test(m_proxy_path, Glib::FILE_TEST_EXISTS))) {
+        return PS_NOT_FOUND;
+    }
+
+    Arc::Credential holder(m_proxy_path, "", "", "");
+
+    if (holder.GetEndTime() < now)
+    {
+        return PS_EXPIRED;
+    }
+    else if (now < holder.GetStartTime())
+    {
+        return PS_NOT_VALID;
+    }
+    else
+    {
+        return PS_VALID;
+    }
+    return PS_VALID;
+}
 
 int ArcProxyController::printInformation()
 {
@@ -1030,7 +1087,7 @@ int ArcProxyController::generateProxy()
 
     //Create proxy or voms proxy
     try {
-        Arc::Credential signer(m_cert_path, m_key_path, "", "");
+        Arc::Credential signer(m_cert_path, m_key_path, "", "", this->m_passphrase.toStdString());
         if (signer.GetIdentityName().empty()) {
             std::cerr << Arc::IString("Proxy generation failed: No valid certificate found.") << std::endl;
             return EXIT_FAILURE;

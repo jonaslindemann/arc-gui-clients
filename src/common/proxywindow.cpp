@@ -1,24 +1,27 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "proxywindow.h"
+#include "ui_proxywindow.h"
 
 #include <QMessageBox>
 
 #include "infodialog.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+ProxyWindow::ProxyWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::ProxyWindow)
 {
     ui->setupUi(this);
 
     // Redirect standard output
 
+    /*
     m_debugStream = new QDebugStream(std::cout, this);
     m_debugStream2 = new QDebugStream(std::cerr, this);
+    */
 
     // Setup proxy controller
 
     m_proxyController.initialize();
+
     ui->identityText->setText(m_proxyController.getIdentity());
 
     QDateTime currentTime = QDateTime::currentDateTime();
@@ -38,16 +41,19 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->vomsServerCombo->addItem(m_proxyController.vomsList().at(i)->alias());
 
     ui->vomsServerCombo->clearEditText();
+    m_proxyController.checkProxy();
 }
 
-MainWindow::~MainWindow()
+ProxyWindow::~ProxyWindow()
 {
     delete ui;
+    /*
     delete m_debugStream;
     delete m_debugStream2;
+    */
 }
 
-void MainWindow::customEvent(QEvent * event)
+void ProxyWindow::customEvent(QEvent * event)
 {
     // When we get here, we've crossed the thread boundary and are now
     // executing in the Qt object's thread
@@ -60,15 +66,17 @@ void MainWindow::customEvent(QEvent * event)
     // use more else ifs to handle other custom events
 }
 
-void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
+void ProxyWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
 {
     // Now you can safely do something with your Qt objects.
     // Access your custom data using event->getCustomData1() etc.
 
+    /*
     ui->logText->append(event->getOutputText());
+    */
 }
 
-void MainWindow::on_generateButton_clicked()
+void ProxyWindow::on_generateButton_clicked()
 {   
     if (ui->passphraseText->text().isEmpty())
     {
@@ -92,12 +100,12 @@ void MainWindow::on_generateButton_clicked()
 
 }
 
-void MainWindow::on_removeButton_clicked()
+void ProxyWindow::on_removeButton_clicked()
 {
     m_proxyController.removeProxy();
 }
 
-void MainWindow::on_passphraseText_returnPressed()
+void ProxyWindow::on_passphraseText_returnPressed()
 {
     if (ui->passphraseText->text().isEmpty())
     {
@@ -119,7 +127,7 @@ void MainWindow::on_passphraseText_returnPressed()
         QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
 }
 
-void MainWindow::on_proxyTypeCombo_currentIndexChanged(int index)
+void ProxyWindow::on_proxyTypeCombo_currentIndexChanged(int index)
 {
     if (index == 0)
         m_proxyController.setUseGSIProxy(false);
@@ -127,7 +135,7 @@ void MainWindow::on_proxyTypeCombo_currentIndexChanged(int index)
         m_proxyController.setUseGSIProxy(true);
 }
 
-void MainWindow::on_infoButton_clicked()
+void ProxyWindow::on_infoButton_clicked()
 {
     InfoDialog dlg;
     dlg.exec();
