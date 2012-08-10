@@ -38,6 +38,12 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QtGui/QApplication>
+#include <QStyle>
+#include <QDesktopWidget>
+
+
+#include "proxywindow.h"
 
 #undef HAVE_NSS
 
@@ -360,10 +366,19 @@ ArcProxyController::ArcProxyController()
     if(!m_proxy_path.empty())Arc::SetEnv("X509_USER_PROXY", m_proxy_path);
     if(!m_ca_dir.empty())Arc::SetEnv("X509_CERT_DIR", m_ca_dir);
 
+    m_proxyWindow = 0;
+    m_application = 0;
+
 }
 
 ArcProxyController::~ArcProxyController()
 {
+    if (m_proxyWindow!=0)
+        delete m_proxyWindow;
+
+    if (m_application!=0)
+        delete m_application;
+
     m_passphrase.fill(0);
     m_passphrase.clear();
 }
@@ -413,11 +428,28 @@ ArcProxyController::TCertStatus ArcProxyController::checkCert()
     return CS_VALID;
 }
 
+ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
+{
+    m_proxyWindow = new ProxyWindow(0, this);
+    m_proxyWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, m_proxyWindow->size(), qApp->desktop()->availableGeometry()));
+    m_proxyWindow->show();
+}
+
+void ArcProxyController::showProxyUIAppLoop()
+{
+    m_application = new QApplication(0,0,0);
+    this->showProxyUI();
+    m_application->exec();
+}
+
+
 int ArcProxyController::initialize()
 {
+    /*
     Arc::Logger::getRootLogger().removeDestinations();
     Arc::Logger::getRootLogger().addDestination(logCerr);
     Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
+    */
     logCerr.setFormat(Arc::ShortFormat);
 
     Arc::ArcLocation::Init("");

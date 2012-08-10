@@ -11,7 +11,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "filelister.h"
-#include "localfileserver.h"
 #include "filepropertiesdialog.h"
 #include "fileserverfactory.h"
 #include "srmsettingsdialog.h"
@@ -300,17 +299,17 @@ void MainWindow::updateFileTree()
 {
     logger.msg(Arc::INFO, "Updating file list.");
 
-    QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
+    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
     ui->filesTreeWidget->clear();
     ui->filesTreeWidget->setSortingEnabled(false);
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement AFE = fileList.at(i);
+        ARCFileElement* AFE = fileList.at(i);
         QTreeWidgetItem *item = new QTreeWidgetItem;
-        item->setText(0, AFE.getFileName());
-        if (AFE.getFileType()==ARCDir)
+        item->setText(0, AFE->getFileName());
+        if (AFE->getFileType()==ARCDir)
         {
             item->setIcon(0,QIcon::fromTheme("folder"));
             item->setText(1, "---");
@@ -318,20 +317,20 @@ void MainWindow::updateFileTree()
         else
         {
             item->setIcon(0,QIcon::fromTheme("document"));
-            item->setText(1, QString::number(AFE.getSize()));
+            item->setText(1, QString::number(AFE->getSize()));
         }
-        if (AFE.getFileType()==ARCDir)
+        if (AFE->getFileType()==ARCDir)
             item->setText(2, "folder");
         else
             item->setText(2, "file");
-        item->setText(3, AFE.getLastModfied().toString());
-        item->setText(4, AFE.getOwner());
-        item->setText(5, AFE.getGroup());
+        item->setText(3, AFE->getLastModfied().toString());
+        item->setText(4, AFE->getOwner());
+        item->setText(5, AFE->getGroup());
         QString tmpStr;
-        tmpStr.sprintf("%x", AFE.getPermissions());
+        tmpStr.sprintf("%x", AFE->getPermissions());
         item->setText(6, tmpStr);
-        item->setText(7, AFE.getLastRead().toString());
-        setURLOfItem(item, AFE.getFilePath());
+        item->setText(7, AFE->getLastRead().toString());
+        setURLOfItem(item, AFE->getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }
 
@@ -350,19 +349,19 @@ void MainWindow::updateFoldersTree()
 {
     logger.msg(Arc::INFO, "Updating folder tree.");
 
-    QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
+    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
     ui->foldersTreeWidget->clear();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement AFE = fileList.at(i);
-        if (AFE.getFileType() == ARCDir)  // If this item in the file list is a folder...
+        ARCFileElement* AFE = fileList.at(i);
+        if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
-            item->setText(0, AFE.getFileName());
+            item->setText(0, AFE->getFileName());
             item->setIcon(0, QIcon::fromTheme("folder"));
-            setURLOfItem(item, AFE.getFilePath());
+            setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
             item->addChild(dummyItem);
@@ -380,19 +379,19 @@ void MainWindow::updateFoldersTreeBelow()
     QString currentURL = m_currentFileServer->getCurrentURL();
     m_currentFileServer->goUpOneFolder();
 
-    QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
+    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
     ui->foldersTreeWidget->clear();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement AFE = fileList.at(i);
-        if (AFE.getFileType() == ARCDir)  // If this item in the file list is a folder...
+        ARCFileElement* AFE = fileList.at(i);
+        if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
-            item->setText(0, AFE.getFileName());
+            item->setText(0, AFE->getFileName());
             item->setIcon(0, QIcon::fromTheme("folder"));
-            setURLOfItem(item, AFE.getFilePath());
+            setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
             item->addChild(dummyItem);
@@ -407,17 +406,17 @@ void MainWindow::updateFoldersTreeBelow()
 
 void MainWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
 {
-    QVector<ARCFileElement> fileList = m_currentFileServer->getFileList();
+    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement AFE = fileList.at(i);
-        if (AFE.getFileType() == ARCDir)  // If this item in the file list is a folder...
+        ARCFileElement* AFE = fileList.at(i);
+        if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
-            item->setText(0, AFE.getFileName());
+            item->setText(0, AFE->getFileName());
             item->setIcon(0, QIcon::fromTheme("folder"));
-            setURLOfItem(item, AFE.getFilePath());
+            setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
             item->addChild(dummyItem);

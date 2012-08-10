@@ -2,6 +2,7 @@
 
 #include <QProcess>
 #include <QDebug>
+#include <QMessageBox>
 
 #include <arc/credential/Credential.h>
 
@@ -11,33 +12,48 @@ ARCTools::ARCTools()
     :QObject()
 {
     m_userConfig = 0;
+    m_proxyController = new ArcProxyController();
 }
 
 void ARCTools::initUserConfig()
 {
+    m_proxyController->initialize();
+
+
     qDebug() << "Creating ARC configuration.";
     m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
 
-    if (m_userConfig->CredentialsFound())
-        qDebug() << "Found credentials.";
-    else
-        qDebug() << "Credentials not found.";
+    ArcProxyController::TCertStatus certStatus = m_proxyController->checkCert();
 
-    if (m_userConfig->InitializeCredentials(Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials)))
-        qDebug() << "Credentials initialised ok.";
-    else
-        qDebug() << "Credentials could not be initialised.";
+    // enum TCertStatus { CS_PATH_EMPTY, CS_NOT_FOUND, CS_INVALID_CONFIG, CS_CADIR_NOT_FOUND, CS_VALID };
 
-    Arc::Credential userCredential(*m_userConfig, Arc::Credential::NoPassword());
+    if (certStatus == ArcProxyController::CS_NOT_FOUND)
+        QMessageBox::warning(0, "Proxy", "Could not certificates");
+    else if (certStatus == ArcProxyController::CS_PATH_EMPTY)
+        QMessageBox::warning(0, "Proxy", "Certificate path empty. Please Check your configuration.");
+    else if (certStatus == ArcProxyController::CS_INVALID_CONFIG)
+        QMessageBox::warning(0, "Proxy", "Certificate configuration invalid.");
+    else if (certStatus == ArcProxyController::CS_CADIR_NOT_FOUND)
+        QMessageBox::warning(0, "Proxy", "CA directory not found. Please check configuration.");
+    else if (certStatus == ArcProxyController::CS_CADIR_NOT_FOUND)
+        QMessageBox::warning(0, "Proxy", "CA directory not found. Please check configuration.");
+    else if (certStatus == ArcProxyController::CS_VALID)
+        qDebug() << "Certificate is valid.";
 
-    if (userCredential.InitProxyCertInfo())
-        qDebug() << "Credentials are valid.";
-    else
-        qDebug() << "Credentials not valid.";
+    ArcProxyController::TProxyStatus proxyStatus = m_proxyController->checkProxy();
 
-    time_t t = m_userConfig->CertificateLifeTime().GetPeriod();
+    // enum TProxyStatus { PS_PATH_EMPTY, PS_NOT_FOUND, PS_EXPIRED, PS_NOT_VALID, PS_VALID };
 
-    qDebug() << t;
+    if (proxyStatus == ArcProxyController::PS_NOT_FOUND)
+        m_proxyController->showProxyUI();
+    else if (proxyStatus == ArcProxyController::PS_PATH_EMPTY)
+        QMessageBox::warning(0, "Proxy", "Proxy path is empty. Please Check your configuration.");
+    else if (proxyStatus == ArcProxyController::PS_EXPIRED)
+        m_proxyController->showProxyUI();
+    else if (proxyStatus == ArcProxyController::PS_NOT_VALID)
+        m_proxyController->showProxyUI();
+    else if (proxyStatus == ArcProxyController::PS_VALID)
+        qDebug() << "Proxy is valid.";
 
     m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
 }

@@ -26,7 +26,9 @@ SOURCES += src/arcstorage-ui/main.cpp\
     src/arcstorage-ui/filetransferlist.cpp \
     src/arcstorage-ui/transferlistwindow.cpp \
     src/arcstorage-ui/globalstateinfo.cpp \
-    src/common/arctools.cpp
+    src/common/arctools.cpp \
+    src/common/arcproxy-utils.cpp \
+    src/common/proxywindow.cpp 
 
 HEADERS  += src/arcstorage-ui/mainwindow.h \
     src/arcstorage-ui/fileserver.h \
@@ -43,10 +45,13 @@ HEADERS  += src/arcstorage-ui/mainwindow.h \
     src/arcstorage-ui/filetransferlist.h \
     src/arcstorage-ui/transferlistwindow.h \
     src/arcstorage-ui/globalstateinfo.h \
-    src/common/arctools.h
+    src/common/arctools.h \
+    src/common/arcproxy-utils.h \
+    src/common/proxywindow.h
 
 FORMS    += src/arcstorage-ui/mainwindow.ui \
     src/arcstorage-ui/filepropertiesdialog.ui \
     src/arcstorage-ui/srmsettingsdialog.ui \
-    src/arcstorage-ui/transferlistwindow.ui
+    src/arcstorage-ui/transferlistwindow.ui \
+    src/common/proxywindow.ui
 

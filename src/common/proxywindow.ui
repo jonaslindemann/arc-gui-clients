@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ProxyWindow</class>
  <widget class="QMainWindow" name="ProxyWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -245,9 +248,6 @@
          </spacer>
         </item>
        </layout>
-       <zorder>layoutWidget</zorder>
-       <zorder>layoutWidget_2</zorder>
-       <zorder>vomsRoleLabel</zorder>
        <zorder>verticalSpacer</zorder>
       </widget>
      </widget>
@@ -269,13 +269,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="infoButton">
-        <property name="text">
-         <string>Show info</string>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="generateButton">

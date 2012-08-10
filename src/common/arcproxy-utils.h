@@ -10,6 +10,9 @@
 #include <arc/Logger.h>
 #include <arc/UserConfig.h>
 
+class ProxyWindow;
+class QApplication;
+
 #define ARC_VERSION_2 1
 
 class VomsListEntry : public QObject
@@ -57,6 +60,7 @@ class ArcProxyController : public QObject
 public:
     enum TCertStatus { CS_PATH_EMPTY, CS_NOT_FOUND, CS_INVALID_CONFIG, CS_CADIR_NOT_FOUND, CS_VALID };
     enum TProxyStatus { PS_PATH_EMPTY, PS_NOT_FOUND, PS_EXPIRED, PS_NOT_VALID, PS_VALID };
+    enum TReturnStatus { RS_OK, RS_FAILED };
 private:
 
     std::string m_proxy_path;
@@ -91,6 +95,9 @@ private:
     QString m_passphrase;
 
     VomsList m_vomsList;
+
+    ProxyWindow* m_proxyWindow;
+    QApplication* m_application;
 public:   
     ArcProxyController();
     virtual ~ArcProxyController();
@@ -100,6 +107,9 @@ public:
     int generateProxy();
     int removeProxy();
 
+    TReturnStatus showProxyUI();
+
+    void showProxyUIAppLoop();
 
     TCertStatus checkCert();
     TProxyStatus checkProxy();
