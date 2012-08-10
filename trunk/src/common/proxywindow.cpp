@@ -1,15 +1,17 @@
 #include "proxywindow.h"
-#include "ui_proxywindow.h"
 
 #include <QMessageBox>
 
-#include "infodialog.h"
+#include "arcproxy-utils.h"
+#include "ui_proxywindow.h"
 
-ProxyWindow::ProxyWindow(QWidget *parent) :
+ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
     QMainWindow(parent),
     ui(new Ui::ProxyWindow)
 {
     ui->setupUi(this);
+
+    m_proxyController = proxyController;
 
     // Redirect standard output
 
@@ -20,9 +22,9 @@ ProxyWindow::ProxyWindow(QWidget *parent) :
 
     // Setup proxy controller
 
-    m_proxyController.initialize();
+    m_proxyController->initialize();
 
-    ui->identityText->setText(m_proxyController.getIdentity());
+    ui->identityText->setText(m_proxyController->getIdentity());
 
     QDateTime currentTime = QDateTime::currentDateTime();
     QDateTime notValidAfter = currentTime.addSecs(12*60*60);
@@ -30,18 +32,18 @@ ProxyWindow::ProxyWindow(QWidget *parent) :
     ui->proxyLifeTimeEdit->setDateTime(notValidAfter);
     ui->passphraseText->setFocus();
 
-    if (m_proxyController.getUseGSIProxy())
+    if (m_proxyController->getUseGSIProxy())
         ui->proxyTypeCombo->setCurrentIndex(1);
     else
         ui->proxyTypeCombo->setCurrentIndex(0);
 
     int i;
 
-    for (i=0; i<m_proxyController.vomsList().count(); i++)
-        ui->vomsServerCombo->addItem(m_proxyController.vomsList().at(i)->alias());
+    for (i=0; i<m_proxyController->vomsList().count(); i++)
+        ui->vomsServerCombo->addItem(m_proxyController->vomsList().at(i)->alias());
 
     ui->vomsServerCombo->clearEditText();
-    m_proxyController.checkProxy();
+    m_proxyController->checkProxy();
 }
 
 ProxyWindow::~ProxyWindow()
@@ -76,6 +78,13 @@ void ProxyWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     */
 }
 
+void ProxyWindow::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "closeEvent";
+    event->accept();
+}
+
+
 void ProxyWindow::on_generateButton_clicked()
 {   
     if (ui->passphraseText->text().isEmpty())
@@ -87,22 +96,21 @@ void ProxyWindow::on_generateButton_clicked()
     QDateTime currentTime = QDateTime::currentDateTime();
     QDateTime notAfterTime = ui->proxyLifeTimeEdit->dateTime();
 
-    m_proxyController.setValidityPeriod(currentTime.secsTo(notAfterTime));
-
-    m_proxyController.setPassphrase(ui->passphraseText->text());
-    int result = m_proxyController.generateProxy();
+    m_proxyController->setValidityPeriod(currentTime.secsTo(notAfterTime));
+    m_proxyController->setPassphrase(ui->passphraseText->text());
+    int result = m_proxyController->generateProxy();
 
     if (result!=EXIT_SUCCESS)
         QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
     else
         QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
 
-
+    this->close();
 }
 
 void ProxyWindow::on_removeButton_clicked()
 {
-    m_proxyController.removeProxy();
+    m_proxyController->removeProxy();
 }
 
 void ProxyWindow::on_passphraseText_returnPressed()
@@ -116,27 +124,23 @@ void ProxyWindow::on_passphraseText_returnPressed()
     QDateTime currentTime = QDateTime::currentDateTime();
     QDateTime notAfterTime = ui->proxyLifeTimeEdit->dateTime();
 
-    m_proxyController.setValidityPeriod(currentTime.secsTo(notAfterTime));
+    m_proxyController->setValidityPeriod(currentTime.secsTo(notAfterTime));
 
-    m_proxyController.setPassphrase(ui->passphraseText->text());
-    int result = m_proxyController.generateProxy();
+    m_proxyController->setPassphrase(ui->passphraseText->text());
+    int result = m_proxyController->generateProxy();
 
     if (result!=EXIT_SUCCESS)
         QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
     else
         QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
+
+    this->close();
 }
 
 void ProxyWindow::on_proxyTypeCombo_currentIndexChanged(int index)
 {
     if (index == 0)
-        m_proxyController.setUseGSIProxy(false);
+        m_proxyController->setUseGSIProxy(false);
     else
-        m_proxyController.setUseGSIProxy(true);
-}
-
-void ProxyWindow::on_infoButton_clicked()
-{
-    InfoDialog dlg;
-    dlg.exec();
+        m_proxyController->setUseGSIProxy(true);
 }

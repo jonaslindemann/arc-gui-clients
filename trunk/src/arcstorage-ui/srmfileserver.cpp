@@ -23,6 +23,7 @@ SRMFileServer::SRMFileServer(QObject *parent) :
     QObject(parent), FileServer()
 {
     m_usercfg = NULL;
+    m_notifyParent = true;
 }
 
 QStringList SRMFileServer::getFileInfoLabels()
@@ -139,19 +140,14 @@ void SRMFileServer::updateFileList(QString URL)
                 {
                     m_currentUrlString = URL;
 
-                    fileList.clear();
+                    int i;
+
+                    this->clearFileList();
+
                     currentPath = URL;
 
                     for (std::list<Arc::FileInfo>::iterator arcFile = arcFiles.begin(); arcFile != arcFiles.end(); arcFile++)
                     {
-// Test printing out all MetaData... not working too well right now /ALEX
-//                        std::cout << arcFile->GetName() << std::endl;
-//                        for (std::map<std::string, std::string>::iterator iter = arcFile->GetMetaData().begin(); iter != arcFile->GetMetaData().end(); ++iter)
-//                        {
-//                            std::cout << (*iter).first << ": " << (*iter).second << std::endl;
-//                        }
-//                        std::cout << std::endl;
-
                         enum ARCFileType ft = ARCUndefined;
                         if (arcFile->GetType() == Arc::FileInfo::file_type_file)
                         {
@@ -177,7 +173,7 @@ void SRMFileServer::updateFileList(QString URL)
 
                         if (!fileNameQS.indexOf(".")==0) // Don't show hidden files.
                         {
-                            ARCFileElement *newAFE = new ARCFileElement(fileNameQS,
+                            ARCFileElement* arcFileElement = new ARCFileElement(fileNameQS,
                                                                         URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
                                                                         ft,
                                                                         QString("???"), //fileInfoList.at(i).group(),
@@ -189,7 +185,7 @@ void SRMFileServer::updateFileList(QString URL)
                                                                         QString("???"), // fileInfoList.at(i).owner(),
                                                                         0, // fileInfoList.at(i).permissions(),
                                                                         arcFile->GetSize());
-                            fileList << (ARCFileElement)(*newAFE);
+                            fileList.append(arcFileElement);
                         }
                     }
                 }

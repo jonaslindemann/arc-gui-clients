@@ -6,11 +6,14 @@
 
 #include <arc/UserConfig.h>
 
+#include "arcproxy-utils.h"
+
 class ARCTools : public QObject
 {
     Q_OBJECT
 private:
     Arc::UserConfig* m_userConfig;
+    ArcProxyController* m_proxyController;
 public:
     static ARCTools* instance()
     {

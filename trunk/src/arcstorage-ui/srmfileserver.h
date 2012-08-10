@@ -32,7 +32,7 @@ public:
 
     QStringList getFileInfoLabels();
     void updateFileList(QString URL);
-    QVector<ARCFileElement> &getFileList() { return fileList; }
+    QVector<ARCFileElement*> &getFileList() { return fileList; }
     bool goUpOneFolder();
     QString getCurrentURL();
     QString getCurrentPath();

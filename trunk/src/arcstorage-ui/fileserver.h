@@ -25,12 +25,14 @@ protected:
     //MainWindow *mainWindow;
 
     /** A list of the files that were last browsed (and are currently displayed in the gui) */
-    QVector<ARCFileElement> fileList;
+    QVector<ARCFileElement*> fileList;
 
     /** The current path (that is displayed in the gui) */
     QString currentPath;
 
     bool m_notifyParent;
+
+    void clearFileList();
 
 public:
     FileServer();
@@ -45,7 +47,7 @@ public:
     virtual void updateFileList(QString URL) = 0;
 
     /** Return a reference to the filelist */
-    virtual QVector<ARCFileElement> &getFileList() = 0;
+    virtual QVector<ARCFileElement*> &getFileList() = 0;
 
     /** Go up one folder in the folder structure (cd ..) */
     virtual bool goUpOneFolder() = 0;
