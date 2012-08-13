@@ -6,7 +6,7 @@
 #include "ui_proxywindow.h"
 
 ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
-    QMainWindow(parent),
+    QDialog(parent),
     ui(new Ui::ProxyWindow)
 {
     ui->setupUi(this);
@@ -44,6 +44,7 @@ ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
 
     ui->vomsServerCombo->clearEditText();
     m_proxyController->checkProxy();
+    m_proxyController->setUiReturnStatus(ArcProxyController::RS_FAILED);
 }
 
 ProxyWindow::~ProxyWindow()
@@ -101,9 +102,15 @@ void ProxyWindow::on_generateButton_clicked()
     int result = m_proxyController->generateProxy();
 
     if (result!=EXIT_SUCCESS)
+    {
+        m_proxyController->setUiReturnStatus(ArcProxyController::RS_OK);
         QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
+    }
     else
+    {
+        m_proxyController->setUiReturnStatus(ArcProxyController::RS_FAILED);
         QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
+    }
 
     this->close();
 }
@@ -130,9 +137,15 @@ void ProxyWindow::on_passphraseText_returnPressed()
     int result = m_proxyController->generateProxy();
 
     if (result!=EXIT_SUCCESS)
+    {
+        m_proxyController->setUiReturnStatus(ArcProxyController::RS_OK);
         QMessageBox::warning(this, "Proxy generation", "Failed to create a proxy.");
+    }
     else
+    {
+        m_proxyController->setUiReturnStatus(ArcProxyController::RS_FAILED);
         QMessageBox::information(this, "Proxy generation", "A proxy certificate has been generated.");
+    }
 
     this->close();
 }

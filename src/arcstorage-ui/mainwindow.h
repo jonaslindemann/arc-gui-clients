@@ -83,6 +83,7 @@ private:
     FileTransferProcessingThread* m_fileProcessingThread;
 
 protected:
+    void showEvent(QShowEvent *e);
     void closeEvent( QCloseEvent *e );
 
 private Q_SLOTS:

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include <QDialog>
 #include <QDebug>
 #include <QCloseEvent>
 
@@ -13,7 +13,7 @@ namespace Ui {
 class ProxyWindow;
 }
 
-class ProxyWindow : public QMainWindow
+class ProxyWindow : public QDialog
 {
     Q_OBJECT
 private:
