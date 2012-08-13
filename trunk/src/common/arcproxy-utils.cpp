@@ -369,6 +369,18 @@ ArcProxyController::ArcProxyController()
     m_proxyWindow = 0;
     m_application = 0;
 
+    m_uiReturnStatus = RS_OK;
+
+}
+
+void ArcProxyController::setUiReturnStatus(TReturnStatus status)
+{
+    m_uiReturnStatus = status;
+}
+
+ArcProxyController::TReturnStatus ArcProxyController::getUiReturnStatus()
+{
+    return m_uiReturnStatus;
 }
 
 ArcProxyController::~ArcProxyController()
@@ -432,7 +444,8 @@ ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
 {
     m_proxyWindow = new ProxyWindow(0, this);
     m_proxyWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, m_proxyWindow->size(), qApp->desktop()->availableGeometry()));
-    m_proxyWindow->show();
+    m_proxyWindow->exec();
+    return m_uiReturnStatus;
 }
 
 void ArcProxyController::showProxyUIAppLoop()

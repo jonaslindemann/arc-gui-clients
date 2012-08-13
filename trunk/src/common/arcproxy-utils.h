@@ -98,6 +98,8 @@ private:
 
     ProxyWindow* m_proxyWindow;
     QApplication* m_application;
+
+    TReturnStatus m_uiReturnStatus;
 public:   
     ArcProxyController();
     virtual ~ArcProxyController();
@@ -106,6 +108,9 @@ public:
     int printInformation();
     int generateProxy();
     int removeProxy();
+
+    void setUiReturnStatus(TReturnStatus status);
+    TReturnStatus getUiReturnStatus();
 
     TReturnStatus showProxyUI();
 

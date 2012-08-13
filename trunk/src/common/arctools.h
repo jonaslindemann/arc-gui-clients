@@ -40,8 +40,9 @@ public:
         mutex.unlock();
     }
 
-    void initUserConfig();
+    bool initUserConfig();
     Arc::UserConfig* currentUserConfig();
+    bool hasValidProxy();
 
 
     void proxyCertificateTool();

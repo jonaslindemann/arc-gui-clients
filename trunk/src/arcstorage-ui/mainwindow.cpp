@@ -38,8 +38,9 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    qDebug() << "MainWindow()";
+
     GlobalStateInfo::instance()->setMainWindow(this);
-    ARCTools::instance()->initUserConfig();
 
     m_childWindow = childWindow;
     Settings::loadFromDisk();
@@ -98,12 +99,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
 
     setBusyUI(true);
 
-    if (Url=="")
-        m_currentFileServer->updateFileList(QDir::homePath());
-    else
-        m_currentFileServer->updateFileList(Url);
-
-    setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+    // Update file list was here....
 
     ui->filesTreeWidget->setMainWindow(this);
 
@@ -189,6 +185,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::showEvent(QShowEvent *e)
+{
+    QMainWindow::showEvent(e);
+
+    qDebug() << "showEvent()";
+    m_currentFileServer->updateFileList(QDir::homePath());
+    setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+}
+
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     QList<QVariant> urlList;
@@ -198,12 +203,13 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
     Settings::setValue("urlList", urlList);
     Settings::saveToDisk();
-    QMainWindow::closeEvent(e);
 
     if (!m_childWindow)
         GlobalStateInfo::instance()->closeChildWindows();
     else
         GlobalStateInfo::instance()->removeChildWindow(this);
+
+    QMainWindow::closeEvent(e);
 }
 
 void MainWindow::deleteSelectedFiles()
@@ -505,6 +511,8 @@ void MainWindow::onFileListFinished(bool error, QString errorMsg)
     }
 
     m_currentUpdateFileListsMode = CUFLM_noUpdate;
+
+
 }
 
 void MainWindow::onCopyFromServerFinished(bool error)
