@@ -28,6 +28,7 @@ public Q_SLOTS:
     void onAddTransfer(QString id);
     void onRemoveTransfer(QString id);
 
+    void onCancelButtonClick();
 };
 
 #endif // TRANSFERLISTWINDOW_H

@@ -70,8 +70,17 @@ bool ARCTools::initUserConfig()
     else if (proxyStatus == ArcProxyController::PS_VALID)
         qDebug() << "Proxy is valid.";
 
+
     if (m_proxyController->getUiReturnStatus()==ArcProxyController::RS_FAILED)
+    {
+        qDebug() << "GUI returns RS_FAILED.";
         prereqFound = false;
+    }
+    else
+    {
+        qDebug() << "GUI returns RS_OK";
+        prereqFound = true;
+    }
 
     if (!prereqFound)
         return false;

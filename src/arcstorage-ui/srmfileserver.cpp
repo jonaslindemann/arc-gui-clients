@@ -32,8 +32,6 @@ QStringList SRMFileServer::getFileInfoLabels()
     QStringList labels;
     labels << "File" << "Size" << "Type" << "Last modified" << "Owner" << "Group" << "Permissions" <<
               "Last read";
-
-    //labels << "File" << "Size" << "Type" << "Last read" << "Last modified";
     return labels;
 }
 
@@ -41,28 +39,7 @@ QStringList SRMFileServer::getFileInfoLabels()
 bool SRMFileServer::initUserConfig()
 {
     bool success = true;
-
     m_usercfg = ARCTools::instance()->currentUserConfig();
-
-    /*
-    if (m_usercfg == NULL)
-    {
-        //QString configFilename = Settings::getStringValue("srmConfigFilename");
-        m_usercfg = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
-        //m_usercfg = new Arc::UserConfig(configFilename.toStdString(), Arc::initializeCredentialsType::SkipCredentials);
-        if (m_usercfg != NULL)
-        {
-            m_usercfg->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
-
-            success = true;
-        }
-    }
-    else
-    {
-        success = true;
-    }
-
-    */
     return success;
 }
 
@@ -210,7 +187,6 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 
     FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
     FileTransferList::instance()->addTransfer(xfr);
-    //m_transferList.append(xfr);
     connect(xfr, SIGNAL(onCompleted(FileTransfer*, Arc::DataStatus, QString)), this, SLOT(onCompleted(FileTransfer*, Arc::DataStatus, QString)));
 
     if (!xfr->execute()) // Startar filöverföringen asynkront.
@@ -234,12 +210,11 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 
     FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
     FileTransferList::instance()->addTransfer(xfr);
-    //m_transferList.append(xfr);
     connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+
     if (!xfr->execute()) // Startar filöverföringen asynkront.
     {
         logger.msg(Arc::INFO, "SRM file copy failed.");
-        //mainWindow->onError("SRM file copy failed");
         m_transferList.removeOne(xfr);
         delete xfr;
         Q_EMIT onError("SRM file transfer failed.");
@@ -274,7 +249,6 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
         FileTransferList::instance()->addTransfer(xfr);
 
         connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
-        //xfr->execute();
     }
 
     return success;
@@ -295,7 +269,6 @@ bool SRMFileServer::deleteItems(QStringList& URLs)
         if (!dataHandle)
         {
             logger.msg(Arc::ERROR, "Unsupported URL given");
-            //mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
             Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
             Q_EMIT onDeleteFinished(true);
             return false;
@@ -322,8 +295,6 @@ bool SRMFileServer::deleteItem(QString URL)
 {
     bool success = false;
 
-    //std::cout << "SRMFileServer::deleteItem(): URL = " + URL.toStdString() << std::endl;
-
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
     Arc::URL arcUrl = URL.toStdString();
@@ -332,7 +303,6 @@ bool SRMFileServer::deleteItem(QString URL)
     if (!dataHandle)
     {
         logger.msg(Arc::ERROR, "Unsupported URL given");
-        //mainWindow->onError("Unsupported URL given. URL = " + arcUrl);
         Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
     }
     else
@@ -401,6 +371,7 @@ void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 
 void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
 {
+    qDebug() << "SRMFileServer::onCompleted.";
     logger.msg(Arc::DEBUG, "SRMFileServer::onCompleted.");
 
     FileTransferList::instance()->removeTransfer(fileTransfer);

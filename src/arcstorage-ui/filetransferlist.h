@@ -66,6 +66,8 @@ public:
     int getTransferCount();
     FileTransfer* getTransfer(QString id);
 
+    void cancelAllTransfers();
+
     void updateStatus(QString id, unsigned long transferred, unsigned long totalSize);
 
 private:
