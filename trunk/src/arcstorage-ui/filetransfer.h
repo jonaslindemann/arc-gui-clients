@@ -71,6 +71,8 @@ public:
     Arc::DataStatus status();
     void completed(Arc::DataStatus res, std::string error);
 
+    void cancel();
+
     bool isCompleted();
 
     QString id();

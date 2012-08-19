@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     qDebug() << "MainWindow()";
 
     GlobalStateInfo::instance()->setMainWindow(this);
+    ARCTools::instance()->initUserConfig();
 
     m_childWindow = childWindow;
     Settings::loadFromDisk();
@@ -960,4 +961,9 @@ void MainWindow::on_actionJobManager_triggered()
 void MainWindow::on_actionJobSubmissionTool_triggered()
 {
     ARCTools::instance()->submissionTool();
+}
+
+void MainWindow::on_actionStop_triggered()
+{
+    FileTransferList::instance()->cancelAllTransfers();
 }

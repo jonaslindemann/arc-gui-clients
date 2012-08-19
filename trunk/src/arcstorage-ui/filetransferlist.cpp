@@ -83,6 +83,30 @@ void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
     m_accessMutex.unlock();
 }
 
+void FileTransferList::cancelAllTransfers()
+{
+    m_accessMutex.lock();
+
+    QList<FileTransfer*> removeTransferList;
+
+    // Only remove idle transfers
+
+    for (int i=0; i<m_transferList.length(); i++)
+    {
+        FileTransfer* xfr = m_transferList.at(i);
+
+        if (xfr->transferState() == TS_IDLE)
+            removeTransferList.append(xfr);
+    }
+
+    for (int i=0; i<removeTransferList.count(); i++)
+    {
+        FileTransfer* xfr = m_transferList.at(i);
+        Q_EMIT onRemoveTransfer(xfr->id());
+    }
+    m_accessMutex.unlock();
+}
+
 FileTransfer* FileTransferList::getTransfer(int i)
 {
     m_accessMutex.lock();

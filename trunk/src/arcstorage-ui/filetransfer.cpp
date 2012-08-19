@@ -8,6 +8,8 @@
 #include <string>
 #include <sstream>
 
+#include <QDebug>
+
 template <typename T>
 std::string convertPointerToStringAddress(const T* obj)
 {
@@ -214,6 +216,7 @@ bool FileTransfer::execute()
 
     logger.msg(Arc::INFO, "Transfer process started.");
 
+    qDebug() << "Transfer initiatied.";
     Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this, m_id.c_str());
     return true;
 }
@@ -225,8 +228,16 @@ void FileTransfer::wait()
     m_cond.wait();
 }
 
+void FileTransfer::cancel()
+{
+    qDebug() << "Cancelling transfer.";
+    if (m_mover!=0)
+        delete m_mover;
+}
+
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
+    qDebug() << "FileTransfer::completed called";
     m_transferState = TS_COMPLETED;
     logger.msg(Arc::INFO, "FileTransfer completed.");
 

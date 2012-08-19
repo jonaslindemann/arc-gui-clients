@@ -5,6 +5,7 @@
 #include "filetransferlist.h"
 
 #include <QDebug>
+#include <QPushButton>
 
 TransferListWindow::TransferListWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -19,7 +20,7 @@ TransferListWindow::TransferListWindow(QWidget *parent) :
     ui->transferTable->clear();
 
     QStringList labels;
-    labels << "ID" << "Transfer" << "State" << "Status";
+    labels << "ID" << "Transfer" << "State" << "Status" << "Action";
     ui->transferTable->setHorizontalHeaderLabels(labels);
     ui->transferTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
     ui->transferTable->verticalHeader()->hide();
@@ -66,6 +67,12 @@ void TransferListWindow::onUpdateStatus(QString id)
     }
 }
 
+void TransferListWindow::onCancelButtonClick()
+{
+    QPushButton* button = (QPushButton*)sender();
+    qDebug() << "button id = " << button->objectName() << " pressed.";
+}
+
 void TransferListWindow::onAddTransfer(QString id)
 {
     logger.msg(Arc::DEBUG, "onAddTransfer(): "+id.toStdString());
@@ -87,6 +94,12 @@ void TransferListWindow::onAddTransfer(QString id)
     ui->transferTable->setItem(row, 1, new QTableWidgetItem(transfer));
     ui->transferTable->setItem(row, 2, new QTableWidgetItem());
     ui->transferTable->setItem(row, 3, new QTableWidgetItem(status));
+
+    QPushButton* button = new QPushButton("Cancel", this);
+    //button->setObjectName(id);
+    connect(button, SIGNAL(clicked()), this, SLOT(onCancelButtonClick(void)));
+
+    ui->transferTable->setCellWidget(row, 4, new QPushButton());
 
     if (xfr->transferState()==TS_IDLE)
         ui->transferTable->item(row, 2)->setText("Idle");

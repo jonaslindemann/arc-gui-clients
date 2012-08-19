@@ -117,6 +117,8 @@ private Q_SLOTS:
 
     void on_actionJobSubmissionTool_triggered();
 
+    void on_actionStop_triggered();
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);

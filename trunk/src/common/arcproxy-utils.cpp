@@ -445,6 +445,12 @@ ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
     m_proxyWindow = new ProxyWindow(0, this);
     m_proxyWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, m_proxyWindow->size(), qApp->desktop()->availableGeometry()));
     m_proxyWindow->exec();
+
+    if (this->checkProxy() != PS_VALID)
+        m_uiReturnStatus = RS_FAILED;
+    else
+        m_uiReturnStatus = RS_OK;
+
     return m_uiReturnStatus;
 }
 
