@@ -6,7 +6,7 @@
 #include <qiodevice.h>
 
 QHash<QString,QVariant> Settings::settings;
-const QString Settings::SETTINGS_FILENAME = QString("ArcFTPClientSettings.dat");
+//const QString Settings::SETTINGS_FILENAME = QString("arcstorage-ui.conf");
 
 Settings::Settings()
 {
@@ -51,23 +51,24 @@ bool Settings::saveToDisk()
 {
     bool success = true;
 
+    /*
     QFile settingsFile(SETTINGS_FILENAME);
     settingsFile.open(QIODevice::WriteOnly);
     QDataStream out(&settingsFile);
     out << settings;
-
+    */
     return success;
 }
 
 bool Settings::loadFromDisk()
 {
     bool success = true;
-
+    /*
     QFile settingsFile(SETTINGS_FILENAME);
     settingsFile.open(QIODevice::ReadOnly);
     QDataStream in(&settingsFile);
     in >> settings;
-
+    */
     return success;
 }
 

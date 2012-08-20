@@ -101,8 +101,13 @@ void FileTransferList::cancelAllTransfers()
 
     for (int i=0; i<removeTransferList.count(); i++)
     {
-        FileTransfer* xfr = m_transferList.at(i);
+        FileTransfer* xfr = removeTransferList.at(i);
+        m_transferList.removeOne(xfr);
+        m_transferDict.remove(xfr->id());
+        m_activeTransferList.removeOne(xfr);
+        m_activeTransferDict.remove(xfr->id());
         Q_EMIT onRemoveTransfer(xfr->id());
+        delete xfr;
     }
     m_accessMutex.unlock();
 }

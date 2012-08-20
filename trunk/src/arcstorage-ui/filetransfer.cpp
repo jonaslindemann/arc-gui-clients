@@ -116,7 +116,6 @@ QString FileTransfer::destUrl()
 
 void FileTransfer::updateTransferStatus(unsigned long transferred, unsigned long totalSize)
 {
-    //logger.msg(Arc::INFO, "ID"+m_id + " updated transfer status.");
     m_transferred = transferred;
     m_totalSize = totalSize;
 }
@@ -193,7 +192,6 @@ bool FileTransfer::execute()
     m_mover->secure(m_secure);
     m_mover->passive(m_passive);
     m_mover->verbose(m_verbose);
-    //mover.force_to_meta(m_force_meta);
 
     if (m_retries)   // 0 means default behavior
     {
@@ -216,7 +214,6 @@ bool FileTransfer::execute()
 
     logger.msg(Arc::INFO, "Transfer process started.");
 
-    qDebug() << "Transfer initiatied.";
     Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this, m_id.c_str());
     return true;
 }
@@ -230,14 +227,12 @@ void FileTransfer::wait()
 
 void FileTransfer::cancel()
 {
-    qDebug() << "Cancelling transfer.";
     if (m_mover!=0)
         delete m_mover;
 }
 
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
-    qDebug() << "FileTransfer::completed called";
     m_transferState = TS_COMPLETED;
     logger.msg(Arc::INFO, "FileTransfer completed.");
 

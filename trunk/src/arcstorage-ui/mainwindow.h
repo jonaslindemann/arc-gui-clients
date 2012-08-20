@@ -43,12 +43,20 @@ public:
     QString getCurrentURL();
     QMenu* getWindowListMenu();
 
+    void writeSettings();
+    void readSettings();
+
+    void openUrl(QString url);
+    void setWindowId(int id);
+    int getWindowId();
+
 private:
     Ui::MainWindow *ui;
     DragDropableTreeWidget m_filesTreeWidget;
     QComboBox m_urlComboBox;
 
     FileServer *m_currentFileServer;
+    QString m_startUrl;
 
     static const QString COPY_TO_TEXT;
     static const QString COPY_TEXT;
@@ -77,6 +85,7 @@ private:
     QDebugStream* m_debugStream2;
 
     bool m_childWindow;
+    int m_windowId;
 
     TransferListWindow* m_transferWindow;
 
