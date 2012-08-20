@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+import shutil, os, sys
+
+arcExecScriptTemplate = r"""#!/bin/sh
+#
+# Author: Aaron Voisine <aaron@voisine.org>
+# Inkscape Modifications: Michael Wybrow <mjwybrow@users.sourceforge.net>
+# K-3D Modifications: Timothy M. Shead <tshead@k-3d.com>
+
+%(PROGVAR)s_BUNDLE="`echo "$0" | sed -e 's/\/Contents\/MacOS\/%(PROGBIN)s//'`"
+%(PROGVAR)s_RESOURCES="$%(PROGVAR)s_BUNDLE/Contents/Resources"
+%(PROGVAR)s_TEMP="/tmp/%(PROGVAR)s/$UID"
+%(PROGVAR)s_ETC="$%(PROGVAR)s_TEMP/etc"
+%(PROGVAR)s_PANGO_RC_FILE="$%(PROGVAR)s_ETC/pango/pangorc"
+
+echo "running $0"
+echo "%(PROGVAR)s_BUNDLE: $%(PROGVAR)s_BUNDLE"
+
+# Because the bundle could be located anywhere at runtime, we have to
+# create temporary copies of the Pango configuration files that
+# reflect our current location
+
+# Set the ARC_LOCATION environment variable. Needed since ARC is installed in a non default location.
+export ARC_LOCATION="$%(PROGVAR)s_RESOURCES"
+# Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
+export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/2.6/bin:${PATH}"
+# Set DYLD_LIBRARY_PATH so LCG-DM plugins can be located.
+export DYLD_LIBRARY_PATH="${ARC_LOCATION}/lib:${ARC_LOCATION}/lib/lcgdm:${DYLD_LIBRARY_PATH}"
+# Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
+export ARC_PLUGIN_PATH="${ARC_LOCATION}/lib/arc"
+# For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set.
+export GLOBUS_LOCATION="${ARC_LOCATION}"
+# For the ARC Python bindings to work the PYTHONPATH need to be set.
+#export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages:${PYTHONPATH}"
+# Set the path to the directory containing CA Certificates
+export X509_CERT_DIR="${ARC_LOCATION}/etc/grid-security/certificates"
+echo "ARC client environment ready"
+
+#export
+exec "$%(PROGVAR)s_BUNDLE/Contents/MacOS/%(PROGBIN)s.bin"
+"""
+
+qtConfigTemplate = r"""[Paths]
+Libraries=./lib
+"""
+
+def fixApp(binaryName, appDir, arcDir, gtDir):
+
+	print("Fixing %s..." % (binaryName))
+	
+	bundleDir = os.path.join(os.path.join(appDir,binaryName+".app"))
+	appBinDir = os.path.join(bundleDir, "Contents/MacOS/")
+	appResourceDir = os.path.join(bundleDir, "Contents/Resources/")
+	execScript = os.path.join(appBinDir, binaryName)
+	realBinary = os.path.join(appBinDir, binaryName+".bin")
+	gtLibDir = os.path.join(gtDir, "lib")
+	appLibDir = os.path.join(appResourceDir, "lib")
+	qtConfig = os.path.join(appResourceDir, "qt.conf")
+	
+	#print "bundleDir = ", bundleDir
+	#print "appBinDir = ", appBinDir
+	#print "appResourceDir = ", appResourceDir
+	#print "execScript = ", execScript
+	#print "realBinary = ", realBinary
+
+	if not os.path.exists(arcDir):
+		print("ARC is not installed at the specified location.")
+		return -1
+		
+	if not os.path.exists(bundleDir):
+		print("Bundle dir, %s, can't be found." % bundleDir)
+		return -1
+		
+	print("Copying ARC runtime to bundles...")
+	
+	#print('cp -rp %s %s' % (arcDir+"/*", appResourceDir))
+	os.system('cp -r %s %s' % (arcDir+"/*", appResourceDir))
+	os.system('rm -rf %s' % (appResourceDir+"/include"))
+	os.system('rm -rf %s' % (appResourceDir+"/bin"))
+	os.system('rm -rf %s' % (appResourceDir+"/share"))
+	
+	print("Copying Globus runtime to bundles...")
+	
+	print("find %s -name *.dylib -type f -exec sh -c 'cp {} %s/`basename {}`' " % (gtLibDir, appLibDir) + r"\;")
+	os.system("find %s -name *.dylib -type f -exec sh -c 'cp {} %s/`basename {}`' " % (gtLibDir, appLibDir) + r"\;")
+	#os.system('cp -H %s %s' % (gtLibDir+"/*.dylib", appLibDir))
+	
+	print("Creating ARC execution wrapper...")
+	
+	if not os.path.exists(realBinary):
+		print("Moving real binary to %s." % realBinary)
+		#print("cp %s %s" % (execScript, realBinary))
+		os.system("cp %s %s" % (execScript, realBinary))
+		
+	execScriptFile = open(execScript, "w")
+	execScriptFile.write(arcExecScriptTemplate % {"PROGVAR":"PROG", "PROGBIN":binaryName})
+	execScriptFile.close()
+	
+	print("Creating QT configuration...")
+	
+	qtConfigFile = open(qtConfig, "w")
+	qtConfigFile.write(qtConfigTemplate)
+	qtConfigFile.close()
+	
+	print("Copying qt_menu.nib...")
+	
+	os.system('cp -r %s %s' % ("./misc/qt_menu.nib", appResourceDir))
+	
+	# dylibbundler -od -b -x ./arcstat-ui.bin -d ../Resources/lib -p @executable_path/../Resources/lib
+	
+	print("Relocating binaries and libraries...")
+	
+	os.system("dylibbundler -of -b -x %s -d %s -p @executable_path/../Resources/lib" % (realBinary, appLibDir))
+
+if __name__ == "__main__":
+
+	fixApp("arcproxy-ui", "./bin", "/opt/arc-1.1", "/opt/globus-5.2.0")
+	fixApp("arcstat-ui", "./bin", "/opt/arc-1.1", "/opt/globus-5.2.0")
+	fixApp("arcstorage-ui", "./bin", "/opt/arc-1.1", "/opt/globus-5.2.0")
+	
+	

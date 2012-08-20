@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+import os, sys, shutil
+
+buildDir = "./builddir"
+
+if __name__ == '__main__':
+	
+	if not os.path.exists(buildDir):
+		print "No builddir found please run configure first."
+		sys.exit(1)
+
+	currDir = os.getcwd()
+	os.chdir(buildDir)
+	os.system("make")
+	os.chdir(currDir)
+		
