@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    if (!m_childWindow)
+        m_windowId = 0;
     qDebug() << "MainWindow()";
 
     GlobalStateInfo::instance()->setMainWindow(this);
@@ -48,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     QVariant qvar = Settings::getValue("urlList");
     QList<QVariant> urlList = qvar.toList();
 
+
+
     m_folderWidgetBeingUpdated = NULL;
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
     m_transferWindow = 0;
@@ -55,6 +59,9 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     ui->setupUi(this);
 
     // Create and add the url combobox manually to the toolbar because QT Designer doesn't support it
+
+    m_startUrl = Url;
+    this->readSettings();
 
     m_urlComboBox.setEditable(true);
     m_urlComboBox.setMaxVisibleItems(10);
@@ -77,9 +84,11 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
 
     ui->filesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
+
     // Get fileserver and wire it up
 
-    m_currentFileServer = FileServerFactory::createFileServer("");  // "" - default file server
+    qDebug() << "start url = " << m_startUrl;
+    m_currentFileServer = FileServerFactory::createFileServer(m_startUrl);  // "" - default file server
 
     // So basically we handle everything using a SRMFileServer (...)
 
@@ -150,14 +159,6 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
 
     // Center main window
 
-    this->setGeometry(
-                QStyle::alignedRect(
-                    Qt::LeftToRight,
-                    Qt::AlignCenter,
-                    this->size(),
-                    qApp->desktop()->availableGeometry()
-                    ));
-
     // Start file processing thread from main window
 
     if (!m_childWindow)
@@ -186,12 +187,107 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setWindowId(int id)
+{
+    m_windowId = id;
+}
+
+int MainWindow::getWindowId()
+{
+    return m_windowId;
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings;
+
+    settings.clear();
+    settings.sync();
+
+    if (!m_childWindow)
+    {
+        settings.beginGroup("MainWindow");
+        settings.setValue("size", size());
+        settings.setValue("pos", pos());
+        settings.setValue("url", this->m_currentFileServer->getCurrentURL());
+        settings.endGroup();
+
+        int i;
+
+        for (i=0; i<GlobalStateInfo::instance()->childWindowCount(); i++)
+        {
+            MainWindow* window = GlobalStateInfo::instance()->getChildWindow(i);
+            settings.beginGroup("ChildWindow"+QString::number(window->getWindowId()));
+            settings.setValue("size", window->size());
+            settings.setValue("pos", window->pos());
+            settings.setValue("url", window->getCurrentURL());
+            settings.endGroup();
+        }
+    }
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings;
+
+    int i;
+
+    if (!m_childWindow)
+    {
+        if (!settings.childGroups().contains("MainWindow"))
+        {
+            this->setGeometry(
+                        QStyle::alignedRect(
+                            Qt::LeftToRight,
+                            Qt::AlignCenter,
+                            this->size(),
+                            qApp->desktop()->availableGeometry()
+                            ));
+            m_startUrl = QDir::homePath();
+        }
+        else
+        {
+            settings.beginGroup("MainWindow");
+            resize(settings.value("size", QSize(this->width(), this->height())).toSize());
+            move(settings.value("pos", QPoint(this->x(), this->y())).toPoint());
+            m_startUrl = settings.value("url", "").toString();
+            settings.endGroup();
+        }
+
+
+        for (i=0; i<10; i++)
+        {
+            QString windowName = "ChildWindow"+QString::number(i);
+            if (settings.childGroups().contains(windowName))
+            {
+                qDebug() << "Found child window " << windowName;
+                settings.beginGroup(windowName);
+                QString url = settings.value("url", "").toString();
+                MainWindow* window = new MainWindow(0, true, url);
+                window->resize(settings.value("size", QSize(this->width(), this->height())).toSize());
+                window->move(settings.value("pos", QPoint(this->x(), this->y())).toPoint());
+                window->show();
+                GlobalStateInfo::instance()->addChildWindow(window);
+                settings.endGroup();
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Child window reading settings:";
+        QString windowName = "ChildWindow"+QString::number(i);
+        settings.beginGroup(windowName);
+        m_startUrl = settings.value("url", m_startUrl).toString();
+        qDebug() << "  start URL = " << m_startUrl;
+        settings.endGroup();
+    }
+}
+
 void MainWindow::showEvent(QShowEvent *e)
 {
     QMainWindow::showEvent(e);
 
-    qDebug() << "showEvent()";
-    m_currentFileServer->updateFileList(QDir::homePath());
+    m_currentFileServer->updateFileList(m_startUrl);
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 }
 
@@ -204,6 +300,9 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
     Settings::setValue("urlList", urlList);
     Settings::saveToDisk();
+
+    if (!m_childWindow)
+        this->writeSettings();
 
     if (!m_childWindow)
         GlobalStateInfo::instance()->closeChildWindows();
@@ -301,6 +400,107 @@ QMenu* MainWindow::getWindowListMenu()
 }
 
 
+//"""
+//Output number of bytes according to locale and with IEC binary prefixes
+//"""
+//if num_bytes is None:
+//    print('File size unavailable.')
+//    return
+//KiB = 1024
+//MiB = KiB * KiB
+//GiB = KiB * MiB
+//TiB = KiB * GiB
+//PiB = KiB * TiB
+//EiB = KiB * PiB
+//ZiB = KiB * EiB
+//YiB = KiB * ZiB
+//locale.setlocale(locale.LC_ALL, '')
+//output = locale.format("%d", num_bytes, grouping=True) + ' bytes'
+//if num_bytes > YiB:
+//    output += ' (%.3g YiB)' % (num_bytes / YiB)
+//elif num_bytes > ZiB:
+//    output += ' (%.3g ZiB)' % (num_bytes / ZiB)
+//elif num_bytes > EiB:
+//    output += ' (%.3g EiB)' % (num_bytes / EiB)
+//elif num_bytes > PiB:
+//    output += ' (%.3g PiB)' % (num_bytes / PiB)
+//elif num_bytes > TiB:
+//    output += ' (%.3g TiB)' % (num_bytes / TiB)
+//elif num_bytes > GiB:
+//    output += ' (%.3g GiB)' % (num_bytes / GiB)
+//elif num_bytes > MiB:
+//    output += ' (%.3g MiB)' % (num_bytes / MiB)
+//elif num_bytes > KiB:
+//    output += ' (%.3g KiB)' % (num_bytes / KiB)
+//print(output)
+
+QString convertToSizeWithUnit(qint64 num_bytes)
+{
+    double KiB = 1024;
+    double MiB = KiB * KiB;
+    double GiB = KiB * MiB;
+    double TiB = KiB * GiB;
+    double PiB = KiB * TiB;
+    double EiB = KiB * PiB;
+    double ZiB = KiB * EiB;
+    double YiB = KiB * ZiB;
+
+    double q;
+    double doubleNumBytes = (double)num_bytes;
+
+    QString unit = "";
+
+
+    if (doubleNumBytes>YiB)
+    {
+        q = (double)doubleNumBytes/YiB;
+        unit = "Y";
+    }
+    else if (doubleNumBytes>ZiB)
+    {
+        q = (double)doubleNumBytes/ZiB;
+        unit = " ZB";
+
+    }
+    else if (doubleNumBytes>EiB)
+    {
+        q = (double)doubleNumBytes/EiB;
+        unit = " EB";
+    }
+    else if (doubleNumBytes>PiB)
+    {
+        q = (double)doubleNumBytes/PiB;
+        unit = " PB";
+    }
+    else if (doubleNumBytes>TiB)
+    {
+        q = (double)doubleNumBytes/TiB;
+        unit = " TB";
+    }
+    else if (doubleNumBytes>GiB)
+    {
+        q = (double)doubleNumBytes/GiB;
+        unit = " GB";
+    }
+    else if (doubleNumBytes>MiB)
+    {
+        q = (double)doubleNumBytes/MiB;
+        unit = " MB";
+    }
+    else if (doubleNumBytes>KiB)
+    {
+        q = (double)doubleNumBytes/KiB;
+        unit = " KB";
+    }
+    else
+    {
+        q = doubleNumBytes;
+        unit = "";
+    }
+
+    QString finalString = QString::number(q, 'g', 5)+unit;
+    return finalString;
+}
 
 void MainWindow::updateFileTree()
 {
@@ -324,7 +524,8 @@ void MainWindow::updateFileTree()
         else
         {
             item->setIcon(0,QIcon::fromTheme("document"));
-            item->setText(1, QString::number(AFE->getSize()));
+            //item->setText(1, QString::number(AFE->getSize()));
+            item->setText(1, convertToSizeWithUnit(AFE->getSize()));
         }
         if (AFE->getFileType()==ARCDir)
             item->setText(2, "folder");
@@ -794,7 +995,7 @@ void MainWindow::on_actionDelete_triggered()
 
 void MainWindow::on_actionNewWindow_triggered()
 {
-    MainWindow* window = new MainWindow(0, true);
+    MainWindow* window = new MainWindow(0, true, this->getCurrentURL());
     QRect r = this->geometry();
     r.setLeft(this->geometry().left()+150);
     r.setTop(this->geometry().top()+150);
@@ -915,10 +1116,8 @@ void MainWindow::on_actionSRM_Preferences_triggered()
     }
 }
 
-void MainWindow::on_actionReload_triggered()
+void MainWindow::openUrl(QString url)
 {
-    QString url = getCurrentComboBoxURL();
-
     setBusyUI(true);
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
 
@@ -941,6 +1140,12 @@ void MainWindow::on_actionReload_triggered()
     m_currentFileServer->updateFileList(url);
 
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+}
+
+void MainWindow::on_actionReload_triggered()
+{
+    QString url = getCurrentComboBoxURL();
+    this->openUrl(url);
 }
 
 void MainWindow::on_actionCreateProxyCert_triggered()

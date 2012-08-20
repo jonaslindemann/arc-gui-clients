@@ -9,6 +9,24 @@ namespace Ui {
 class TransferListWindow;
 }
 
+class TransferStatusDisplay : public QWidget
+{
+    Q_OBJECT
+private:
+    unsigned long m_transferred, m_totalSize;
+
+public:
+    TransferStatusDisplay(QWidget *parent = 0);
+
+    void setStatus(unsigned long transferred, unsigned long totalSize);
+
+public Q_SLOTS:
+
+protected:
+    void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event);
+};
+
 class TransferListWindow : public QMainWindow
 {
     Q_OBJECT

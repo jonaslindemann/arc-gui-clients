@@ -50,6 +50,8 @@ public:
 
     void updateWindowList(QMenu* menu);
 
+    void enumerateWindows();
+
 private:
 
     GlobalStateInfo();

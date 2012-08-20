@@ -6,6 +6,50 @@
 
 #include <QDebug>
 #include <QPushButton>
+#include <QPainter>
+
+TransferStatusDisplay::TransferStatusDisplay(QWidget *parent)
+    :QWidget(parent)
+{
+    m_totalSize = 1000;
+    m_transferred = 0;
+}
+
+void TransferStatusDisplay::setStatus(unsigned long transferred, unsigned long totalSize)
+{
+    m_totalSize = totalSize;
+    m_transferred = transferred;
+}
+
+void TransferStatusDisplay::paintEvent(QPaintEvent *event)
+{
+    QPainter p(this);
+
+    p.setBrush(Qt::red);
+
+    // | ----W---- | ---R--- |
+    // 0           x1        x2
+
+    int x1 = int((double)(m_transferred/(double)m_totalSize) * (double)this->width()-1);
+    int x2 = int(1.0 * (double)this->width()-1);
+
+    p.setFont(QFont("Arial",8));
+    p.setBrush(Qt::green);
+    p.drawRect(0, 0, x1, this->height()-1);
+    p.setBrush(Qt::gray);
+    p.drawRect(x1, 0, x2-x1, this->height()-1);
+
+    QString status = QString::number(m_transferred) + "kB/" + QString::number(m_totalSize) + "kB";
+
+    p.drawText(8,3, this->width()-4, this->height()-4, Qt::AlignHCenter|Qt::AlignVCenter, status);
+
+    p.end();
+}
+
+void TransferStatusDisplay::resizeEvent(QResizeEvent *event)
+{
+
+}
 
 TransferListWindow::TransferListWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -48,8 +92,16 @@ void TransferListWindow::onUpdateStatus(QString id)
         unsigned long transferred, totalSize;
         xfr->getTransferStatus(transferred, totalSize);
 
+        ui->transferTable->cellWidget(row, 4)->setEnabled(false);
+
+        TransferStatusDisplay* xfrDisplay = (TransferStatusDisplay*)ui->transferTable->cellWidget(row, 3);
+        xfrDisplay->setStatus(transferred, totalSize);
+
         if (xfr->transferState()==TS_IDLE)
+        {
             ui->transferTable->item(row, 2)->setText("Idle");
+            ui->transferTable->cellWidget(row, 4)->setEnabled(true);
+        }
 
         if (xfr->transferState()==TS_EXECUTED)
             ui->transferTable->item(row, 2)->setText("Running");
@@ -70,7 +122,9 @@ void TransferListWindow::onUpdateStatus(QString id)
 void TransferListWindow::onCancelButtonClick()
 {
     QPushButton* button = (QPushButton*)sender();
-    qDebug() << "button id = " << button->objectName() << " pressed.";
+    QString id = button->objectName();
+    FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
+    FileTransferList::instance()->removeTransfer(xfr);
 }
 
 void TransferListWindow::onAddTransfer(QString id)
@@ -90,19 +144,32 @@ void TransferListWindow::onAddTransfer(QString id)
     QString status = QString::number(transferred) + "kB / " + QString::number(totalSize) + " kB";
     QString transfer = xfr->sourceUrl() + " -> " + xfr->destUrl();
 
+    // Status display
+
+    TransferStatusDisplay* xfrDisplay = new TransferStatusDisplay();
+    ui->transferTable->setCellWidget(row, 3, xfrDisplay);
+
     ui->transferTable->setItem(row, 0, new QTableWidgetItem(id));
     ui->transferTable->setItem(row, 1, new QTableWidgetItem(transfer));
     ui->transferTable->setItem(row, 2, new QTableWidgetItem());
     ui->transferTable->setItem(row, 3, new QTableWidgetItem(status));
 
-    QPushButton* button = new QPushButton("Cancel", this);
-    //button->setObjectName(id);
-    connect(button, SIGNAL(clicked()), this, SLOT(onCancelButtonClick(void)));
+    QPushButton* button = new QPushButton();
+    button->setFlat(true);
+    button->setText("");
+    button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    button->setIcon(QIcon::fromTheme("stop"));
+    button->setObjectName(id);
+    connect(button, SIGNAL(clicked(void)), this, SLOT(onCancelButtonClick(void)));
 
-    ui->transferTable->setCellWidget(row, 4, new QPushButton());
+    ui->transferTable->setCellWidget(row, 4, button);
+    button->setEnabled(false);
 
     if (xfr->transferState()==TS_IDLE)
+    {
         ui->transferTable->item(row, 2)->setText("Idle");
+        button->setEnabled(true);
+    }
 
     if (xfr->transferState()==TS_EXECUTED)
         ui->transferTable->item(row, 2)->setText("Running");
@@ -116,6 +183,7 @@ void TransferListWindow::onAddTransfer(QString id)
     //ui->transferTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
     ui->transferTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
     ui->transferTable->horizontalHeader()->setResizeMode(2, QHeaderView::ResizeToContents);
+    ui->transferTable->horizontalHeader()->setResizeMode(4, QHeaderView::ResizeToContents);
 
     m_accessLock.unlock();
 }

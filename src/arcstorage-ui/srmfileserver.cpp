@@ -371,7 +371,6 @@ void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 
 void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
 {
-    qDebug() << "SRMFileServer::onCompleted.";
     logger.msg(Arc::DEBUG, "SRMFileServer::onCompleted.");
 
     FileTransferList::instance()->removeTransfer(fileTransfer);

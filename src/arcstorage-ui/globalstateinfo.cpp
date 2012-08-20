@@ -17,30 +17,29 @@ void GlobalStateInfo::setMainWindow(MainWindow* window)
 
 void GlobalStateInfo::addChildWindow(MainWindow* window)
 {
-    qDebug() << "addChildWindow()";
     m_childWindows.append(window);
 
     for (int i=0; i<m_childWindows.count(); i++)
         this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
 
+    this->enumerateWindows();
     this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::removeChildWindow(MainWindow* window)
 {
-    qDebug() << "removeChildWindow()";
     m_childWindows.removeOne(window);
     delete window;
 
     for (int i=0; i<m_childWindows.count(); i++)
         this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
 
+    this->enumerateWindows();
     this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::closeChildWindows()
 {
-    qDebug() << "closeChildWindow()";
     for (int i=0; i<m_childWindows.count(); i++)
     {
         m_childWindows.at(i)->close();
@@ -52,6 +51,14 @@ int GlobalStateInfo::childWindowCount()
 {
     return m_childWindows.count();
 }
+
+void GlobalStateInfo::enumerateWindows()
+{
+    int counter = 0;
+    for (int i=0; i<m_childWindows.count(); i++)
+        m_childWindows.at(i)->setWindowId(counter++);
+}
+
 
 MainWindow* GlobalStateInfo::getChildWindow(int idx)
 {
