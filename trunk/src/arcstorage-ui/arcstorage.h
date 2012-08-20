@@ -1,7 +1,7 @@
 #ifndef ARCSTORAGE_H
 #define ARCSTORAGE_H
 
-#define ARCSTORAGE_VERSION "0.2.3"
+#define ARCSTORAGE_VERSION "0.3.0"
 
 #include <arc/Logger.h>
 

@@ -964,7 +964,7 @@ void MainWindow::on_foldersTreeWidget_clicked(QModelIndex index)
 void MainWindow::on_actionAbout_ARC_File_Navigator_triggered()
 {
     QMessageBox msgBox;
-    msgBox.setText("ARC Storage Explorer\n\nCopyright (C) 2011 Lunarc, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nARC library interface - Jonas Lindemann");
+    msgBox.setText("ARC Storage Explorer\n\nCopyright (C) 2011-2012 Lunarc, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
     msgBox.exec();
 }
 
