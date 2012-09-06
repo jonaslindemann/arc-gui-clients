@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
-Name=ARC Certificate Utility
-GenericName=Certificate Utility
-Comment=Converts between X509 and PKCS12 certificates
-Exec=arccert-ui
+Name=ARC Job Submission Tool
+GenericName=Job Submission Tool
+Comment=Submit jobs to the Grid
+Exec=arcsub-ui
 Icon=system-config-authentication
 Terminal=false
 Type=Application

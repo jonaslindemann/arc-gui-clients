@@ -50,8 +50,6 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     QVariant qvar = Settings::getValue("urlList");
     QList<QVariant> urlList = qvar.toList();
 
-
-
     m_folderWidgetBeingUpdated = NULL;
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
     m_transferWindow = 0;
@@ -83,7 +81,6 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     ui->mainToolBar->addWidget(w);
 
     ui->filesTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-
 
     // Get fileserver and wire it up
 
@@ -1121,6 +1118,13 @@ void MainWindow::openUrl(QString url)
     setBusyUI(true);
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
 
+    // Delete previous file server
+
+    if (m_currentFileServer!=0)
+        delete m_currentFileServer;
+
+    // Create and wire up new file server.
+
     m_currentFileServer = FileServerFactory::createFileServer(url);
     SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
@@ -1131,6 +1135,7 @@ void MainWindow::openUrl(QString url)
     connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget (in case it's a new file server)
+
     fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
     ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
     ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);

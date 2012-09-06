@@ -16,6 +16,7 @@ include(${QT_USE_FILE})
 
 subdirs(src)
 
+set(CPACK_GENERATOR "TGZ;RPM")
 set(CPACK_PACKAGE_NAME "arc-gui-clients")
 set(CPACK_PACKAGE_VENDOR "lunarc.lu.se")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Graphical clients for the ARC middleware")
@@ -23,13 +24,13 @@ set(CPACK_PACKAGE_VERSION "0.3.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "3")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_BINARY_RPM "ON")
 set(CPACK_RPM_PACKAGE_VENDOR "Lunarc, Lund University")
 set(CPACK_RPM_PACKAGE_LICENSE "Apache License V2.0")
 set(CPACK_RPM_PACKAGE_DESCRIPTION "Graphical clients for the ARC middleware")
 set(CPACK_RPM_PACKAGE_REQUIRES "nordugrid-arc-plugins-globus >= 2.0, nordugrid-arc >= 2.0, nordugrid-arc-plugins-needed >= 2.0, nordugrid-arc-client >= 2.0, qt >= 4.6, qt-x11 >= 4.6, openssl >= 1.0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
-SET(CPACK_BINARY_RPM "ON")
-set(CPACK_SOURCE_GENERATOR TGZ)
+set(CPACK_SOURCE_GENERATOR "TGZ;RPM")
 set(CPACK_SOURCE_IGNORE_FILES
         /CVS
         /.svn
