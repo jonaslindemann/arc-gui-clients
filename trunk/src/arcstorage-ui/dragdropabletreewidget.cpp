@@ -84,6 +84,13 @@ void DragDropableTreeWidget::mouseMoveEvent(QMouseEvent *event)
                         QUrl url = QUrl::fromLocalFile(dataQV.toString());
                         urlList->append(url);
                     }
+                    else
+                    {
+                        QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                        QUrl url = QUrl::fromLocalFile(dataQV.toString()+"/");
+                        urlList->append(url);
+                    }
+
                 }
                 mimeData->setUrls(*urlList);
 
