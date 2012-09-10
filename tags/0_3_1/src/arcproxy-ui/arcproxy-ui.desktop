@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=ARC Proxy Generator
+GenericName=Proxy generator
+Comment=Create shortlived X509 proxy certificate
+Exec=arcproxy-ui
+Icon=system-config-authentication
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;

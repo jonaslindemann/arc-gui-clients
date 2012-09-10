@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+import os, sys, shutil
+
+from optparse import OptionParser
+
+buildDir = "./builddir"
+binDir = "./bin"
+
+if __name__ == '__main__':
+	
+    parser = OptionParser()
+    parser.add_option("-p", "--prefix", action="store", type="string", dest="prefix", default="", help="Installation prefix.")
+    parser.add_option("-d", "--debug", action="store_true", dest="debug", default=False, help="Build debug version.")
+
+    (options, args) = parser.parse_args()
+
+    if os.path.exists(buildDir):
+	    print "Removing build dir..."
+	    shutil.rmtree(buildDir)
+
+    print "Creating build dir..."
+    os.mkdir(buildDir)
+
+    currDir = os.getcwd()
+    os.chdir(buildDir)
+
+    cmakeOptions = ""
+
+    if options.prefix!="":
+	cmakeOptions += "-DCMAKE_INSTALL_PREFIX=%s " % options.prefix
+    else: 
+	cmakeOptions += "-DCMAKE_INSTALL_PREFIX=%s " % os.path.expanduser("~")
+
+    if options.debug:
+	cmakeOptions += "-DCMAKE_BUILD_TYPE=Debug "
+
+    os.system("cmake "+cmakeOptions+" ..")
+
+    os.chdir(currDir)
+		
