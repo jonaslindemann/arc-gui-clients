@@ -81,9 +81,10 @@ void TransferListWindow::onUpdateStatus(QString id)
 {
     logger.msg(Arc::DEBUG, "onUpdateStatus(): "+id.toStdString());
 
+    m_accessLock.lock();
+
     if (m_idToRowDict.contains(id))
     {
-        m_accessLock.lock();
 
         FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
 
@@ -114,9 +115,8 @@ void TransferListWindow::onUpdateStatus(QString id)
 
         QString status = QString::number(transferred) + "kB / " + QString::number(totalSize) + " kB";
         ui->transferTable->item(row, 3)->setText(status);
-
-        m_accessLock.unlock();
     }
+    m_accessLock.unlock();
 }
 
 void TransferListWindow::onCancelButtonClick()
@@ -129,10 +129,11 @@ void TransferListWindow::onCancelButtonClick()
 
 void TransferListWindow::onAddTransfer(QString id)
 {
+    m_accessLock.lock();
+
     logger.msg(Arc::DEBUG, "onAddTransfer(): "+id.toStdString());
     FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
 
-    m_accessLock.lock();
 
     ui->transferTable->insertRow(ui->transferTable->rowCount());
 
@@ -192,10 +193,10 @@ void TransferListWindow::onRemoveTransfer(QString id)
 {
     logger.msg(Arc::DEBUG, "onRemoveTransfer(): "+id.toStdString());
 
+    m_accessLock.lock();
+
     if (m_idToRowDict.contains(id))
     {
-        m_accessLock.lock();
-
         // Remove transfer from table
 
         int row = m_idToRowDict[id];
@@ -208,7 +209,7 @@ void TransferListWindow::onRemoveTransfer(QString id)
         for (int i=0; i<ui->transferTable->rowCount(); i++)
             m_idToRowDict[ui->transferTable->item(i,0)->text()] = i;
 
-        m_accessLock.unlock();
     }
+    m_accessLock.unlock();
 }
 

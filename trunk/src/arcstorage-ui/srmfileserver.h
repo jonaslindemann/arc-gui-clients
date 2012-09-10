@@ -6,8 +6,6 @@
 #include "fileserver.h"
 #include "filetransfer.h"
 
-class MainWindow;
-
 class SRMFileServer : public QObject, public FileServer
 {
     Q_OBJECT
@@ -15,20 +13,14 @@ class SRMFileServer : public QObject, public FileServer
 private:
     Arc::UserConfig* m_usercfg;
     QString m_currentUrlString;
-
     QList<FileTransfer*> m_transferList;
-
     bool m_notifyParent;
-
     bool initUserConfig();
-
     void updateFileListSilent(QString URL);
+    void listFiles(QList<QUrl> &urlList, QString currentDir);
 
 public:
-    explicit SRMFileServer(QObject *parent = 0);
-
-    void setNotifyParent(bool flag);
-    bool getNotifyParent();
+    explicit SRMFileServer();
 
     QStringList getFileInfoLabels();
     void updateFileList(QString URL);

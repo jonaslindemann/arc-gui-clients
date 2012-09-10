@@ -11,9 +11,8 @@
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
 #include "filetransferlist.h"
+#include "srmfileserver.h"
 
-
-class FileServer;
 
 namespace Ui {
     class MainWindow;
@@ -55,7 +54,7 @@ private:
     DragDropableTreeWidget m_filesTreeWidget;
     QComboBox m_urlComboBox;
 
-    FileServer *m_currentFileServer;
+    SRMFileServer *m_currentFileServer;
     QString m_startUrl;
 
     static const QString COPY_TO_TEXT;

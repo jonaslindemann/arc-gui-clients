@@ -85,11 +85,11 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
     // Get fileserver and wire it up
 
     qDebug() << "start url = " << m_startUrl;
-    m_currentFileServer = FileServerFactory::createFileServer(m_startUrl);  // "" - default file server
+    m_currentFileServer = new SRMFileServer();
 
     // So basically we handle everything using a SRMFileServer (...)
 
-    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
+    SRMFileServer* srmFileServer = m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
     connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
     connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
@@ -123,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
         m_logStream = new Arc::LogStream(std::cout);
         m_logStream->setFormat(Arc::ShortFormat);
         Arc::Logger::getRootLogger().addDestination(*m_logStream);
-        Arc::Logger::getRootLogger().setThreshold(Arc::INFO);
+        Arc::Logger::getRootLogger().setThreshold(Arc::ERROR);
     }
 
     // Set splitter sizes
@@ -666,7 +666,9 @@ void MainWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
     for (i=0; i<urlList.length(); i++)
         logger.msg(Arc::INFO, "file:" + urlList[i].toString().toStdString());
 
+    FileTransferList::instance()->pauseProcessing();
     m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
+    FileTransferList::instance()->resumeProcessing();
 }
 
 void MainWindow::onFileListFinished(bool error, QString errorMsg)
@@ -1125,8 +1127,8 @@ void MainWindow::openUrl(QString url)
 
     // Create and wire up new file server.
 
-    m_currentFileServer = FileServerFactory::createFileServer(url);
-    SRMFileServer* srmFileServer = (SRMFileServer*)m_currentFileServer;
+    m_currentFileServer = new SRMFileServer();
+    SRMFileServer* srmFileServer = m_currentFileServer;
     connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
     connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
     connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));

@@ -13,10 +13,13 @@ class FileTransferProcessingThread : public QThread
     Q_OBJECT
 private:
     bool m_terminate;
+    bool m_pause;
 public:
     FileTransferProcessingThread();
 
     void shutdown();
+    void pause();
+    void resume();
 
 private:
     void run();
@@ -30,6 +33,7 @@ private:
     QList<FileTransfer*> m_activeTransferList;
     QHash<QString, FileTransfer*> m_transferDict;
     QHash<QString, FileTransfer*> m_activeTransferDict;
+    FileTransferProcessingThread* m_fileProcessingThread;
     QMutex m_accessMutex;
     int m_maxTransfers;
 public:
@@ -60,6 +64,8 @@ public:
 
     void processTransfers();
 
+    void setProcessingThread(FileTransferProcessingThread* processingThread);
+
     void addTransfer(FileTransfer* fileTransfer);
     void removeTransfer(FileTransfer* fileTransfer);
     FileTransfer* getTransfer(int i);
@@ -69,6 +75,9 @@ public:
     void cancelAllTransfers();
 
     void updateStatus(QString id, unsigned long transferred, unsigned long totalSize);
+
+    void pauseProcessing();
+    void resumeProcessing();
 
 private:
     FileTransferList();
