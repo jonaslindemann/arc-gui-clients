@@ -21,8 +21,7 @@
 #include <arc/OptionParser.h>
 #include <arc/FileUtils.h>
 
-SRMFileServer::SRMFileServer(QObject *parent) :
-    QObject(parent), FileServer()
+SRMFileServer::SRMFileServer()
 {
     m_usercfg = NULL;
     m_notifyParent = true;
@@ -234,8 +233,6 @@ void SRMFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
     if (!dataHandle)
     {
         logger.msg(Arc::ERROR, "Unsupported URL given");
-        if (m_notifyParent)
-            Q_EMIT onFileListFinished(true, "Unsupported URL given. URL = " + arcUrl);
         return;
     }
     else
@@ -262,35 +259,28 @@ void SRMFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
         // Check for errors
         if (!arcResult)
         {
-            if (m_notifyParent)
-                Q_EMIT onFileListFinished(true, "Failed to get file list from: " + URL);
             return;
         }
         else
         {
-            currentPath = URL;
-
             for (std::list<Arc::FileInfo>::iterator arcFile = arcFiles.begin(); arcFile != arcFiles.end(); arcFile++)
             {
-                enum ARCFileType ft = ARCUndefined;
                 if (arcFile->GetType() == Arc::FileInfo::file_type_file)
                 {
                     QUrl url;
-                    QString filename = arcFile->GetName();
-                    url.setUrl(currentDir+"/"+filename);
+                    QString filename = arcFile->GetName().c_str();
+                    url.setUrl(currentDir+filename);
                     urlList.append(url);
                 }
                 else if (arcFile->GetType() == Arc::FileInfo::file_type_dir)
                 {
                     QUrl url;
-                    QString dirName = arcFile->GetName();
-                    url.setUrl(currentDir+"/"+dirName+"/");
-                    urlList.append(url);
+                    QString dirName = arcFile->GetName().c_str();
+                    QString newDir = currentDir+dirName+"/";
+                    this->listFiles(urlList, newDir);
                 }
                 else
                 {
-                    ft = ARCUndefined;
-                    // HANDLE THIS!!! /ALEX
                 }
             }
         }
@@ -312,7 +302,6 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
     for (int i = 0; i < urlList.size(); ++i)
     {
         QUrl url = urlList.at(i);
-
         QString sourcePath = url.path();
 
         // 0123456789
@@ -322,8 +311,6 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
         {
             QString sourceFilename = sourcePath.right(sourcePath.length() - sourcePath.lastIndexOf('/') - 1);
             QString destinationPath = destinationFolder + "/" + sourceFilename;
-            QString output = "File "+sourceFilename+" will be copied.";
-            qDebug(output.toAscii());
 
             logger.msg(Arc::INFO, "Adding filertransfer : "+sourcePath.toStdString()+" -> " + destinationPath.toStdString());
             FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
@@ -332,8 +319,29 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
         }
         else
         {
-            QString output = "Directory "+sourcePath+" will be copied.";
-            qDebug(output.toAscii());
+            //  "/home/jonas/Development/job_templates/"
+            //  | sourceLocation        | sourceDirName |
+            //  |              sourcePath              |
+            //  |              sourceDir              |
+            QString sourceDir = sourcePath.left(sourcePath.length()-1);
+            QString sourceDirName = sourceDir.right(sourceDir.length() - sourceDir.lastIndexOf("/")-1);
+            QString sourceLocation = sourceDir.left(sourceDir.lastIndexOf("/"));
+            QList<QUrl> fileList;
+            this->listFiles(fileList, sourcePath);
+
+            for (int j=0; j<fileList.size(); ++j)
+            {
+                QUrl fileUrl = fileList.at(j);
+                QString fileSourcePath = fileUrl.toString();
+                QString locationPath = fileSourcePath;
+                locationPath.remove(sourceLocation);
+                QString destinationPath = destinationFolder + locationPath;
+
+                logger.msg(Arc::INFO, "Adding filertransfer : "+fileSourcePath.toStdString()+" -> " + destinationPath.toStdString());
+                FileTransfer* xfr = new FileTransfer(fileSourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+                FileTransferList::instance()->addTransfer(xfr);
+                connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+            }
         }
     }
 

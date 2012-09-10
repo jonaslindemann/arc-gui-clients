@@ -12,6 +12,7 @@ FileTransferProcessingThread::FileTransferProcessingThread()
     :QThread()
 {
     m_terminate = false;
+    m_pause = false;
 }
 
 void FileTransferProcessingThread::shutdown()
@@ -19,11 +20,22 @@ void FileTransferProcessingThread::shutdown()
     m_terminate = true;
 }
 
+void FileTransferProcessingThread::pause()
+{
+    m_pause = true;
+}
+
+void FileTransferProcessingThread::resume()
+{
+    m_pause = false;
+}
+
 void FileTransferProcessingThread::run()
 {
     while(!m_terminate)
     {
-        FileTransferList::instance()->processTransfers();
+        while(!m_pause)
+            FileTransferList::instance()->processTransfers();
         sleep(1);
     }
 }
@@ -42,7 +54,26 @@ std::string convertPointerToStringAddress(const T* obj)
 FileTransferList::FileTransferList()
 {
     m_maxTransfers = 5;
+    m_fileProcessingThread = 0;
 }
+
+void FileTransferList::setProcessingThread(FileTransferProcessingThread *processingThread)
+{
+    m_fileProcessingThread = processingThread;
+}
+
+void FileTransferList::pauseProcessing()
+{
+    if (m_fileProcessingThread!=0)
+        m_fileProcessingThread->pause();
+}
+
+void FileTransferList::resumeProcessing()
+{
+    if (m_fileProcessingThread!=0)
+        m_fileProcessingThread->resume();
+}
+
 
 void FileTransferList::processTransfers()
 {
