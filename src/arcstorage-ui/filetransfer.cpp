@@ -1,14 +1,14 @@
 #include "filetransfer.h"
-
 #include "arcstorage.h"
-
 #include "filetransferlist.h"
+#include "globalstateinfo.h"
 
 #include <iostream>
 #include <string>
 #include <sstream>
 
 #include <QDebug>
+
 
 template <typename T>
 std::string convertPointerToStringAddress(const T* obj)
@@ -57,15 +57,25 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
       m_destHandle(m_destUrl, usercfg)
 {
     m_config = &usercfg;
+
+    // Retrieve global settings
+
+    m_retries = GlobalStateInfo::instance()->transferRetries();
+    m_timeout = GlobalStateInfo::instance()->transferTimeout();
+    m_passive = GlobalStateInfo::instance()->passiveTransfers();
+    m_secure = GlobalStateInfo::instance()->secureTransfers();
+
+    /*
     m_retries = 3;
     m_timeout = 300;
-
     m_passive = false;
     m_notpassive = false;
+    m_secure = false;
+    */
+
     m_force = false;
     m_verbose = true;
     m_nocopy = false;
-    m_secure = false;
     m_recursion = 0;
 
     m_mover = 0;

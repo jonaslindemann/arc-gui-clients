@@ -20,6 +20,7 @@
 #include "globalstateinfo.h"
 #include "arcstorage.h"
 #include "arctools.h"
+#include "applicationsettings.h"
 
 #include "filetransferlist.h"
 
@@ -123,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent, bool childWindow, QString Url):
         m_logStream = new Arc::LogStream(std::cout);
         m_logStream->setFormat(Arc::ShortFormat);
         Arc::Logger::getRootLogger().addDestination(*m_logStream);
-        Arc::Logger::getRootLogger().setThreshold(Arc::ERROR);
+        Arc::Logger::getRootLogger().setThreshold(Arc::INFO);
     }
 
     // Set splitter sizes
@@ -203,6 +204,8 @@ void MainWindow::writeSettings()
 
     if (!m_childWindow)
     {
+        GlobalStateInfo::instance()->writeSettings();
+
         settings.beginGroup("MainWindow");
         settings.setValue("size", size());
         settings.setValue("pos", pos());
@@ -231,6 +234,8 @@ void MainWindow::readSettings()
 
     if (!m_childWindow)
     {
+        GlobalStateInfo::instance()->readSettings();
+
         if (!settings.childGroups().contains("MainWindow"))
         {
             this->setGeometry(
@@ -1178,4 +1183,14 @@ void MainWindow::on_actionJobSubmissionTool_triggered()
 void MainWindow::on_actionStop_triggered()
 {
     FileTransferList::instance()->cancelAllTransfers();
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    ApplicationSettings dialog(this);
+    dialog.setModal(true);
+    int dialogReturnValue = dialog.exec();
+    if (dialogReturnValue != 0)
+    {
+    }
 }

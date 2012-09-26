@@ -7,6 +7,7 @@ set(arcstorageui_UIS
     filepropertiesdialog.ui
     srmsettingsdialog.ui
     transferlistwindow.ui
+    applicationsettings.ui
     ../common/proxywindow.ui
 )
 
@@ -25,6 +26,7 @@ set(arcstorageui_SRCS
     filetransferlist.cpp
     transferlistwindow.cpp
     globalstateinfo.cpp
+    applicationsettings.cpp
     ../common/arctools.cpp
     ../common/arcproxy-utils.cpp
     ../common/proxywindow.cpp
@@ -39,6 +41,7 @@ set(arcstorageui_MOC_HDRS
     filetransferlist.h
     transferlistwindow.h
     globalstateinfo.h
+    applicationsettings.h
     ../common/arctools.h
     ../common/arcproxy-utils.h
     ../common/proxywindow.h

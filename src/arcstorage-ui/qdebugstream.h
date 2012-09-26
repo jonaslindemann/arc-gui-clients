@@ -8,6 +8,7 @@
 #include <iostream>
 #include <streambuf>
 #include <string>
+#include <QMutex>
 
 #include "qtextedit.h"
 
@@ -32,8 +33,11 @@ public:
 protected:
     virtual int_type overflow(int_type v)
     {
+        m_accessMutex.lock();
+
         if (v == '\n')
         {
+
             log_window->append(m_string.c_str());
 
             // Scroll to bottom of window
@@ -46,11 +50,13 @@ protected:
         else
             m_string += v;
 
+        m_accessMutex.unlock();
         return v;
     }
 
     virtual std::streamsize xsputn(const char *p, std::streamsize n)
     {
+        m_accessMutex.lock();
         m_string.append(p, p + n);
 
         std::string::size_type pos = 0;
@@ -71,6 +77,7 @@ protected:
             }
         }
 
+        m_accessMutex.unlock();
         return n;
     }
 
@@ -79,6 +86,7 @@ private:
     std::streambuf *m_old_buf;
     std::string m_string;
     QTextEdit* log_window;
+    QMutex m_accessMutex;
 };
 
 #endif // QDEBUGSTREAM_H

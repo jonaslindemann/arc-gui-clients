@@ -1,5 +1,5 @@
 #include "filetransferlist.h"
-
+#include "globalstateinfo.h"
 #include "arcstorage.h"
 
 #include <iostream>
@@ -36,7 +36,7 @@ void FileTransferProcessingThread::run()
     {
         while(!m_pause)
             FileTransferList::instance()->processTransfers();
-        sleep(1);
+        sleep(GlobalStateInfo::instance()->transferThreadWakeUpInterval());
     }
 }
 
@@ -53,7 +53,7 @@ std::string convertPointerToStringAddress(const T* obj)
 
 FileTransferList::FileTransferList()
 {
-    m_maxTransfers = 5;
+    m_maxTransfers = GlobalStateInfo::instance()->maxTransfers();
     m_fileProcessingThread = 0;
 }
 
