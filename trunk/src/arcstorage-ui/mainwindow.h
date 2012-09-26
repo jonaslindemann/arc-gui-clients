@@ -127,6 +127,8 @@ private Q_SLOTS:
 
     void on_actionStop_triggered();
 
+    void on_actionSettings_triggered();
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);

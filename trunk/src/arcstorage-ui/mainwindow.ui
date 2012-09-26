@@ -168,7 +168,7 @@
      <x>0</x>
      <y>0</y>
      <width>814</width>
-     <height>25</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -189,7 +189,7 @@
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
-    <addaction name="actionSRM_Preferences"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuGo">
     <property name="title">
@@ -434,6 +434,11 @@
   <action name="actionJobSubmissionTool">
    <property name="text">
     <string>Job Submission Tool...</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings...</string>
    </property>
   </action>
  </widget>
