@@ -12,9 +12,11 @@ TEMPLATE = app
 
 SOURCES += src/arcproxy-ui/main.cpp\
         src/common/proxywindow.cpp \
-    src/common/arcproxy-utils.cpp 
+    src/common/arcproxy-utils.cpp \
+    src/common/arcproxy-utils-functions.cpp
 
 HEADERS  += src/common/proxywindow.h \
-    src/common/arcproxy-utils.h 
+    src/common/arcproxy-utils.h \
+    src/common/arcproxy-utils-functions.h
 
 FORMS    += src/common/proxywindow.ui \
