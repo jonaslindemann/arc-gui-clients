@@ -50,6 +50,7 @@ public:
     virtual ~VomsList();
     void clear();
     bool read();
+    bool write();
     VomsListEntry* at(int idx);
     int count();
 };
@@ -63,34 +64,35 @@ public:
     enum TReturnStatus { RS_OK, RS_FAILED };
 private:
 
-    std::string m_proxy_path;
-    std::string m_cert_path;
-    std::string m_key_path;
-    std::string m_ca_dir;
-    std::string m_vomses_path;
-    std::string m_voms_dir;
-    std::list<std::string> m_vomslist;
-    std::list<std::string> m_orderlist;
-    std::string m_user_name; //user name to MyProxy server
-    std::string m_retrievable_by_cert; //if use empty passphrase to myproxy server
-    std::string m_myproxy_server; //url of MyProxy server
-    std::string m_myproxy_command; //command to myproxy server
-    std::list<std::string> m_constraintlist;
-    std::string m_conffile;
-    std::string m_debug;
+    std::string proxy_path;
+    std::string cert_path;
+    std::string key_path;
+    std::string ca_dir;
+    std::string vomses_path;
+    std::string voms_dir;
+    std::list<std::string> vomslist;
+    std::list<std::string> orderlist;
+    std::string user_name; //user name to MyProxy server
+    std::string retrievable_by_cert; //if use empty passphrase to myproxy server
+    std::string myproxy_server; //url of MyProxy server
+    std::string myproxy_command; //command to myproxy server
+    std::list<std::string> constraintlist;
+    std::string conffile;
+    std::string debug;
 
-    bool m_use_gsi_comm;
-    bool m_use_gsi_proxy;
-    bool m_info;
-    bool m_remove_proxy;
-    bool m_use_empty_passphrase; //if use empty passphrase to myproxy server
-    int m_timeout;
-    bool m_version;
-    bool m_use_http_comm;
-    bool m_use_nssdb;
+    bool use_gsi_comm;
+    bool use_gsi_proxy;
+    bool info;
+    bool remove_proxy;
+    bool use_empty_passphrase; //if use empty passphrase to myproxy server
+    int timeout;
+    bool version;
+    bool use_http_comm;
+    bool use_nssdb;
 
     Arc::Logger logger;
     Arc::LogStream logCerr;
+    Arc::User user;
 
     QString m_passphrase;
 
@@ -100,7 +102,7 @@ private:
     QApplication* m_application;
 
     TReturnStatus m_uiReturnStatus;
-public:   
+public:
     ArcProxyController();
     virtual ~ArcProxyController();
 
@@ -124,15 +126,17 @@ public:
     void setUseGSIProxy(bool flag);
     bool getUseGSIProxy();
 
+    void addVomsServer(const QString& server, const QString& role);
+
     QString getIdentity();
 
     VomsList& vomsList();
 
-/*
-private Q_SLOTS:
+    /*
+    private Q_SLOTS:
 
-Q_SIGNALS:
-*/
+    Q_SIGNALS:
+    */
 };
 
 #endif // ARCPROXYUTILS_H

@@ -29,7 +29,6 @@ public:
 
 protected:
     void customEvent(QEvent * event);
-    void closeEvent(QCloseEvent *event);
     
 private Q_SLOTS:
     void on_generateButton_clicked();
@@ -39,6 +38,16 @@ private Q_SLOTS:
     void on_passphraseText_returnPressed();
 
     void on_proxyTypeCombo_currentIndexChanged(int index);
+
+    void on_addVomsServer_clicked();
+
+    void on_removeVomsServer_clicked();
+
+    void on_addVomsServerConfig_clicked();
+
+    void on_removeVomsServerConfig_clicked();
+
+    void on_modifyVomsConfigItem_clicked();
 
 private:
     Ui::ProxyWindow *ui;

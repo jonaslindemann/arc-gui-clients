@@ -8,6 +8,7 @@ SET(arcproxyui_UIS
 )
 
 SET(arcproxyui_SRCS
+  ../common/arcproxy-utils-functions.cpp
   ../common/arcproxy-utils.cpp
   ../common/infodialog.cpp
   ../common/proxywindow.cpp
@@ -15,6 +16,7 @@ SET(arcproxyui_SRCS
 )
 
 SET(arcproxyui_MOC_HDRS
+  ../common/arcproxy-utils-functions.h
   ../common/arcproxy-utils.h
   ../common/proxywindow.h
   ../common/infodialog.h

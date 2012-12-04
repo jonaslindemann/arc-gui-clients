@@ -45,6 +45,23 @@ ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
     ui->vomsServerCombo->clearEditText();
     m_proxyController->checkProxy();
     m_proxyController->setUiReturnStatus(ArcProxyController::RS_FAILED);
+
+    ui->vomsConfigTable->setRowCount(m_proxyController->vomsList().count());
+
+    ui->vomsConfigTable->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
+    ui->vomsConfigTable->horizontalHeader()->setResizeMode(1, QHeaderView::ResizeToContents);
+    ui->vomsConfigTable->horizontalHeader()->setResizeMode(2, QHeaderView::ResizeToContents);
+    ui->vomsConfigTable->horizontalHeader()->setResizeMode(3, QHeaderView::ResizeToContents);
+    ui->vomsConfigTable->horizontalHeader()->setResizeMode(4, QHeaderView::ResizeToContents );
+
+    for (i=0; i<m_proxyController->vomsList().count(); i++)
+    {
+        ui->vomsConfigTable->setItem(i, 0, new QTableWidgetItem(m_proxyController->vomsList().at(i)->alias()));
+        ui->vomsConfigTable->setItem(i, 1, new QTableWidgetItem(m_proxyController->vomsList().at(i)->machine()));
+        ui->vomsConfigTable->setItem(i, 2, new QTableWidgetItem(m_proxyController->vomsList().at(i)->port()));
+        ui->vomsConfigTable->setItem(i, 3, new QTableWidgetItem(m_proxyController->vomsList().at(i)->hostDN()));
+        ui->vomsConfigTable->setItem(i, 4, new QTableWidgetItem(m_proxyController->vomsList().at(i)->officialName()));
+    }
 }
 
 ProxyWindow::~ProxyWindow()
@@ -78,13 +95,6 @@ void ProxyWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     ui->logText->append(event->getOutputText());
     */
 }
-
-void ProxyWindow::closeEvent(QCloseEvent *event)
-{
-    qDebug() << "closeEvent";
-    event->accept();
-}
-
 
 void ProxyWindow::on_generateButton_clicked()
 {   
@@ -156,4 +166,34 @@ void ProxyWindow::on_proxyTypeCombo_currentIndexChanged(int index)
         m_proxyController->setUseGSIProxy(false);
     else
         m_proxyController->setUseGSIProxy(true);
+}
+
+void ProxyWindow::on_addVomsServer_clicked()
+{
+    m_proxyController->addVomsServer(ui->vomsServerCombo->currentText(), ui->vomsRoleText->text());
+
+    if (ui->vomsRoleText->text().length()!=0)
+        ui->vomsList->addItem(ui->vomsServerCombo->currentText()+":/"+ui->vomsRoleText->text());
+    else
+        ui->vomsList->addItem(ui->vomsServerCombo->currentText());
+}
+
+void ProxyWindow::on_removeVomsServer_clicked()
+{
+
+}
+
+void ProxyWindow::on_addVomsServerConfig_clicked()
+{
+
+}
+
+void ProxyWindow::on_removeVomsServerConfig_clicked()
+{
+
+}
+
+void ProxyWindow::on_modifyVomsConfigItem_clicked()
+{
+    ui->vomsConfigTable->editItem(ui->vomsConfigTable->currentItem());
 }
