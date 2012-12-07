@@ -40,7 +40,7 @@
 #include <arc/credential/NSSUtil.h>
 #endif
 
- int create_proxy_file(const std::string& path) {
+int create_proxy_file(const std::string& path) {
     int f = -1;
 
     if((::unlink(path.c_str()) != 0) && (errno != ENOENT)) {
@@ -58,7 +58,7 @@
     return f;
 }
 
- void write_proxy_file(const std::string& path, const std::string& content) {
+void write_proxy_file(const std::string& path, const std::string& content) {
     std::string::size_type off = 0;
     int f = create_proxy_file(path);
     while(off < content.length()) {
@@ -73,13 +73,13 @@
     ::close(f);
 }
 
- void remove_proxy_file(const std::string& path) {
+void remove_proxy_file(const std::string& path) {
     if((::unlink(path.c_str()) != 0) && (errno != ENOENT)) {
         throw std::runtime_error("Failed to remove proxy file " + path);
     }
 }
 
- void tls_process_error(Arc::Logger& logger) {
+void tls_process_error(Arc::Logger& logger) {
     unsigned long err;
     err = ERR_get_error();
     if (err != 0) {
@@ -92,10 +92,10 @@
 }
 
 #define PASS_MIN_LENGTH (4)
- int input_password(char *password, int passwdsz, bool verify,
-                          const std::string& prompt_info,
-                          const std::string& prompt_verify_info,
-                          Arc::Logger& logger) {
+int input_password(char *password, int passwdsz, bool verify,
+                   const std::string& prompt_info,
+                   const std::string& prompt_verify_info,
+                   Arc::Logger& logger) {
     UI *ui = NULL;
     int res = 0;
     ui = UI_new();
@@ -160,19 +160,19 @@
     return res;
 }
 
- bool is_file(std::string path) {
+bool is_file(std::string path) {
     if (Glib::file_test(path, Glib::FILE_TEST_IS_REGULAR))
         return true;
     return false;
 }
 
- bool is_dir(std::string path) {
+bool is_dir(std::string path) {
     if (Glib::file_test(path, Glib::FILE_TEST_IS_DIR))
         return true;
     return false;
 }
 
- std::vector<std::string> search_vomses(std::string path) {
+std::vector<std::string> search_vomses(std::string path) {
     std::vector<std::string> vomses_files;
     if(is_file(path)) vomses_files.push_back(path);
     else if(is_dir(path)) {
@@ -200,7 +200,7 @@
     return vomses_files;
 }
 
- std::string tokens_to_string(std::vector<std::string> tokens) {
+std::string tokens_to_string(std::vector<std::string> tokens) {
     std::string s;
     for(int n = 0; n<tokens.size(); ++n) {
         s += "\""+tokens[n]+"\" ";
@@ -209,7 +209,7 @@
 }
 
 #ifdef HAVE_NSS
- std::string get_nssdb_path() {
+std::string get_nssdb_path() {
     std::string nss_path;
     const Arc::User user;
 #ifndef WIN32

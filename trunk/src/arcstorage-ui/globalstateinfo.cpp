@@ -45,6 +45,7 @@ void GlobalStateInfo::writeSettings()
     */
 
     QSettings settings;
+    settings.remove("Transfers");
     settings.beginGroup("Transfers");
     settings.setValue("max", m_maxTransfers);
     settings.setValue("passive", m_passive);
@@ -53,6 +54,7 @@ void GlobalStateInfo::writeSettings()
     settings.setValue("timeout", m_timeout);
     settings.endGroup();
 
+    settings.remove("Windows");
     settings.beginGroup("Windows");
     settings.setValue("remember_pos", m_rememberWindowsPositions);
     settings.setValue("remember_url", m_rememberStartupDirs);

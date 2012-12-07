@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>352</height>
+    <width>529</width>
+    <height>307</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,19 +22,19 @@
   <property name="windowTitle">
    <string>Generate Proxy</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
-         <verstretch>1</verstretch>
+         <verstretch>20</verstretch>
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="standardProxyTab">
         <attribute name="title">
@@ -66,30 +66,6 @@
             <widget class="QLineEdit" name="identityText">
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="passphraseLabel">
-             <property name="minimumSize">
-              <size>
-               <width>120</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Passphrase</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="passphraseText">
-             <property name="echoMode">
-              <enum>QLineEdit::Password</enum>
              </property>
             </widget>
            </item>
@@ -186,19 +162,16 @@
        <widget class="QWidget" name="tab">
         <property name="maximumSize">
          <size>
-          <width>439</width>
-          <height>461</height>
+          <width>9999</width>
+          <height>9999</height>
          </size>
         </property>
         <attribute name="title">
          <string>VOMS</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetDefaultConstraint</enum>
-           </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_13">
              <item>
@@ -421,13 +394,19 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QPushButton" name="helpButton">
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>passphraseText</tabstop>
   <tabstop>proxyLifeTimeEdit</tabstop>
   <tabstop>proxyTypeCombo</tabstop>
   <tabstop>identityText</tabstop>

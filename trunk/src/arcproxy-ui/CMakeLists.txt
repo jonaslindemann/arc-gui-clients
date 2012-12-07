@@ -5,6 +5,7 @@ include(${QT_USE_FILE})
 SET(arcproxyui_UIS
     ../common/proxywindow.ui
     ../common/infodialog.ui
+    ../common/helpwindow.ui
 )
 
 SET(arcproxyui_SRCS
@@ -12,6 +13,7 @@ SET(arcproxyui_SRCS
   ../common/arcproxy-utils.cpp
   ../common/infodialog.cpp
   ../common/proxywindow.cpp
+  ../common/helpwindow.cpp
   main.cpp
 )
 
@@ -20,6 +22,7 @@ SET(arcproxyui_MOC_HDRS
   ../common/arcproxy-utils.h
   ../common/proxywindow.h
   ../common/infodialog.h
+  ../common/helpwindow.h
 )
 
 SET(arcproxyui_RCS 

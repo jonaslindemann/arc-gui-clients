@@ -199,13 +199,13 @@ void MainWindow::writeSettings()
 {
     QSettings settings;
 
-    settings.clear();
     settings.sync();
 
     if (!m_childWindow)
     {
         GlobalStateInfo::instance()->writeSettings();
 
+        settings.remove("MainWindow");
         settings.beginGroup("MainWindow");
         settings.setValue("size", size());
         settings.setValue("pos", pos());
@@ -217,6 +217,7 @@ void MainWindow::writeSettings()
         for (i=0; i<GlobalStateInfo::instance()->childWindowCount(); i++)
         {
             MainWindow* window = GlobalStateInfo::instance()->getChildWindow(i);
+            settings.remove("ChildWindow"+QString::number(window->getWindowId()));
             settings.beginGroup("ChildWindow"+QString::number(window->getWindowId()));
             settings.setValue("size", window->size());
             settings.setValue("pos", window->pos());
