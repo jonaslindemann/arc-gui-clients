@@ -70,7 +70,7 @@ private:
     std::string ca_dir;
     std::string vomses_path;
     std::string voms_dir;
-    std::list<std::string> vomslist;
+    std::vector<std::string> vomslist;
     std::list<std::string> orderlist;
     std::string user_name; //user name to MyProxy server
     std::string retrievable_by_cert; //if use empty passphrase to myproxy server
@@ -127,6 +127,10 @@ public:
     bool getUseGSIProxy();
 
     void addVomsServer(const QString& server, const QString& role);
+    void addVomsServerAndRole(const QString& serverAndRole);
+    void removeVomsServer(const QString& server, const QString& role);
+    QString getVomsServer(int idx);
+    int vomsServerCount();
 
     QString getIdentity();
 

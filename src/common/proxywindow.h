@@ -4,8 +4,9 @@
 #include <QDialog>
 #include <QDebug>
 #include <QCloseEvent>
+#include <QModelIndex>
 
-#include "qdebugstream.h"
+class HelpWindow;
 
 class ArcProxyController;
 
@@ -18,24 +19,22 @@ class ProxyWindow : public QDialog
     Q_OBJECT
 private:
     ArcProxyController* m_proxyController;
-    QDebugStream* m_debugStream;
-    QDebugStream* m_debugStream2;
 
-    void handleDebugStreamEvent(const DebugStreamEvent *event);
+    HelpWindow* m_helpWindow;
+
+    bool m_configTableDirty;
+
+    void writeSettings();
+    void readSettings();
 
 public:
     explicit ProxyWindow(QWidget *parent = 0, ArcProxyController* m_proxyController = 0);
     ~ProxyWindow();
-
-protected:
-    void customEvent(QEvent * event);
     
 private Q_SLOTS:
     void on_generateButton_clicked();
 
     void on_removeButton_clicked();
-
-    void on_passphraseText_returnPressed();
 
     void on_proxyTypeCombo_currentIndexChanged(int index);
 
@@ -48,6 +47,12 @@ private Q_SLOTS:
     void on_removeVomsServerConfig_clicked();
 
     void on_modifyVomsConfigItem_clicked();
+
+    void on_vomsList_clicked(const QModelIndex &index);
+
+    void on_vomsConfigTable_cellChanged(int row, int column);
+
+    void on_helpButton_clicked();
 
 private:
     Ui::ProxyWindow *ui;

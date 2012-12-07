@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <algorithm>
 #include <stdexcept>
 #include <unistd.h>
 #include <stdlib.h>
@@ -113,7 +114,6 @@ VomsList::VomsList()
 
 VomsList::~VomsList()
 {
-    this->write();
     this->clear();
 }
 
@@ -196,8 +196,9 @@ int VomsList::count()
 bool VomsList::write()
 {
     QString vomsFilename = QDir::homePath() + "/.arc/vomses";
+    qDebug() << "writing file :" << vomsFilename;
     QFile vomsFile(vomsFilename);
-    vomsFile.open(QIODevice::WriteOnly);
+    vomsFile.open(QFile::WriteOnly|QFile::Truncate);
 
     QTextStream out(&vomsFile);
 
@@ -210,7 +211,7 @@ bool VomsList::write()
         out << "\"" << m_vomsList.at(i)->officialName() << "\" " << endl;
     }
 
-    out.flush();
+    //out.flush();
 
     vomsFile.close();
 
@@ -291,6 +292,12 @@ bool ArcProxyController::getUseGSIProxy()
     return use_gsi_proxy;
 }
 
+void ArcProxyController::addVomsServerAndRole(const QString& serverAndRole)
+{
+    std::string serverLine = serverAndRole.toStdString();
+    vomslist.push_back(serverLine);
+}
+
 void ArcProxyController::addVomsServer(const QString& server, const QString& role)
 {
     std::string serverLine;
@@ -301,6 +308,34 @@ void ArcProxyController::addVomsServer(const QString& server, const QString& rol
         serverLine = server.toStdString();
 
     vomslist.push_back(serverLine);
+}
+
+void ArcProxyController::removeVomsServer(const QString& server, const QString& role)
+{
+    std::string serverLine;
+
+    if (role.length()!=0)
+        serverLine = server.toStdString() + ":/" + role.toStdString();
+    else
+        serverLine = server.toStdString();
+
+    std::vector<std::string>::iterator it;
+
+    it = find(vomslist.begin(), vomslist.end(), serverLine);
+
+    if (it!=vomslist.end())
+        vomslist.erase(it);
+}
+
+QString ArcProxyController::getVomsServer(int idx)
+{
+    QString returnString = vomslist[idx].c_str();
+    return returnString;
+}
+
+int ArcProxyController::vomsServerCount()
+{
+    return vomslist.size();
 }
 
 
@@ -1081,7 +1116,7 @@ int ArcProxyController::generateProxy()
 
             //Parse the voms server and command from command line
             std::multimap<std::string, std::string> server_command_map;
-            for (std::list<std::string>::iterator it = vomslist.begin();
+            for (std::vector<std::string>::iterator it = vomslist.begin();
                  it != vomslist.end(); it++) {
                 size_t p;
                 std::string voms_server;

@@ -25,4 +25,6 @@ std::string tokens_to_string(std::vector<std::string> tokens);
 std::string get_nssdb_path();
 #endif
 
+void tls_process_error(Arc::Logger& logger);
+
 #endif

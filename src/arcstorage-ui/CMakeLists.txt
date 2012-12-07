@@ -9,6 +9,7 @@ set(arcstorageui_UIS
     transferlistwindow.ui
     applicationsettings.ui
     ../common/proxywindow.ui
+    ../common/helpwindow.ui
 )
 
 set(arcstorageui_SRCS
@@ -29,7 +30,9 @@ set(arcstorageui_SRCS
     applicationsettings.cpp
     ../common/arctools.cpp
     ../common/arcproxy-utils.cpp
+    ../common/arcproxy-utils-functions.cpp
     ../common/proxywindow.cpp
+    ../common/helpwindow.cpp
 )
 
 set(arcstorageui_MOC_HDRS
@@ -45,6 +48,8 @@ set(arcstorageui_MOC_HDRS
     ../common/arctools.h
     ../common/arcproxy-utils.h
     ../common/proxywindow.h
+    ../common/arcproxy-utils-functions.h
+    ../common/helpwindow.h
 )
 
 #SET(arcexplorerui_RCS 
