@@ -1,5 +1,9 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef ArcStorageWindow_H
+#define ArcStorageWindow_H
+
+namespace Ui {
+    class ArcStorageWindow;
+}
 
 #include "dragdropabletreewidget.h"
 
@@ -14,9 +18,6 @@
 #include "srmfileserver.h"
 
 
-namespace Ui {
-    class MainWindow;
-}
 
 enum updateFileListsMode { CUFLM_noUpdate,
                            CUFLM_clickedBrowse,
@@ -26,13 +27,13 @@ enum updateFileListsMode { CUFLM_noUpdate,
                            CUFLM_doubleClickedFolder
                          };
 
-class MainWindow : public QMainWindow
+class ArcStorageWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, bool childWindow = false, QString Url="");
-    ~MainWindow();
+    explicit ArcStorageWindow(QWidget *parent = 0, bool childWindow = false, QString Url="");
+    ~ArcStorageWindow();
 
     void onNewStatus(QString errorStr);
 
@@ -50,7 +51,7 @@ public:
     int getWindowId();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::ArcStorageWindow *ui;
     DragDropableTreeWidget m_filesTreeWidget;
     QComboBox m_urlComboBox;
 
@@ -140,4 +141,4 @@ public Q_SLOTS:
 
 };
 
-#endif // MAINWINDOW_H
+#endif // ArcStorageWindow_H

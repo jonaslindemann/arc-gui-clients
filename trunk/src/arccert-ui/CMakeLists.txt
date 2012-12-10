@@ -3,16 +3,16 @@ add_definitions(-DQT_NO_KEYWORDS)
 include(${QT_USE_FILE})
 
 SET(arccertui_UIS
-    mainwindow.ui
+    certconvertwindow.ui
 )
 
 SET(arccertui_SRCS
-  mainwindow.cpp
+  certconvertwindow.cpp
   main.cpp
 )
 
 SET(arccertui_MOC_HDRS
-  mainwindow.h
+  certconvertwindow.h
 )
 
 #SET(arccertui_RCS 

@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef CertConvertWindow_H
+#define CertConvertWindow_H
 
 #include <QMainWindow>
 #include <QDebug>
@@ -7,10 +7,10 @@
 #include "qdebugstream.h"
 
 namespace Ui {
-class MainWindow;
+class CertConvertWindow;
 }
 
-class MainWindow : public QMainWindow
+class CertConvertWindow : public QMainWindow
 {
     Q_OBJECT
 private:
@@ -28,8 +28,8 @@ private:
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit CertConvertWindow(QWidget *parent = 0);
+    ~CertConvertWindow();
 
 protected:
     void customEvent(QEvent * event);
@@ -51,7 +51,7 @@ private Q_SLOTS:
     void on_convertToX509Button_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::CertConvertWindow *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // CertConvertWindow_H

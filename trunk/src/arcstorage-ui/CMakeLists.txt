@@ -3,7 +3,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 include(${QT_USE_FILE})
 
 set(arcstorageui_UIS
-    mainwindow.ui
+    arcstoragewindow.ui
     filepropertiesdialog.ui
     srmsettingsdialog.ui
     transferlistwindow.ui
@@ -14,7 +14,7 @@ set(arcstorageui_UIS
 
 set(arcstorageui_SRCS
     main.cpp
-    mainwindow.cpp
+    arcstoragewindow.cpp
     fileserver.cpp
     arcfileelement.cpp
     dragdropabletreewidget.cpp
@@ -36,7 +36,7 @@ set(arcstorageui_SRCS
 )
 
 set(arcstorageui_MOC_HDRS
-    mainwindow.h
+    arcstoragewindow.h
     filepropertiesdialog.h
     srmfileserver.h
     srmsettingsdialog.h

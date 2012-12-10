@@ -87,12 +87,12 @@ void GlobalStateInfo::readSettings()
 }
 
 
-void GlobalStateInfo::setMainWindow(MainWindow* window)
+void GlobalStateInfo::setMainWindow(ArcStorageWindow* window)
 {
     m_mainWindow = window;
 }
 
-void GlobalStateInfo::addChildWindow(MainWindow* window)
+void GlobalStateInfo::addChildWindow(ArcStorageWindow* window)
 {
     m_childWindows.append(window);
 
@@ -103,7 +103,7 @@ void GlobalStateInfo::addChildWindow(MainWindow* window)
     this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
-void GlobalStateInfo::removeChildWindow(MainWindow* window)
+void GlobalStateInfo::removeChildWindow(ArcStorageWindow* window)
 {
     m_childWindows.removeOne(window);
     delete window;
@@ -137,7 +137,7 @@ void GlobalStateInfo::enumerateWindows()
 }
 
 
-MainWindow* GlobalStateInfo::getChildWindow(int idx)
+ArcStorageWindow* GlobalStateInfo::getChildWindow(int idx)
 {
     if ((idx>=0)&&(idx<m_childWindows.count()))
         return m_childWindows.at(idx);
@@ -149,7 +149,7 @@ void GlobalStateInfo::updateWindowList(QMenu* menu)
 {
     /*
     menu->clear();
-    menu->addMenu(m_mainWindow->getCurrentURL());
+    menu->addMenu(m_ArcStorageWindow->getCurrentURL());
     for (int i=0; i<m_childWindows.count(); i++)
         menu->addMenu(m_childWindows.at(i)->getCurrentURL());
     */

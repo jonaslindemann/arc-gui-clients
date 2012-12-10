@@ -4,7 +4,7 @@
 #include <QtGui>
 #include <QDebug>
 
-#include "mainwindow.h"
+#include "arcstoragewindow.h"
 
 DragDropableTreeWidget::DragDropableTreeWidget(QWidget *parent) : QTreeWidget(parent)
 {

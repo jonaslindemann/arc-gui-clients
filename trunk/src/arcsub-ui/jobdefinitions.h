@@ -27,41 +27,70 @@ private:
     int m_paramSize;
     QString m_name;
     std::string m_xrsl;
+    QString m_jobDir;
+    QStringList m_inputFiles;
+    QStringList m_inputFileUrls;
+    QStringList m_outputFiles;
+    QStringList m_outputFileUrls;
+    int m_wallTime;
+    int m_memory;
+    QString m_email;
+
+    void setupJobDir(QString createPath = "");
+    void setupParamDirs();
+    void setupJobDescription();
 public:
     explicit JobDefinitionBase(QObject *parent = 0, QString name = "");
 
+    void setParamSize(int nSize);
+    int paramSize();
+
     void setExecutable(QString name);
-    QString getExecutable();
+    QString executable();
 
     void clearArguments();
     void addArgument(QString argument);
 
     void setName(QString name);
-    QString getName();
+    QString name();
+
+    void setEmail(QString email);
+    QString email();
 
     void clearInputFiles();
     void addInputFile(QString filename, QString sourceLocation = "");
+    int inputFileCount();
+    QString inputFileAt(int idx);
+    QString inputFileSourceAt(int idx);
+    void removeInputFile(int idx);
 
     void clearOutputFiles();
     void addOutputFile(QString filename, QString targetLocation = "");
+    int outputFileCount();
+    QString outputFileAt(int idx);
+    QString outputFileSourceAt(int idx);
+    void removeOutputFile(int idx);
 
     void clearRuntimes();
     void addRuntime(QString runtimeName, QString runtimeVersion);
 
     void setWalltime(int t);
-    int getWalltime();
+    int walltime();
 
     void setMemory(int m);
-    int getMemory();
+    int memory();
 
+    void clear();
     bool setup();
-    bool load();
-    bool save();
-
+    bool load(QString jobDefDir);
+    bool save(QString saveDir);
     void print();
-    QString xrslString();
 
+    QString xrslString();
     Arc::JobDescription& jobDescription();
+
+protected:
+    virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
 
     
 Q_SIGNALS:

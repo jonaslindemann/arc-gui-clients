@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "certconvertwindow.h"
+#include "ui_certconvertwindow.h"
 
 #include <QMessageBox>
 #include <QProcess>
@@ -9,9 +9,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-MainWindow::MainWindow(QWidget *parent) :
+CertConvertWindow::CertConvertWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::CertConvertWindow)
 {
     ui->setupUi(this);
 
@@ -41,14 +41,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-MainWindow::~MainWindow()
+CertConvertWindow::~CertConvertWindow()
 {
     delete ui;
     delete m_debugStream;
     delete m_debugStream2;
 }
 
-void MainWindow::customEvent(QEvent * event)
+void CertConvertWindow::customEvent(QEvent * event)
 {
     // When we get here, we've crossed the thread boundary and are now
     // executing in the Qt object's thread
@@ -61,7 +61,7 @@ void MainWindow::customEvent(QEvent * event)
     // use more else ifs to handle other custom events
 }
 
-void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
+void CertConvertWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
 {
     // Now you can safely do something with your Qt objects.
     // Access your custom data using event->getCustomData1() etc.
@@ -69,7 +69,7 @@ void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     ui->logText->append(event->getOutputText());
 }
 
-void MainWindow::on_convertToPKCS12Button_clicked()
+void CertConvertWindow::on_convertToPKCS12Button_clicked()
 {
     // Check for existing files
 
@@ -153,7 +153,7 @@ void MainWindow::on_convertToPKCS12Button_clicked()
     m_passout.clear();
 }
 
-void MainWindow::on_selectCertFileButton_clicked()
+void CertConvertWindow::on_selectCertFileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
     globusDir.cd(".globus");
@@ -165,7 +165,7 @@ void MainWindow::on_selectCertFileButton_clicked()
     ui->usercertFileText->setText(m_certificateFilename);
 }
 
-void MainWindow::on_selectKeyButton_clicked()
+void CertConvertWindow::on_selectKeyButton_clicked()
 {
     QDir globusDir = QDir::homePath();
     globusDir.cd(".globus");
@@ -177,7 +177,7 @@ void MainWindow::on_selectKeyButton_clicked()
     ui->userkeyFileText->setText(m_keyFilename);
 }
 
-void MainWindow::on_selectPKCS12FileButton_clicked()
+void CertConvertWindow::on_selectPKCS12FileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
     globusDir.cd(".globus");
@@ -193,7 +193,7 @@ void MainWindow::on_selectPKCS12FileButton_clicked()
         ui->pkcsFileText->setText(dlg.selectedFiles()[0]);
 }
 
-void MainWindow::on_selectPKCS12ImportFileButton_clicked()
+void CertConvertWindow::on_selectPKCS12ImportFileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
     globusDir.cd(".globus");
@@ -205,7 +205,7 @@ void MainWindow::on_selectPKCS12ImportFileButton_clicked()
     ui->pkcsImportFileText->setText(m_pkcs12ImportFilename);
 }
 
-void MainWindow::on_selectCertKeyOutputDirButton_clicked()
+void CertConvertWindow::on_selectCertKeyOutputDirButton_clicked()
 {
     QDir globusDir = QDir::homePath();
     globusDir.cd(".globus");
@@ -216,7 +216,7 @@ void MainWindow::on_selectCertKeyOutputDirButton_clicked()
     ui->certKeyDirText->setText(m_certOutputDir);
 }
 
-void MainWindow::on_convertToX509Button_clicked()
+void CertConvertWindow::on_convertToX509Button_clicked()
 {
     bool ok;
 
