@@ -1,5 +1,5 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "jobstatuswindow.h"
+#include "ui_jobstatuswindow.h"
 
 #include <QTableWidget>
 #include <QDebug>
@@ -7,9 +7,9 @@
 
 #include "arcjobcontroller.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+JobStatusWindow::JobStatusWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::JobStatusWindow)
 {
     m_firstShow = true;
     ui->setupUi(this);
@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_jobController, SIGNAL(onQueryAllJobListStatusDone()), this, SLOT(onQueryAllJobListStatusDone()));
 }
 
-MainWindow::~MainWindow()
+JobStatusWindow::~JobStatusWindow()
 {
     delete m_jobController;
     delete m_debugStream;
@@ -54,7 +54,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::disableActions()
+void JobStatusWindow::disableActions()
 {
     ui->jobTable->setDisabled(true);
     ui->actionCleanSelected->setDisabled(true);
@@ -64,7 +64,7 @@ void MainWindow::disableActions()
     ui->actionResubmitSelected->setDisabled(true);
 }
 
-void MainWindow::enableActions()
+void JobStatusWindow::enableActions()
 {
     ui->jobTable->setEnabled(true);
     ui->actionCleanSelected->setEnabled(true);
@@ -74,7 +74,7 @@ void MainWindow::enableActions()
     ui->actionResubmitSelected->setEnabled(true);
 }
 
-void MainWindow::customEvent(QEvent * event)
+void JobStatusWindow::customEvent(QEvent * event)
 {
     // When we get here, we've crossed the thread boundary and are now
     // executing in the Qt object's thread
@@ -87,7 +87,7 @@ void MainWindow::customEvent(QEvent * event)
     // use more else ifs to handle other custom events
 }
 
-void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
+void JobStatusWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
 {
     // Now you can safely do something with your Qt objects.
     // Access your custom data using event->getCustomData1() etc.
@@ -95,7 +95,7 @@ void MainWindow::handleDebugStreamEvent(const DebugStreamEvent *event)
     ui->logText->append(event->getOutputText());
 }
 
-void MainWindow::showEvent ( QShowEvent * event )
+void JobStatusWindow::showEvent ( QShowEvent * event )
 {
     if (m_firstShow)
     {
@@ -107,28 +107,28 @@ void MainWindow::showEvent ( QShowEvent * event )
     }
 }
 
-void MainWindow::on_actionRefresh_triggered()
+void JobStatusWindow::on_actionRefresh_triggered()
 {
     this->statusBar()->showMessage("Querying job status...");
     this->disableActions();
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::onQueryJobStatusDone()
+void JobStatusWindow::onQueryJobStatusDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
     qDebug() << "onQueryJobStatusDone()";
 }
 
-void MainWindow::onQueryAllJobListStatusDone()
+void JobStatusWindow::onQueryAllJobListStatusDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
     qDebug() << "onQueryAllJobListStatusDone()";
 }
 
-void MainWindow::onDownloadJobsDone()
+void JobStatusWindow::onDownloadJobsDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
@@ -136,7 +136,7 @@ void MainWindow::onDownloadJobsDone()
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::onKillJobsDone()
+void JobStatusWindow::onKillJobsDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
@@ -144,7 +144,7 @@ void MainWindow::onKillJobsDone()
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::onCleanJobsDone()
+void JobStatusWindow::onCleanJobsDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
@@ -152,7 +152,7 @@ void MainWindow::onCleanJobsDone()
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::onResubmitJobsDone()
+void JobStatusWindow::onResubmitJobsDone()
 {
     this->statusBar()->showMessage("");
     this->enableActions();
@@ -160,7 +160,7 @@ void MainWindow::onResubmitJobsDone()
     m_jobController->startQueryJobStatus();
 }
 
-void MainWindow::on_actionOpenJobList_triggered()
+void JobStatusWindow::on_actionOpenJobList_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this,
          tr("Open job list file"), "", tr("Job list files (*.xml)"));
@@ -174,31 +174,31 @@ void MainWindow::on_actionOpenJobList_triggered()
     }
 }
 
-void MainWindow::on_actionSelectAll_triggered()
+void JobStatusWindow::on_actionSelectAll_triggered()
 {
     m_jobController->selectAllJobs();
 }
 
-void MainWindow::on_actionClearSelection_triggered()
+void JobStatusWindow::on_actionClearSelection_triggered()
 {
     m_jobController->clearSelection();
 }
 
-void MainWindow::on_actionCleanSelected_triggered()
+void JobStatusWindow::on_actionCleanSelected_triggered()
 {
     this->disableActions();
     m_jobController->startCleanJobs();
     this->statusBar()->showMessage("Cleaning jobs...");
 }
 
-void MainWindow::on_actionKillSelected_triggered()
+void JobStatusWindow::on_actionKillSelected_triggered()
 {
     this->disableActions();
     m_jobController->startKillJobs();
     this->statusBar()->showMessage("Killing jobs...");
 }
 
-void MainWindow::on_actionDownloadSelected_triggered()
+void JobStatusWindow::on_actionDownloadSelected_triggered()
 {
     QString dirName = QFileDialog::getExistingDirectory(this, "Select download directory");
 
@@ -212,19 +212,19 @@ void MainWindow::on_actionDownloadSelected_triggered()
     this->statusBar()->showMessage("Downloading jobs...");
 }
 
-void MainWindow::on_actionExit_triggered()
+void JobStatusWindow::on_actionExit_triggered()
 {
     this->close();
 }
 
-void MainWindow::on_actionResubmitSelected_triggered()
+void JobStatusWindow::on_actionResubmitSelected_triggered()
 {
     this->disableActions();
     m_jobController->startResubmitJobs();
     this->statusBar()->showMessage("Resubmitting jobs...");
 }
 
-void MainWindow::on_actionRemoveJobList_triggered()
+void JobStatusWindow::on_actionRemoveJobList_triggered()
 {
     m_jobController->removeSelectedJobList();
 }

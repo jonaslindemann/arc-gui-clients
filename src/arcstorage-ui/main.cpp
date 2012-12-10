@@ -1,6 +1,6 @@
 #include <QtGui/QApplication>
 #include <iostream>
-#include "mainwindow.h"
+#include "arcstoragewindow.h"
 #include "arctools.h"
 
 int main(int argc, char *argv[])
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     // Start actual user interface
 
-    MainWindow w;
+    ArcStorageWindow w;
     w.show();
     return a.exec();
 }

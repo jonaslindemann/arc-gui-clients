@@ -3,18 +3,18 @@ add_definitions(-DQT_NO_KEYWORDS)
 include(${QT_USE_FILE})
 
 SET(arcsubui_UIS
-    mainwindow.ui
+    jobdefinitionwindow.ui
 )
 
 SET(arcsubui_SRCS
-  mainwindow.cpp
+  jobdefinitionwindow.cpp
   jobdefinitions.cpp
   main.cpp
 )
 
 SET(arcsubui_MOC_HDRS
   jobdefinitions.h
-  mainwindow.h
+  jobdefinitionwindow.h
 )
 
 #SET(arccertui_RCS 

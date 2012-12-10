@@ -1,15 +1,15 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef JobStatusWindow_H
+#define JobStatusWindow_H
 
 #include <QMainWindow>
 #include "arcjobcontroller.h"
 #include "qdebugstream.h"
 
 namespace Ui {
-class MainWindow;
+class JobStatusWindow;
 }
 
-class MainWindow : public QMainWindow
+class JobStatusWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -26,8 +26,8 @@ private:
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit JobStatusWindow(QWidget *parent = 0);
+    ~JobStatusWindow();
 
     void showEvent ( QShowEvent * event );
 
@@ -62,7 +62,7 @@ private Q_SLOTS:
     void on_actionRemoveJobList_triggered();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::JobStatusWindow *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // JobStatusWindow_H

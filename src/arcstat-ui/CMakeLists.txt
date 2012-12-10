@@ -3,19 +3,19 @@ add_definitions(-DQT_NO_KEYWORDS)
 include(${QT_USE_FILE})
 
 SET(arcstatui_UIS
-    mainwindow.ui
+    jobstatuswindow.ui
 )
 
 SET(arcstatui_SRCS
   JmBase.cpp
-  mainwindow.cpp
+  jobstatuswindow.cpp
   main.cpp
   arcjobcontroller.cpp
 )
 
 SET(arcstatui_MOC_HDRS
   JmBase.h
-  mainwindow.h
+  jobstatuswindow.h
   arcjobcontroller.h
 )
 

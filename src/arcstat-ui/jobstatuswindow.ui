@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>JobStatusWindow</class>
+ <widget class="QMainWindow" name="JobStatusWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -104,7 +104,7 @@
      <x>0</x>
      <y>0</y>
      <width>840</width>
-     <height>25</height>
+     <height>28</height>
     </rect>
    </property>
    <property name="defaultUp">

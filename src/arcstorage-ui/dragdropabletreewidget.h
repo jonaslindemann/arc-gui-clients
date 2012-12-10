@@ -5,7 +5,7 @@
 #include <QtGui>
 #include <QList>
 
-class MainWindow;
+class ArcStorageWindow;
 
 /** This class describes extends the standard QTreeWidget to provide both
   * drag and drop functionality. The dragging and dropping is done in
@@ -18,12 +18,12 @@ class DragDropableTreeWidget : public QTreeWidget
 public:
     DragDropableTreeWidget(QWidget *parent = 0);
     ~DragDropableTreeWidget();
-    void setMainWindow(MainWindow *mw) { mainWindow = mw; }
+    void setMainWindow(ArcStorageWindow *mw) { mainWindow = mw; }
 
     void resetSelection();
 
 private:
-    MainWindow *mainWindow;
+    ArcStorageWindow *mainWindow;
     QPoint dragStartPos;
     QList<QTreeWidgetItem*> m_selectedItems;
 

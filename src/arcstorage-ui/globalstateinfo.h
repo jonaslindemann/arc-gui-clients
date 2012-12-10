@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#include "mainwindow.h"
+#include "arcstoragewindow.h"
 #include "transferlistwindow.h"
 
 class GlobalStateInfo : public QObject
@@ -11,8 +11,8 @@ class GlobalStateInfo : public QObject
     Q_OBJECT
 private:
     TransferListWindow* m_transferListWindow;
-    QList<MainWindow*> m_childWindows;
-    MainWindow* m_mainWindow;
+    QList<ArcStorageWindow*> m_childWindows;
+    ArcStorageWindow* m_mainWindow;
 public:
     enum TLogLevel {LL_VERBOSE, LL_INFO, LL_WARNING, LL_ERROR};
     static GlobalStateInfo* instance()
@@ -43,14 +43,14 @@ public:
     void writeSettings();
     void readSettings();
 
-    void setMainWindow(MainWindow* window);
-    void addChildWindow(MainWindow* window);
-    void removeChildWindow(MainWindow* window);
+    void setMainWindow(ArcStorageWindow* window);
+    void addChildWindow(ArcStorageWindow* window);
+    void removeChildWindow(ArcStorageWindow* window);
     void closeChildWindows();
     void showTransferWindow();
     void hideTransferWindow();
     int childWindowCount();
-    MainWindow* getChildWindow(int idx);
+    ArcStorageWindow* getChildWindow(int idx);
 
     void updateWindowList(QMenu* menu);
 

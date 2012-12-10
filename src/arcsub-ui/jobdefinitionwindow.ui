@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>JobDefinitionWindow</class>
+ <widget class="QMainWindow" name="JobDefinitionWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
-    <height>409</height>
+    <width>681</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Job Submission Tool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -68,7 +68,7 @@
             <widget class="QLabel" name="jobNameLabel">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>175</width>
                <height>0</height>
               </size>
              </property>
@@ -88,7 +88,7 @@
             <widget class="QLabel" name="memoryLabel">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>175</width>
                <height>0</height>
               </size>
              </property>
@@ -140,7 +140,7 @@
             <widget class="QLabel" name="notificationEmailLabel">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>175</width>
                <height>0</height>
               </size>
              </property>
@@ -210,9 +210,178 @@
         </layout>
        </widget>
        <widget class="QWidget" name="paramTab">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <attribute name="title">
          <string>Parameters</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="paramSweepLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>175</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Parameter sweep size</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="paramSweepValue">
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="value">
+                <number>5</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="inputFilesTab">
+        <attribute name="title">
+         <string>Input files</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <widget class="QListWidget" name="inputFilesList"/>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QPushButton" name="addInputFileButton">
+               <property name="text">
+                <string>Add...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeInputFileButton">
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearInputFilesButton">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="outputFilesTab">
+        <attribute name="title">
+         <string>Output files</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <item>
+            <widget class="QListWidget" name="outputFilesList"/>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <item>
+              <widget class="QPushButton" name="addOutputFileButton">
+               <property name="text">
+                <string>Add...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeOutpuFileButton">
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearOutputFileButton">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="applicationTab">
         <attribute name="title">
@@ -239,7 +408,7 @@
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>16777215</height>
+         <height>150</height>
         </size>
        </property>
        <property name="font">
@@ -263,8 +432,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>603</width>
-     <height>25</height>
+     <width>681</width>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -318,6 +487,20 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>addInputFileButton</tabstop>
+  <tabstop>removeInputFileButton</tabstop>
+  <tabstop>clearInputFilesButton</tabstop>
+  <tabstop>inputFilesList</tabstop>
+  <tabstop>walltimeEdit</tabstop>
+  <tabstop>paramSweepValue</tabstop>
+  <tabstop>descriptionText</tabstop>
+  <tabstop>logText</tabstop>
+  <tabstop>scriptTab</tabstop>
+  <tabstop>jobNameEdit</tabstop>
+  <tabstop>memoryEdit</tabstop>
+  <tabstop>notificationEmailEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

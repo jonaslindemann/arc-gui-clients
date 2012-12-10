@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>CertConvertWindow</class>
+ <widget class="QMainWindow" name="CertConvertWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>566</width>
-    <height>307</height>
+    <height>311</height>
    </rect>
   </property>
   <property name="windowTitle">
