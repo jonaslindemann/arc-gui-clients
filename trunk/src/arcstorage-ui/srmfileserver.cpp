@@ -1,5 +1,5 @@
 #include "srmfileserver.h"
-#include "mainwindow.h"
+#include "arcstoragewindow.h"
 #include "settings.h"
 #include "filetransfer.h"
 #include "arcstorage.h"

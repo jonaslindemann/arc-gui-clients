@@ -29,13 +29,51 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
 
     m_logStream.setFormat(Arc::ShortFormat);
     Arc::Logger::getRootLogger().addDestination(m_logStream);
-    Arc::Logger::getRootLogger().setThreshold(Arc::INFO);
+    Arc::Logger::getRootLogger().setThreshold(Arc::DEBUG);
 
     Arc::ArcLocation::Init("/usr");
 
     m_jobDefinition = new JobDefinitionBase(this, "Test");
 
     this->setData();
+
+#ifdef __linux__
+    ui->actionNewJobDefinition->setIcon(QIcon::fromTheme("document-new"));
+    ui->actionOpenJobDefinition->setIcon(QIcon::fromTheme("document-open"));
+    ui->actionSaveJobDefinition->setIcon(QIcon::fromTheme("document-save"));
+#endif
+
+    QStringList defaultREs;
+
+    defaultREs << "APPS/BIO/BLAST";
+    defaultREs << "APPS/BIO/CLUSTALW";
+    defaultREs << "APPS/BIO/HMMER";
+    defaultREs << "APPS/BIO/MAFFT";
+    defaultREs << "APPS/BIO/MUSCLE";
+    defaultREs << "APPS/MATH/NUMPY";
+    defaultREs << "APPS/MATH/OCTAVE";
+    defaultREs << "APPS/STATISTICS/R";
+    defaultREs << "ENV/ALIEN";
+    defaultREs << "ENV/GCC";
+    defaultREs << "ENV/INTEL-11.1";
+    defaultREs << "ENV/JAVA/JRE";
+    defaultREs << "ENV/JAVA/SDK";
+    defaultREs << "ENV/LOCALDISK-18000";
+    defaultREs << "ENV/MPI/OPENMPI";
+    defaultREs << "ENV/MPI/OPENMPI";
+    defaultREs << "ENV/MPI/OPENMPI/GCC";
+    defaultREs << "ENV/NUMPY";
+    defaultREs << "ENV/PROXY";
+    defaultREs << "ENV/PYTHON-2.4";
+    defaultREs << "ENV/PYTHON-2.5";
+    defaultREs << "ENV/PYTHON-2.7";
+    defaultREs << "ENV/PYTHON";
+    defaultREs << "ENV/RUNTIME/PROXY";
+    defaultREs << "ENV/SCIPY";
+
+    ui->runtimeCombo->addItems(defaultREs);
+    ui->runtimeCombo->setCurrentIndex(-1);
+
 }
 
 JobDefinitionWindow::~JobDefinitionWindow()
@@ -72,6 +110,8 @@ void JobDefinitionWindow::setData()
     ui->jobNameEdit->setText(m_jobDefinition->name());
     ui->walltimeEdit->setText(QString::number(m_jobDefinition->walltime()));
     ui->memoryEdit->setText(QString::number(m_jobDefinition->memory()));
+    ui->paramSweepValue->setValue(m_jobDefinition->paramSize());
+    ui->notificationEmailEdit->setText(m_jobDefinition->email());
 
     ui->inputFilesList->clear();
 
@@ -85,6 +125,12 @@ void JobDefinitionWindow::setData()
 
     ui->descriptionText->clear();
     ui->descriptionText->setText(m_jobDefinition->xrslString());
+
+    ui->runtimesList->clear();
+
+    for (int i=0; i<m_jobDefinition->runtimeCount(); i++)
+        ui->runtimesList->addItem(m_jobDefinition->runtimeAt(i));
+
 }
 
 void JobDefinitionWindow::getData()
@@ -92,6 +138,8 @@ void JobDefinitionWindow::getData()
     m_jobDefinition->setName(ui->jobNameEdit->text());
     m_jobDefinition->setWalltime(ui->walltimeEdit->text().toInt());
     m_jobDefinition->setMemory(ui->memoryEdit->text().toInt());
+    m_jobDefinition->setParamSize(ui->paramSweepValue->value());
+    m_jobDefinition->setEmail(ui->notificationEmailEdit->text());
 }
 
 
@@ -151,24 +199,16 @@ void JobDefinitionWindow::on_actionSaveJobDefinition_triggered()
 
     if (createDir.length()!=0)
         m_jobDefinition->save(createDir);
+
+    this->setData();
 }
 
 void JobDefinitionWindow::on_scriptTab_currentChanged(QWidget *arg1)
 {
     qDebug() << "currentChanged";
-    if (arg1 == ui->generalTab)
-    {
-        this->setData();
-    }
-    else
-    {
-        this->getData();
-    }
 
-    if (arg1 == ui->descriptionTab)
-    {
-        this->setData();
-    }
+    this->getData();
+    this->setData();
 }
 
 void JobDefinitionWindow::on_addInputFileButton_clicked()
@@ -224,4 +264,47 @@ void JobDefinitionWindow::on_actionOpenJobDefinition_triggered()
         m_jobDefinition->load(jobDir);
         this->setData();
     }
+}
+
+void JobDefinitionWindow::on_addRuntimeButton_clicked()
+{
+    m_jobDefinition->addRuntime(ui->runtimeCombo->currentText(), "");
+    this->setData();
+}
+
+void JobDefinitionWindow::on_removeRuntimeButton_clicked()
+{
+    m_jobDefinition->removeRuntime(ui->runtimesList->currentRow());
+    this->setData();
+}
+
+void JobDefinitionWindow::on_clearRuntimesButton_clicked()
+{
+    m_jobDefinition->clearRuntimes();
+    this->setData();
+}
+
+void JobDefinitionWindow::on_addIdButton_clicked()
+{
+    ui->scriptEditor->insertPlainText("%id%");
+}
+
+void JobDefinitionWindow::on_addSizeButton_clicked()
+{
+    ui->scriptEditor->insertPlainText("%size%");
+}
+
+void JobDefinitionWindow::on_addJobNameButton_clicked()
+{
+    ui->scriptEditor->insertPlainText("%jobname%");
+}
+
+void JobDefinitionWindow::on_sampleScriptCombo_currentIndexChanged(int index)
+{
+
+}
+
+void JobDefinitionWindow::on_sampleScriptCombo_activated(int index)
+{
+
 }

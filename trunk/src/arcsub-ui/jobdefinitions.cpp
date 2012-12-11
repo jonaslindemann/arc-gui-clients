@@ -68,6 +68,8 @@ JobDefinitionBase::JobDefinitionBase(QObject *parent, QString name) :
     m_xrsl = "";
     m_wallTime = 3600;
     m_memory = 2000;
+    m_paramSize = 5;
+    m_executable = "run.sh";
 }
 
 Arc::JobDescription& JobDefinitionBase::jobDescription()
@@ -78,13 +80,12 @@ Arc::JobDescription& JobDefinitionBase::jobDescription()
 
 void JobDefinitionBase::setExecutable(QString name)
 {
-    m_jobDescription.Application.Executable.Path = name.toStdString();
+    m_executable = name;
 }
 
 QString JobDefinitionBase::executable()
 {
-    QString executable = m_jobDescription.Application.Executable.Path.c_str();
-    return executable;
+    return m_executable;
 }
 
 void JobDefinitionBase::clearArguments()
@@ -99,13 +100,32 @@ void JobDefinitionBase::addArgument(QString argument)
 
 void JobDefinitionBase::clearRuntimes()
 {
-    m_jobDescription.Resources.RunTimeEnvironment.clear();
+    m_runtimeEnvironments.clear();
 }
 
 void JobDefinitionBase::addRuntime(QString runtimeName, QString runtimeVersion)
 {
-    QString RE = runtimeName + "-" + runtimeVersion;
-    m_jobDescription.Resources.RunTimeEnvironment.add(RE.toStdString(), Arc::Software::GREATERTHAN);
+    if (runtimeVersion.length()!=0)
+        m_runtimeEnvironments.append(runtimeName + "-" + runtimeVersion);
+    else
+        m_runtimeEnvironments.append(runtimeName);
+}
+
+int JobDefinitionBase::runtimeCount()
+{
+    return m_runtimeEnvironments.count();
+}
+
+QString JobDefinitionBase::runtimeAt(int idx)
+{
+    if ((idx>=0)&&(idx<m_runtimeEnvironments.count()))
+        return m_runtimeEnvironments[idx];
+}
+
+void JobDefinitionBase::removeRuntime(int idx)
+{
+    if ((idx>=0)&&(idx<m_runtimeEnvironments.count()))
+        m_runtimeEnvironments.removeAt(idx);
 }
 
 void JobDefinitionBase::setName(QString name)
@@ -248,9 +268,11 @@ void JobDefinitionBase::setupJobDir(QString createPath)
 
 void JobDefinitionBase::setupJobDescription()
 {
+    m_jobDescription.Identification.JobName = m_name.toStdString();
     m_jobDescription.Resources.IndividualPhysicalMemory = m_memory;
     m_jobDescription.Resources.TotalWallTime.range.max = m_wallTime;
     m_jobDescription.Resources.TotalWallTime.range.min = m_wallTime;
+    m_jobDescription.Application.Executable.Path = m_executable.toStdString();
 
     m_jobDescription.DataStaging.InputFiles.clear();
     for (int i=0; i<m_inputFiles.count(); i++)
@@ -265,6 +287,11 @@ void JobDefinitionBase::setupJobDescription()
         m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
         m_jobDescription.DataStaging.OutputFiles.front().Name = m_outputFiles[i].toStdString();
     }
+
+    m_jobDescription.Resources.RunTimeEnvironment.clear();
+
+    for (int i=0; i<m_runtimeEnvironments.count(); i++)
+        m_jobDescription.Resources.RunTimeEnvironment.add(m_runtimeEnvironments[i].toStdString(), Arc::Software::GREATERTHANOREQUAL);
 }
 
 void JobDefinitionBase::setupParamDirs()
@@ -329,11 +356,14 @@ bool JobDefinitionBase::load(QString jobDefDir)
             m_jobDir = jobDefDir;
             QSettings jobDefConfig(m_jobDir+"/config.ini", QSettings::IniFormat);
 
-            jobDefConfig.clear();
-
             jobDefConfig.beginGroup("Information");
             m_name = jobDefConfig.value("Name", "Noname").toString();
             m_email = jobDefConfig.value("Email","").toString();
+            jobDefConfig.endGroup();
+
+            jobDefConfig.beginGroup("Resources");
+            m_wallTime = jobDefConfig.value("Walltime", 120).toInt();
+            m_memory = jobDefConfig.value("Memory", 2000).toInt();
             jobDefConfig.endGroup();
 
             jobDefConfig.beginGroup("ParameterSweep");
@@ -375,9 +405,16 @@ bool JobDefinitionBase::save(QString saveDir)
 
     QSettings jobDefConfig(m_jobDir+"/config.ini", QSettings::IniFormat);
 
+    jobDefConfig.clear();
+
     jobDefConfig.beginGroup("Information");
     jobDefConfig.setValue("Name", m_name);
     jobDefConfig.setValue("Email", m_email);
+    jobDefConfig.endGroup();
+
+    jobDefConfig.beginGroup("Resources");
+    jobDefConfig.setValue("Walltime", m_wallTime);
+    jobDefConfig.setValue("Memory", m_memory);
     jobDefConfig.endGroup();
 
     jobDefConfig.beginGroup("ParameterSweep");
@@ -399,6 +436,8 @@ bool JobDefinitionBase::save(QString saveDir)
         jobDefConfig.setValue("OutputFileSource"+QString::number(i), m_outputFileUrls[i]);
     }
     jobDefConfig.endGroup();
+
+    jobDefConfig.sync();
 
     return true;
 }
@@ -435,9 +474,6 @@ void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumbe
 ShellScriptJob::ShellScriptJob(QObject *parent, QString name) :
     JobDefinitionBase(parent, name)
 {
-    this->setExecutable("/bin/sh");
-    this->addArgument("./run.sh");
-    this->addInputFile("run.sh");
 }
 
 void ShellScriptJob::setScript(QStringList script)
