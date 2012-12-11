@@ -32,9 +32,11 @@ private:
     QStringList m_inputFileUrls;
     QStringList m_outputFiles;
     QStringList m_outputFileUrls;
+    QStringList m_runtimeEnvironments;
     int m_wallTime;
     int m_memory;
     QString m_email;
+    QString m_executable;
 
     void setupJobDir(QString createPath = "");
     void setupParamDirs();
@@ -73,6 +75,9 @@ public:
 
     void clearRuntimes();
     void addRuntime(QString runtimeName, QString runtimeVersion);
+    int runtimeCount();
+    QString runtimeAt(int idx);
+    void removeRuntime(int idx);
 
     void setWalltime(int t);
     int walltime();

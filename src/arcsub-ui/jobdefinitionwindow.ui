@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>681</width>
-    <height>663</height>
+    <width>886</width>
+    <height>773</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="generalTab">
         <property name="sizePolicy">
@@ -68,7 +68,7 @@
             <widget class="QLabel" name="jobNameLabel">
              <property name="minimumSize">
               <size>
-               <width>175</width>
+               <width>200</width>
                <height>0</height>
               </size>
              </property>
@@ -88,7 +88,7 @@
             <widget class="QLabel" name="memoryLabel">
              <property name="minimumSize">
               <size>
-               <width>175</width>
+               <width>200</width>
                <height>0</height>
               </size>
              </property>
@@ -140,7 +140,7 @@
             <widget class="QLabel" name="notificationEmailLabel">
              <property name="minimumSize">
               <size>
-               <width>175</width>
+               <width>200</width>
                <height>0</height>
               </size>
              </property>
@@ -160,7 +160,7 @@
             <widget class="QLabel" name="wallTimeLabel">
              <property name="minimumSize">
               <size>
-               <width>150</width>
+               <width>200</width>
                <height>0</height>
               </size>
              </property>
@@ -387,6 +387,156 @@
         <attribute name="title">
          <string>Application</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="QComboBox" name="runtimeCombo">
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QListWidget" name="runtimesList"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_11">
+             <item>
+              <widget class="QPushButton" name="addRuntimeButton">
+               <property name="text">
+                <string>Add...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeRuntimeButton">
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clearRuntimesButton">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_5">
+        <attribute name="title">
+         <string>Script</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_13">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QPushButton" name="addIdButton">
+               <property name="toolTip">
+                <string>Inserts job id substitution parameter</string>
+               </property>
+               <property name="text">
+                <string>id</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addSizeButton">
+               <property name="toolTip">
+                <string>Inserts sweep size substitution parameter</string>
+               </property>
+               <property name="text">
+                <string>size</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addJobNameButton">
+               <property name="toolTip">
+                <string>Inserts the job name substution variable</string>
+               </property>
+               <property name="text">
+                <string>jobname</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="sampleScriptCombo">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Shellscript template</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>NumPy template</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Octave/Matlab template</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>R template</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>SciPy template</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTextEdit" name="scriptEditor">
+             <property name="font">
+              <font>
+               <family>Monospace</family>
+              </font>
+             </property>
+             <property name="acceptRichText">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="descriptionTab">
         <attribute name="title">
@@ -397,11 +547,6 @@
           <widget class="QTextEdit" name="descriptionText"/>
          </item>
         </layout>
-       </widget>
-       <widget class="QWidget" name="tab_5">
-        <attribute name="title">
-         <string>Script</string>
-        </attribute>
        </widget>
       </widget>
       <widget class="QTextEdit" name="logText">
@@ -432,7 +577,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>681</width>
+     <width>886</width>
      <height>28</height>
     </rect>
    </property>
@@ -459,15 +604,30 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNewJobDefinition"/>
+   <addaction name="actionOpenJobDefinition"/>
+   <addaction name="actionSaveJobDefinition"/>
   </widget>
   <action name="actionSaveJobDefinition">
    <property name="text">
     <string>Save job definition</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionOpenJobDefinition">
    <property name="text">
     <string>Open job definition</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionSubmitJobDefinition">
@@ -479,10 +639,19 @@
    <property name="text">
     <string>New job definition</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>

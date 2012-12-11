@@ -57,6 +57,22 @@ private Q_SLOTS:
 
     void on_actionOpenJobDefinition_triggered();
 
+    void on_addRuntimeButton_clicked();
+
+    void on_removeRuntimeButton_clicked();
+
+    void on_clearRuntimesButton_clicked();
+
+    void on_addIdButton_clicked();
+
+    void on_addSizeButton_clicked();
+
+    void on_addJobNameButton_clicked();
+
+    void on_sampleScriptCombo_currentIndexChanged(int index);
+
+    void on_sampleScriptCombo_activated(int index);
+
 private:
     Ui::JobDefinitionWindow *ui;
 };
