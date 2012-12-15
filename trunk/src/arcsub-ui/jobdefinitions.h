@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QSettings>
 
 #include <arc/client/JobDescription.h>
 
@@ -91,12 +92,15 @@ public:
     bool save(QString saveDir);
     void print();
 
-    QString xrslString();
+    QString xrslString(QString jobName="");
     Arc::JobDescription& jobDescription();
+
+    Arc::JobDescription& jobDescriptionParam(int i);
 
 protected:
     virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
-
+    virtual void doSaveSettings(QSettings& settings);
+    virtual void doLoadSettings(QSettings& settings);
     
 Q_SIGNALS:
     
@@ -104,16 +108,21 @@ public Q_SLOTS:
     
 };
 
-class ShellScriptJob : public JobDefinitionBase
+class ShellScriptDefinition : public JobDefinitionBase
 {
     Q_OBJECT
 private:
-    QStringList m_script;
+    QString m_script;
 public:
-    explicit ShellScriptJob(QObject *parent = 0, QString name = "");
+    explicit ShellScriptDefinition(QObject *parent = 0, QString name = "");
 
-    void setScript(QStringList script);
-    QStringList getScript();
+    void setScript(QString script);
+    QString script();
+
+protected:
+    virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
+    virtual void doSaveSettings(QSettings& settings);
+    virtual void doLoadSettings(QSettings& settings);
 };
 
 #endif // JOBDEFINITIONS_H

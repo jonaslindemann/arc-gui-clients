@@ -294,6 +294,24 @@ void JobDefinitionBase::setupJobDescription()
         m_jobDescription.Resources.RunTimeEnvironment.add(m_runtimeEnvironments[i].toStdString(), Arc::Software::GREATERTHANOREQUAL);
 }
 
+Arc::JobDescription& JobDefinitionBase::jobDescriptionParam(int i)
+{
+    this->setupJobDescription();
+
+    QString numberString;
+    numberString.sprintf("%03d", i);
+
+    QString paramDir = "param"+numberString;
+
+    // Define job name
+
+    QString jobName = m_name+"-"+numberString;
+    m_jobDescription.Identification.JobName = jobName.toStdString();
+    m_jobDescription.Application.Executable.Path = (m_jobDir+"/"+paramDir+"/run.sh").toStdString();
+
+    return m_jobDescription;
+}
+
 void JobDefinitionBase::setupParamDirs()
 {
     // Clean any existing param directories
@@ -314,22 +332,20 @@ void JobDefinitionBase::setupParamDirs()
 
         // Define job name
 
-        QString jobName = m_name+numberString;
+        QString jobName = m_name+"-"+numberString;
         m_jobDescription.Identification.JobName = jobName.toStdString();
-
 
         // Write job description file in parameter directory
 
-        QFile xrslFile(m_jobDir+"/"+paramDir+"/"+jobName+".xrsl");
+        QFile xrslFile(m_jobDir+"/"+paramDir+"/job.xrsl");
         xrslFile.open(QFile::WriteOnly);
         QTextStream out(&xrslFile);
-        out << xrslString() << endl;
+        out << xrslString(jobName) << endl;
         xrslFile.close();
 
         // Create job script file
 
         this->doCreateRunScript(m_jobDir+"/"+paramDir+"/run.sh", i, m_paramSize, jobName);
-
     }
 }
 
@@ -373,8 +389,8 @@ bool JobDefinitionBase::load(QString jobDefDir)
             jobDefConfig.beginGroup("InputFiles");
             for (int i=0; i<jobDefConfig.childKeys().count()/2; i++)
             {
-                QString inputFile = jobDefConfig.value("inputFile"+QString::number(i), "").toString();
-                QString inputFileSource = jobDefConfig.value("inputFileSource"+QString::number(i), "").toString();
+                QString inputFile = jobDefConfig.value("InputFile"+QString::number(i), "").toString();
+                QString inputFileSource = jobDefConfig.value("InputFileSource"+QString::number(i), "").toString();
                 if (inputFile.length()!=0)
                     this->addInputFile(inputFile, inputFileSource);
             }
@@ -383,12 +399,23 @@ bool JobDefinitionBase::load(QString jobDefDir)
             jobDefConfig.beginGroup("OutputFiles");
             for (int i=0; i<jobDefConfig.childKeys().count()/2; i++)
             {
-                QString outputFile = jobDefConfig.value("outputFile"+QString::number(i), "").toString();
-                QString outputFileSource = jobDefConfig.value("outputFileSource"+QString::number(i), "").toString();
+                QString outputFile = jobDefConfig.value("OutputFile"+QString::number(i), "").toString();
+                QString outputFileSource = jobDefConfig.value("OutputFileSource"+QString::number(i), "").toString();
                 if (outputFile.length()!=0)
                     this->addOutputFile(outputFile, outputFileSource);
             }
             jobDefConfig.endGroup();
+
+            jobDefConfig.beginGroup("RuntimeEnvironments");
+            for (int i=0; i<jobDefConfig.childKeys().count(); i++)
+            {
+                QString runtimeEnvironment = jobDefConfig.value("RuntimeEnvironments"+QString::number(i), "").toString();
+                if (runtimeEnvironment.length()!=0)
+                    m_runtimeEnvironments.append(runtimeEnvironment);
+            }
+            jobDefConfig.endGroup();
+
+            this->doLoadSettings(jobDefConfig);
         }
         else
             return false;
@@ -424,8 +451,8 @@ bool JobDefinitionBase::save(QString saveDir)
     jobDefConfig.beginGroup("InputFiles");
     for (int i=0; i<m_inputFiles.count(); i++)
     {
-        jobDefConfig.setValue("inputFile"+QString::number(i), m_inputFiles[i]);
-        jobDefConfig.setValue("inputFileSource"+QString::number(i), m_inputFileUrls[i]);
+        jobDefConfig.setValue("InputFile"+QString::number(i), m_inputFiles[i]);
+        jobDefConfig.setValue("InputFileSource"+QString::number(i), m_inputFileUrls[i]);
     }
     jobDefConfig.endGroup();
 
@@ -436,6 +463,13 @@ bool JobDefinitionBase::save(QString saveDir)
         jobDefConfig.setValue("OutputFileSource"+QString::number(i), m_outputFileUrls[i]);
     }
     jobDefConfig.endGroup();
+
+    jobDefConfig.beginGroup("RuntimeEnvironments");
+    for (int i=0; i<m_runtimeEnvironments.count(); i++)
+        jobDefConfig.setValue("RuntimeEnvironment"+QString::number(i), m_runtimeEnvironments[i]);
+    jobDefConfig.endGroup();
+
+    this->doSaveSettings(jobDefConfig);
 
     jobDefConfig.sync();
 
@@ -449,9 +483,15 @@ void JobDefinitionBase::print()
     std::cout << m_xrsl << std::endl;
 }
 
-QString JobDefinitionBase::xrslString()
+QString JobDefinitionBase::xrslString(QString jobName)
 {
     this->setupJobDescription();
+
+    if (jobName.length()==0)
+        m_jobDescription.Identification.JobName = m_name.toStdString();
+    else
+        m_jobDescription.Identification.JobName = jobName.toStdString();
+
     m_jobDescription.UnParse(m_xrsl, "nordugrid:xrsl");
     QString returnString = m_xrsl.c_str();
     return returnString;
@@ -470,18 +510,66 @@ void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumbe
     scriptFile.close();
 }
 
+void JobDefinitionBase::doSaveSettings(QSettings& settings)
+{
 
-ShellScriptJob::ShellScriptJob(QObject *parent, QString name) :
+}
+
+void JobDefinitionBase::doLoadSettings(QSettings& settings)
+{
+
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+
+
+ShellScriptDefinition::ShellScriptDefinition(QObject *parent, QString name) :
     JobDefinitionBase(parent, name)
 {
 }
 
-void ShellScriptJob::setScript(QStringList script)
+void ShellScriptDefinition::setScript(QString script)
 {
     m_script = script;
 }
 
-QStringList ShellScriptJob::getScript()
+QString ShellScriptDefinition::script()
 {
     return m_script;
 }
+
+void ShellScriptDefinition::doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName)
+{
+    QFile scriptFile(scriptFilename);
+    scriptFile.open(QFile::WriteOnly);
+    QTextStream out(&scriptFile);
+
+    out << m_script.arg(QString::number(paramNumber), QString::number(paramSize), jobName) << endl;
+
+    scriptFile.close();
+}
+
+void ShellScriptDefinition::doSaveSettings(QSettings& settings)
+{
+    QStringList scriptFile = m_script.split("\n");
+
+    settings.beginGroup("ScriptTemplate");
+    for (int i=0; i<scriptFile.count(); i++)
+        settings.setValue("row"+QString::number(i), scriptFile[i]);
+    settings.endGroup();
+}
+
+void ShellScriptDefinition::doLoadSettings(QSettings& settings)
+{
+    m_script = "";
+
+    settings.beginGroup("ScriptTemplate");
+    for (int i=0; i<settings.childKeys().count(); i++)
+    {
+        QString row = settings.value("row"+QString::number(i), "").toString();
+        m_script += row + "\n";
+    }
+    settings.endGroup();
+}
+
+

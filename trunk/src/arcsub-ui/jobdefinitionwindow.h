@@ -23,7 +23,7 @@ private:
     Arc::JobDescription m_jobDescription;
     Arc::LogStream m_logStream;
 
-    JobDefinitionBase* m_jobDefinition;
+    ShellScriptDefinition* m_jobDefinition;
 
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
@@ -72,6 +72,10 @@ private Q_SLOTS:
     void on_sampleScriptCombo_currentIndexChanged(int index);
 
     void on_sampleScriptCombo_activated(int index);
+
+    void on_actionExit_triggered();
+
+    void on_actionSubmitJobDefinition_triggered();
 
 private:
     Ui::JobDefinitionWindow *ui;
