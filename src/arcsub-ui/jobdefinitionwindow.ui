@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>886</width>
-    <height>773</height>
+    <width>687</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
         </size>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="generalTab">
         <property name="sizePolicy">
@@ -409,7 +409,7 @@
              <item>
               <widget class="QPushButton" name="addRuntimeButton">
                <property name="text">
-                <string>Add...</string>
+                <string>Add</string>
                </property>
               </widget>
              </item>
@@ -577,8 +577,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>886</width>
-     <height>28</height>
+     <width>687</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -588,6 +588,8 @@
     <addaction name="actionNewJobDefinition"/>
     <addaction name="actionOpenJobDefinition"/>
     <addaction name="actionSaveJobDefinition"/>
+    <addaction name="separator"/>
+    <addaction name="actionSubmitJobDefinition"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -607,6 +609,8 @@
    <addaction name="actionNewJobDefinition"/>
    <addaction name="actionOpenJobDefinition"/>
    <addaction name="actionSaveJobDefinition"/>
+   <addaction name="separator"/>
+   <addaction name="actionSubmitJobDefinition"/>
   </widget>
   <action name="actionSaveJobDefinition">
    <property name="text">
@@ -633,6 +637,9 @@
   <action name="actionSubmitJobDefinition">
    <property name="text">
     <string>Submit job definition</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionNewJobDefinition">

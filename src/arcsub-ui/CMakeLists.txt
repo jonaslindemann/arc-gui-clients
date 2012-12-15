@@ -7,12 +7,14 @@ SET(arcsubui_UIS
 )
 
 SET(arcsubui_SRCS
+  utils.cpp
   jobdefinitionwindow.cpp
   jobdefinitions.cpp
   main.cpp
 )
 
 SET(arcsubui_MOC_HDRS
+  utils.h
   jobdefinitions.h
   jobdefinitionwindow.h
 )

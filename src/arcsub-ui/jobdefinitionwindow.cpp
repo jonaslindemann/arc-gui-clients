@@ -12,6 +12,8 @@
 #include <arc/Logger.h>
 #include <arc/ArcLocation.h>
 
+#include "utils.h"
+
 JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::JobDefinitionWindow),
@@ -33,7 +35,7 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
 
     Arc::ArcLocation::Init("/usr");
 
-    m_jobDefinition = new JobDefinitionBase(this, "Test");
+    m_jobDefinition = new ShellScriptDefinition(this, "Test");
 
     this->setData();
 
@@ -41,6 +43,7 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     ui->actionNewJobDefinition->setIcon(QIcon::fromTheme("document-new"));
     ui->actionOpenJobDefinition->setIcon(QIcon::fromTheme("document-open"));
     ui->actionSaveJobDefinition->setIcon(QIcon::fromTheme("document-save"));
+    ui->actionSubmitJobDefinition->setIcon(QIcon::fromTheme("system-run"));
 #endif
 
     QStringList defaultREs;
@@ -131,6 +134,9 @@ void JobDefinitionWindow::setData()
     for (int i=0; i<m_jobDefinition->runtimeCount(); i++)
         ui->runtimesList->addItem(m_jobDefinition->runtimeAt(i));
 
+    ui->scriptEditor->clear();
+    ui->scriptEditor->append(m_jobDefinition->script());
+
 }
 
 void JobDefinitionWindow::getData()
@@ -140,6 +146,7 @@ void JobDefinitionWindow::getData()
     m_jobDefinition->setMemory(ui->memoryEdit->text().toInt());
     m_jobDefinition->setParamSize(ui->paramSweepValue->value());
     m_jobDefinition->setEmail(ui->notificationEmailEdit->text());
+    m_jobDefinition->setScript(ui->scriptEditor->document()->toPlainText());
 }
 
 
@@ -286,17 +293,17 @@ void JobDefinitionWindow::on_clearRuntimesButton_clicked()
 
 void JobDefinitionWindow::on_addIdButton_clicked()
 {
-    ui->scriptEditor->insertPlainText("%id%");
+    ui->scriptEditor->insertPlainText("%1");
 }
 
 void JobDefinitionWindow::on_addSizeButton_clicked()
 {
-    ui->scriptEditor->insertPlainText("%size%");
+    ui->scriptEditor->insertPlainText("%2");
 }
 
 void JobDefinitionWindow::on_addJobNameButton_clicked()
 {
-    ui->scriptEditor->insertPlainText("%jobname%");
+    ui->scriptEditor->insertPlainText("%3");
 }
 
 void JobDefinitionWindow::on_sampleScriptCombo_currentIndexChanged(int index)
@@ -307,4 +314,21 @@ void JobDefinitionWindow::on_sampleScriptCombo_currentIndexChanged(int index)
 void JobDefinitionWindow::on_sampleScriptCombo_activated(int index)
 {
 
+}
+
+void JobDefinitionWindow::on_actionExit_triggered()
+{
+    this->close();
+}
+
+void JobDefinitionWindow::on_actionSubmitJobDefinition_triggered()
+{
+    JobSubmitter* jobSubmitter = new JobSubmitter();
+
+    std::list<Arc::JobDescription> jobDescriptions;
+
+    for (int i=0; i<m_jobDefinition->paramSize(); i++)
+        jobDescriptions.push_back(m_jobDefinition->jobDescriptionParam(i));
+
+    jobSubmitter->submit(jobDescriptions);
 }
