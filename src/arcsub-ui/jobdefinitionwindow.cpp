@@ -13,6 +13,7 @@
 #include <arc/ArcLocation.h>
 
 #include "utils.h"
+#include "arcsubmitcontroller.h"
 
 JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -35,7 +36,9 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
 
     Arc::ArcLocation::Init("/usr");
 
-    m_jobDefinition = new ShellScriptDefinition(this, "Test");
+    m_submitController = new ArcSubmitController();
+
+    m_jobDefinition = new ShellScriptDefinition(this, "None");
 
     this->setData();
 
@@ -85,6 +88,7 @@ JobDefinitionWindow::~JobDefinitionWindow()
     delete m_debugStream;
     delete m_debugStream2;
     delete m_jobDefinition;
+    delete m_submitController;
 }
 
 void JobDefinitionWindow::customEvent(QEvent * event)
@@ -323,12 +327,9 @@ void JobDefinitionWindow::on_actionExit_triggered()
 
 void JobDefinitionWindow::on_actionSubmitJobDefinition_triggered()
 {
-    JobSubmitter* jobSubmitter = new JobSubmitter();
-
-    std::list<Arc::JobDescription> jobDescriptions;
-
     for (int i=0; i<m_jobDefinition->paramSize(); i++)
-        jobDescriptions.push_back(m_jobDefinition->jobDescriptionParam(i));
+        m_submitController->addJobDescription(m_jobDefinition->jobDescriptionParam(i));
 
-    jobSubmitter->submit(jobDescriptions);
+    m_submitController->setJobListFilename("/home/jonas/arcsub-ui.xml");
+    m_submitController->startSubmission();
 }

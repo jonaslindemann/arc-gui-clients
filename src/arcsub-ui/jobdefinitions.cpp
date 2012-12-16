@@ -273,13 +273,28 @@ void JobDefinitionBase::setupJobDescription()
     m_jobDescription.Resources.TotalWallTime.range.max = m_wallTime;
     m_jobDescription.Resources.TotalWallTime.range.min = m_wallTime;
     m_jobDescription.Application.Executable.Path = m_executable.toStdString();
+    m_jobDescription.Application.Output = "stdout.txt";
+    m_jobDescription.Application.Error = "stderr.txt";
 
     m_jobDescription.DataStaging.InputFiles.clear();
     for (int i=0; i<m_inputFiles.count(); i++)
     {
         m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
-        m_jobDescription.DataStaging.InputFiles.front().Name = m_inputFiles[i].toStdString();
-    }
+
+        if (m_inputFileUrls[i].length() == 0)
+        {
+            QFileInfo fileInfo(m_inputFiles[i]);
+            QString destinationFile = m_jobDir + QDir::separator() + fileInfo.fileName();
+            //QFile::link(m_inputFiles[i], destinationFile);
+            m_jobDescription.DataStaging.InputFiles.front().Name = fileInfo.fileName().toStdString();
+            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+m_inputFiles[i].toStdString()));
+        }
+        else
+        {
+            m_jobDescription.DataStaging.InputFiles.front().Name = m_inputFiles[i].toStdString();
+            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL(m_inputFileUrls[i].toStdString()));
+        }
+    }    
 
     m_jobDescription.DataStaging.OutputFiles.clear();
     for (int i=0; i<m_outputFiles.count(); i++)
@@ -287,6 +302,10 @@ void JobDefinitionBase::setupJobDescription()
         m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
         m_jobDescription.DataStaging.OutputFiles.front().Name = m_outputFiles[i].toStdString();
     }
+
+    m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
+    m_jobDescription.DataStaging.OutputFiles.front().Name = "/";
+    m_jobDescription.Application.LogDir = "joblog";
 
     m_jobDescription.Resources.RunTimeEnvironment.clear();
 
@@ -307,7 +326,11 @@ Arc::JobDescription& JobDefinitionBase::jobDescriptionParam(int i)
 
     QString jobName = m_name+"-"+numberString;
     m_jobDescription.Identification.JobName = jobName.toStdString();
-    m_jobDescription.Application.Executable.Path = (m_jobDir+"/"+paramDir+"/run.sh").toStdString();
+    m_jobDescription.Application.Executable.Path = "run.sh";
+
+    m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
+    m_jobDescription.DataStaging.InputFiles.front().Name = m_executable.toStdString();
+    m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL( ("file://"+m_jobDir+"/"+paramDir+"/"+"run.sh").toStdString()));
 
     return m_jobDescription;
 }
@@ -342,6 +365,18 @@ void JobDefinitionBase::setupParamDirs()
         QTextStream out(&xrslFile);
         out << xrslString(jobName) << endl;
         xrslFile.close();
+
+        // Create symbolic links to input files
+
+        for (int j=0; j<m_inputFiles.count(); j++)
+        {
+            if (m_inputFileUrls[j].length()==0)
+            {
+                QFileInfo fileInfo(m_inputFiles[j]);
+                QString destinationFile = m_jobDir + QDir::separator() + paramDir + QDir::separator() + fileInfo.fileName();
+                QFile::link(m_inputFiles[j], destinationFile);
+            }
+        }
 
         // Create job script file
 

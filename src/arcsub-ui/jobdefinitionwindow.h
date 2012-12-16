@@ -8,6 +8,7 @@
 #include "qdebugstream.h"
 
 #include "jobdefinitions.h"
+#include "arcsubmitcontroller.h"
 
 namespace Ui {
 class JobDefinitionWindow;
@@ -24,6 +25,8 @@ private:
     Arc::LogStream m_logStream;
 
     ShellScriptDefinition* m_jobDefinition;
+
+    ArcSubmitController* m_submitController;
 
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 

@@ -4,9 +4,17 @@ include(${QT_USE_FILE})
 
 SET(arcsubui_UIS
     jobdefinitionwindow.ui
+    ../common/proxywindow.ui
+    ../common/helpwindow.ui
 )
 
 SET(arcsubui_SRCS
+    ../common/arctools.cpp
+    ../common/arcproxy-utils.cpp
+    ../common/arcproxy-utils-functions.cpp
+    ../common/proxywindow.cpp
+    ../common/helpwindow.cpp  
+  arcsubmitcontroller.cpp
   utils.cpp
   jobdefinitionwindow.cpp
   jobdefinitions.cpp
@@ -14,6 +22,12 @@ SET(arcsubui_SRCS
 )
 
 SET(arcsubui_MOC_HDRS
+    ../common/arctools.h
+    ../common/arcproxy-utils.h
+    ../common/proxywindow.h
+    ../common/arcproxy-utils-functions.h
+    ../common/helpwindow.h
+  arcsubmitcontroller.h
   utils.h
   jobdefinitions.h
   jobdefinitionwindow.h
@@ -75,7 +89,7 @@ ELSE(APPLE)
 	add_executable(arcsub-ui ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H} )
 ENDIF(APPLE)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/src/common ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
 target_link_libraries (arcsub-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
 
