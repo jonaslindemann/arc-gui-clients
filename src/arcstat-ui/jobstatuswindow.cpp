@@ -44,6 +44,8 @@ JobStatusWindow::JobStatusWindow(QWidget *parent) :
     connect(m_jobController, SIGNAL(onCleanJobsDone()), this, SLOT(onCleanJobsDone()));
     connect(m_jobController, SIGNAL(onResubmitJobsDone()), this, SLOT(onResubmitJobsDone()));
     connect(m_jobController, SIGNAL(onQueryAllJobListStatusDone()), this, SLOT(onQueryAllJobListStatusDone()));
+
+    qDebug() << QApplication::arguments();
 }
 
 JobStatusWindow::~JobStatusWindow()
@@ -101,8 +103,23 @@ void JobStatusWindow::showEvent ( QShowEvent * event )
     {
         m_firstShow = false;
 
+        if (QApplication::arguments().length()>1)
+        {
+            QString filename = QApplication::arguments()[1];
+
+            if (!QFile(filename).exists())
+                return;
+            else
+            {
+                qDebug() << "Opening: " << filename;
+                this->statusBar()->showMessage("Querying job status...");
+                this->enableActions();
+                m_jobController->openJobList(filename);
+                //m_jobController->startQueryJobStatus();
+            }
+        }
+
         this->disableActions();
-        //m_jobController->startQueryJobStatus();
         m_jobController->startQueryAllJobListStatus();
     }
 }

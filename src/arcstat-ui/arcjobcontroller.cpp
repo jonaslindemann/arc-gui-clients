@@ -266,29 +266,28 @@ void ArcJobController::newJobList(const QString &jobListName)
 {
     if (m_jobListTable!=0)
     {
-        /*
-        //QTableWidget* jobTable = new QTableWidget(0, 3);
-        m_jobTable->clear();
-        m_jobTable->setRowCount(0);
-        m_jobTable->setColumnCount(3);
-        QStringList labels;
-        labels << "JobID" << "Name" << "State";
-        m_jobTable->setHorizontalHeaderLabels(labels);
-        m_jobTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
-        m_jobTable->verticalHeader()->hide();
-        m_jobTable->setShowGrid(true);
-        m_jobTable->setFrameStyle(QFrame::NoFrame);
-        m_jobTable->setSelectionBehavior(QTableWidget::SelectRows);
-        m_jobTable->setSelectionMode(QAbstractItemView::MultiSelection);
-        */
+        bool jobListExists = false;
 
-        JmJobList* jmJobList = new JmJobList();
-        jmJobList->setFilename(jobListName);
-        m_jmJobLists.append(jmJobList);
+        qDebug() << "Checking existing job lists.";
 
-        // Store index to m_jobList in table, to handle case when table is sorted.
+        for (int i=0; i<m_jmJobLists.count(); i++)
+        {
+            qDebug() << m_jmJobLists[i]->filename();
+            if (m_jmJobLists[i]->filename() == jobListName)
+                jobListExists = true;
+        }
 
-        m_currentJmJobList = jmJobList;
+        if (!jobListExists)
+        {
+            qDebug() << "Adding job list";
+            JmJobList* jmJobList = new JmJobList();
+            jmJobList->setFilename(jobListName);
+            m_jmJobLists.append(jmJobList);
+
+            // Store index to m_jobList in table, to handle case when table is sorted.
+
+            m_currentJmJobList = jmJobList;
+        }
 
         this->updateJobList();
         this->updateJobTable();

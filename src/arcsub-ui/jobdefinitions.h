@@ -23,6 +23,8 @@
 class JobDefinitionBase : public QObject
 {
     Q_OBJECT
+public:
+    enum TSweepType {ST_SINGLE_INPUT, ST_MULTIPLE_INPUT};
 private:
     Arc::JobDescription m_jobDescription;
     int m_paramSize;
@@ -38,6 +40,8 @@ private:
     int m_memory;
     QString m_email;
     QString m_executable;
+
+    TSweepType m_sweepType;
 
     void setupJobDir(QString createPath = "");
     void setupParamDirs();
@@ -60,8 +64,13 @@ public:
     void setEmail(QString email);
     QString email();
 
+    void setSweepType(TSweepType sweepType);
+    TSweepType sweepType();
+
     void clearInputFiles();
     void addInputFile(QString filename, QString sourceLocation = "");
+    void setInputFileAt(int idx, QString filename, QString sourceLocation = "");
+    void setInputSourceAt(int idx, QString sourceLocation);
     int inputFileCount();
     QString inputFileAt(int idx);
     QString inputFileSourceAt(int idx);
@@ -69,9 +78,11 @@ public:
 
     void clearOutputFiles();
     void addOutputFile(QString filename, QString targetLocation = "");
+    void setOutputFileAt(int idx, QString filename, QString targetLocation = "");
+    void setOutputTargetAt(int idx, QString targetLocation);
     int outputFileCount();
     QString outputFileAt(int idx);
-    QString outputFileSourceAt(int idx);
+    QString outputFileTargetAt(int idx);
     void removeOutputFile(int idx);
 
     void clearRuntimes();
@@ -85,6 +96,8 @@ public:
 
     void setMemory(int m);
     int memory();
+
+    QString jobDir();
 
     void clear();
     bool setup();

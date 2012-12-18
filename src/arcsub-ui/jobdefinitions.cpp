@@ -70,6 +70,7 @@ JobDefinitionBase::JobDefinitionBase(QObject *parent, QString name) :
     m_memory = 2000;
     m_paramSize = 5;
     m_executable = "run.sh";
+    m_sweepType = ST_SINGLE_INPUT;
 }
 
 Arc::JobDescription& JobDefinitionBase::jobDescription()
@@ -86,6 +87,16 @@ void JobDefinitionBase::setExecutable(QString name)
 QString JobDefinitionBase::executable()
 {
     return m_executable;
+}
+
+void JobDefinitionBase::setSweepType(TSweepType sweepType)
+{
+    m_sweepType = sweepType;
+}
+
+JobDefinitionBase::TSweepType JobDefinitionBase::sweepType()
+{
+    return m_sweepType;
 }
 
 void JobDefinitionBase::clearArguments()
@@ -146,8 +157,32 @@ void JobDefinitionBase::clearInputFiles()
 
 void JobDefinitionBase::addInputFile(QString filename, QString sourceLocation)
 {
-    m_inputFiles.append(filename);
-    m_inputFileUrls.append(sourceLocation);
+    if (sourceLocation.length()==0)
+    {
+        m_inputFiles.append(QFileInfo(filename).fileName());
+        m_inputFileUrls.append(filename);
+    }
+    else
+    {
+        m_inputFiles.append(filename);
+        m_inputFileUrls.append(sourceLocation);
+    }
+}
+
+void JobDefinitionBase::setInputFileAt(int idx, QString filename, QString sourceLocation)
+{
+    if ((idx>=0)&&(idx<m_inputFiles.count()))
+    {
+        m_inputFiles[idx] = filename;
+        if (sourceLocation.length()>0)
+            m_inputFileUrls[idx] = sourceLocation;
+    }
+}
+
+void JobDefinitionBase::setInputSourceAt(int idx, QString sourceLocation)
+{
+    if ((idx>=0)&&(idx<m_inputFiles.count()))
+        m_inputFileUrls[idx] = sourceLocation;
 }
 
 void JobDefinitionBase::clearOutputFiles()
@@ -160,6 +195,22 @@ void JobDefinitionBase::addOutputFile(QString filename, QString targetLocation)
 {
     m_outputFiles.append(filename);
     m_outputFileUrls.append(targetLocation);
+}
+
+void JobDefinitionBase::setOutputFileAt(int idx, QString filename, QString targetLocation)
+{
+    if ((idx>=0)&&(idx<m_outputFiles.count()))
+    {
+        m_outputFileUrls[idx] = filename;
+        if (targetLocation.length()>0)
+            m_outputFileUrls[idx] = targetLocation;
+    }
+}
+
+void JobDefinitionBase::setOutputTargetAt(int idx, QString targetLocation)
+{
+    if ((idx>=0)&&(idx<m_outputFiles.count()))
+        m_outputFileUrls[idx] = targetLocation;
 }
 
 int JobDefinitionBase::inputFileCount()
@@ -199,7 +250,7 @@ QString JobDefinitionBase::outputFileAt(int idx)
         return m_outputFiles.at(idx);
 }
 
-QString JobDefinitionBase::outputFileSourceAt(int idx)
+QString JobDefinitionBase::outputFileTargetAt(int idx)
 {
     if ((idx>=0)&&(idx<m_outputFileUrls.count()))
         return m_outputFileUrls.at(idx);
@@ -254,6 +305,12 @@ QString JobDefinitionBase::email()
     return m_email;
 }
 
+QString JobDefinitionBase::jobDir()
+{
+    return m_jobDir;
+}
+
+
 void JobDefinitionBase::setupJobDir(QString createPath)
 {
     if (createPath.length()==0)
@@ -281,19 +338,13 @@ void JobDefinitionBase::setupJobDescription()
     {
         m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
 
-        if (m_inputFileUrls[i].length() == 0)
-        {
-            QFileInfo fileInfo(m_inputFiles[i]);
-            QString destinationFile = m_jobDir + QDir::separator() + fileInfo.fileName();
-            //QFile::link(m_inputFiles[i], destinationFile);
-            m_jobDescription.DataStaging.InputFiles.front().Name = fileInfo.fileName().toStdString();
-            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+m_inputFiles[i].toStdString()));
-        }
-        else
-        {
-            m_jobDescription.DataStaging.InputFiles.front().Name = m_inputFiles[i].toStdString();
-            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL(m_inputFileUrls[i].toStdString()));
-        }
+        /*
+        QFileInfo fileInfo(m_inputFiles[i]);
+        QString destinationFile = m_jobDir + QDir::separator() + fileInfo.fileName();
+        */
+        //QFile::link(m_inputFiles[i], destinationFile);
+        m_jobDescription.DataStaging.InputFiles.front().Name = m_inputFiles[i].toStdString();
+        m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+m_inputFileUrls[i].toStdString()));
     }    
 
     m_jobDescription.DataStaging.OutputFiles.clear();
@@ -301,6 +352,7 @@ void JobDefinitionBase::setupJobDescription()
     {
         m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
         m_jobDescription.DataStaging.OutputFiles.front().Name = m_outputFiles[i].toStdString();
+        m_jobDescription.DataStaging.OutputFiles.front().Targets.push_back(Arc::URL(m_outputFileUrls[i].toStdString()));
     }
 
     m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
@@ -435,7 +487,7 @@ bool JobDefinitionBase::load(QString jobDefDir)
             for (int i=0; i<jobDefConfig.childKeys().count()/2; i++)
             {
                 QString outputFile = jobDefConfig.value("OutputFile"+QString::number(i), "").toString();
-                QString outputFileSource = jobDefConfig.value("OutputFileSource"+QString::number(i), "").toString();
+                QString outputFileSource = jobDefConfig.value("OutputFileTarget"+QString::number(i), "").toString();
                 if (outputFile.length()!=0)
                     this->addOutputFile(outputFile, outputFileSource);
             }
@@ -494,8 +546,8 @@ bool JobDefinitionBase::save(QString saveDir)
     jobDefConfig.beginGroup("OutputFiles");
     for (int i=0; i<m_outputFiles.count(); i++)
     {
-        jobDefConfig.setValue("OutputFiles"+QString::number(i), m_outputFiles[i]);
-        jobDefConfig.setValue("OutputFileSource"+QString::number(i), m_outputFileUrls[i]);
+        jobDefConfig.setValue("OutputFile"+QString::number(i), m_outputFiles[i]);
+        jobDefConfig.setValue("OutputFileTarget"+QString::number(i), m_outputFileUrls[i]);
     }
     jobDefConfig.endGroup();
 

@@ -97,6 +97,7 @@ int ArcSubmitController::submit()
          m_jobDescriptions.begin(); itJ != m_jobDescriptions.end();
          ++itJ, ++jobnr) {
         std::cout << "Submitting " << jobnr << " of " << m_jobDescriptions.size() << std::endl;
+        Q_EMIT onSubmissionStatus(jobnr, m_jobDescriptions.size(), "Submitting job.");
         bool descriptionSubmitted = false;
         submittedJobs.push_back(Arc::Job());
         broker.set(*itJ);

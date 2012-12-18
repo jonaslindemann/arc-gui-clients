@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QDebug>
+#include <QTableWidget>
+
 #include <arc/client/JobDescription.h>
 
 #include "qdebugstream.h"
@@ -28,6 +30,8 @@ private:
 
     ArcSubmitController* m_submitController;
 
+    bool m_updatingTables;
+
     void handleDebugStreamEvent(const DebugStreamEvent *event);
 
     void setData();
@@ -41,6 +45,8 @@ protected:
     void customEvent(QEvent * event);
     
 private Q_SLOTS:
+
+    void onSubmissionStatus(int currentJobId, int totalJobs, QString text);
 
     void on_actionSaveJobDefinition_triggered();
 
@@ -79,6 +85,20 @@ private Q_SLOTS:
     void on_actionExit_triggered();
 
     void on_actionSubmitJobDefinition_triggered();
+
+    void on_actionShowJobStatus_triggered();
+
+    void on_singleInputMultipleOutputRadio_clicked();
+
+    void on_multipleInputMultipleOutputRadio_clicked();
+
+    void on_outputFileTable_itemChanged(QTableWidgetItem *item);
+
+    void on_inputFileTable_itemChanged(QTableWidgetItem *item);
+
+    void on_outputFileTable_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
+
+    void on_inputFileTable_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
 
 private:
     Ui::JobDefinitionWindow *ui;
