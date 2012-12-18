@@ -14,6 +14,7 @@ class ARCTools : public QObject
 private:
     Arc::UserConfig* m_userConfig;
     ArcProxyController* m_proxyController;
+    QString m_jobListFile;
 public:
     static ARCTools* instance()
     {
@@ -44,6 +45,8 @@ public:
     Arc::UserConfig* currentUserConfig();
     bool hasValidProxy();
 
+    void setJobListFile(QString filename);
+    QString jobListFile();
 
     void proxyCertificateTool();
     void certConversionTool();

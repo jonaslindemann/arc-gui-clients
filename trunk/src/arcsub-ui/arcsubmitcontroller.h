@@ -37,6 +37,7 @@ private Q_SLOTS:
 
 Q_SIGNALS:
     void onSubmissionFinished();
+    void onSubmissionStatus(int currentJobId, int totalJobs, QString text);
 };
 
 #endif

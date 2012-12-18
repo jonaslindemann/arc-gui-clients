@@ -105,6 +105,16 @@ bool ARCTools::hasValidProxy()
     return m_proxyController->checkProxy() == ArcProxyController::PS_VALID;
 }
 
+void ARCTools::setJobListFile(QString filename)
+{
+    m_jobListFile = filename;
+}
+
+QString ARCTools::jobListFile()
+{
+    return m_jobListFile;
+}
+
 
 void ARCTools::proxyCertificateTool()
 {
@@ -121,7 +131,10 @@ void ARCTools::certConversionTool()
 void ARCTools::jobManagerTool()
 {
     QProcess process;
-    process.startDetached("arcstat-ui");
+    if (m_jobListFile.length()==0)
+        process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcstat-ui/arcstat-ui");
+    else
+        process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcstat-ui/arcstat-ui "+m_jobListFile);
 }
 
 void ARCTools::submissionTool()
