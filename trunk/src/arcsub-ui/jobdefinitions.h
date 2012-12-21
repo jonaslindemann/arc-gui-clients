@@ -38,6 +38,7 @@ private:
     QStringList m_runtimeEnvironments;
     int m_wallTime;
     int m_memory;
+    int m_processorCount;
     QString m_email;
     QString m_executable;
 
@@ -63,6 +64,9 @@ public:
 
     void setEmail(QString email);
     QString email();
+
+    void setProcessorCount(int count);
+    int processorCount();
 
     void setSweepType(TSweepType sweepType);
     TSweepType sweepType();
@@ -112,6 +116,8 @@ public:
 
 protected:
     virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
+    virtual void doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName);
+    virtual void doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName);
     virtual void doSaveSettings(QSettings& settings);
     virtual void doLoadSettings(QSettings& settings);
     

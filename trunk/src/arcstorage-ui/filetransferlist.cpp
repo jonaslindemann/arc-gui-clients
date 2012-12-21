@@ -35,8 +35,10 @@ void FileTransferProcessingThread::run()
     while(!m_terminate)
     {
         while(!m_pause)
+        {
             FileTransferList::instance()->processTransfers();
-        sleep(GlobalStateInfo::instance()->transferThreadWakeUpInterval());
+            sleep(GlobalStateInfo::instance()->transferThreadWakeUpInterval());
+        }
     }
 }
 

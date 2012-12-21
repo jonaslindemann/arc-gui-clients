@@ -58,6 +58,8 @@ int ArcSubmitController::submit()
         return 1;
     }
 
+    m_jobDescriptions.clear();
+
     std::list<std::string> preferredInterfaceNames;
 
     if (usercfg.InfoInterface().empty()) {

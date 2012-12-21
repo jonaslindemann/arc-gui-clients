@@ -127,6 +127,7 @@ void JobDefinitionWindow::setData()
     ui->memoryEdit->setText(QString::number(m_jobDefinition->memory()));
     ui->paramSweepValue->setValue(m_jobDefinition->paramSize());
     ui->notificationEmailEdit->setText(m_jobDefinition->email());
+    ui->processorCountSpin->setValue(m_jobDefinition->processorCount());
 
     ui->inputFileTable->clear();
     ui->inputFileTable->setRowCount(m_jobDefinition->inputFileCount());
@@ -196,6 +197,7 @@ void JobDefinitionWindow::getData()
     m_jobDefinition->setParamSize(ui->paramSweepValue->value());
     m_jobDefinition->setEmail(ui->notificationEmailEdit->text());
     m_jobDefinition->setScript(ui->scriptEditor->document()->toPlainText());
+    m_jobDefinition->setProcessorCount(ui->processorCountSpin->value());
 }
 
 void JobDefinitionWindow::onSubmissionStatus(int currentJobId, int totalJobs, QString text)
