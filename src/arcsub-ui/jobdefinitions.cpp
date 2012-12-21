@@ -70,6 +70,7 @@ JobDefinitionBase::JobDefinitionBase(QObject *parent, QString name) :
     m_memory = 2000;
     m_paramSize = 5;
     m_executable = "run.sh";
+    m_processorCount = 1;
     m_sweepType = ST_SINGLE_INPUT;
 }
 
@@ -87,6 +88,16 @@ void JobDefinitionBase::setExecutable(QString name)
 QString JobDefinitionBase::executable()
 {
     return m_executable;
+}
+
+void JobDefinitionBase::setProcessorCount(int count)
+{
+    m_processorCount = count;
+}
+
+int JobDefinitionBase::processorCount()
+{
+    return m_processorCount;
 }
 
 void JobDefinitionBase::setSweepType(TSweepType sweepType)
@@ -329,6 +340,8 @@ void JobDefinitionBase::setupJobDescription()
     m_jobDescription.Resources.IndividualPhysicalMemory = m_memory;
     m_jobDescription.Resources.TotalWallTime.range.max = m_wallTime;
     m_jobDescription.Resources.TotalWallTime.range.min = m_wallTime;
+
+    //m_jobDescription.Resources.ParallelEnvironment.
     m_jobDescription.Application.Executable.Path = m_executable.toStdString();
     m_jobDescription.Application.Output = "stdout.txt";
     m_jobDescription.Application.Error = "stderr.txt";
@@ -496,7 +509,7 @@ bool JobDefinitionBase::load(QString jobDefDir)
             jobDefConfig.beginGroup("RuntimeEnvironments");
             for (int i=0; i<jobDefConfig.childKeys().count(); i++)
             {
-                QString runtimeEnvironment = jobDefConfig.value("RuntimeEnvironments"+QString::number(i), "").toString();
+                QString runtimeEnvironment = jobDefConfig.value("RuntimeEnvironment"+QString::number(i), "").toString();
                 if (runtimeEnvironment.length()!=0)
                     m_runtimeEnvironments.append(runtimeEnvironment);
             }
@@ -595,6 +608,16 @@ void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumbe
     out << "echo I am " << paramNumber << " of " << paramSize << endl;
 
     scriptFile.close();
+}
+
+void JobDefinitionBase::doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName)
+{
+
+}
+
+void JobDefinitionBase::doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName)
+{
+
 }
 
 void JobDefinitionBase::doSaveSettings(QSettings& settings)
