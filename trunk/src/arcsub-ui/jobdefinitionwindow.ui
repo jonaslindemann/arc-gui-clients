@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>687</width>
-    <height>529</height>
+    <width>743</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -649,7 +649,42 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QTextEdit" name="descriptionText"/>
+          <layout class="QVBoxLayout" name="verticalLayout_14">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Parameter</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="scriptParamSpin">
+               <property name="maximum">
+                <number>9999</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTextEdit" name="descriptionText"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -682,8 +717,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>687</width>
-     <height>26</height>
+     <width>743</width>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -781,7 +816,6 @@
   <tabstop>clearInputFilesButton</tabstop>
   <tabstop>walltimeEdit</tabstop>
   <tabstop>paramSweepValue</tabstop>
-  <tabstop>descriptionText</tabstop>
   <tabstop>logText</tabstop>
   <tabstop>scriptTab</tabstop>
   <tabstop>jobNameEdit</tabstop>

@@ -42,6 +42,7 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     m_jobDefinition = new ShellScriptDefinition(this, "None");
 
     m_updatingTables = true;
+    m_currentParam = 0;
 
     this->setData();
 
@@ -63,6 +64,7 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     defaultREs << "APPS/MATH/NUMPY";
     defaultREs << "APPS/MATH/OCTAVE";
     defaultREs << "APPS/STATISTICS/R";
+    defaultREs << "APPS/MISC/POVRAY";
     defaultREs << "ENV/ALIEN";
     defaultREs << "ENV/GCC";
     defaultREs << "ENV/INTEL-11.1";
@@ -80,6 +82,7 @@ JobDefinitionWindow::JobDefinitionWindow(QWidget *parent) :
     defaultREs << "ENV/PYTHON";
     defaultREs << "ENV/RUNTIME/PROXY";
     defaultREs << "ENV/SCIPY";
+    defaultREs << "ENV/FULLNODE";
 
     ui->runtimeCombo->addItems(defaultREs);
     ui->runtimeCombo->setCurrentIndex(-1);
@@ -133,6 +136,8 @@ void JobDefinitionWindow::setData()
     ui->inputFileTable->setRowCount(m_jobDefinition->inputFileCount());
     ui->inputFileTable->setColumnCount(2);
 
+    ui->scriptParamSpin->setValue(m_currentParam);
+
 
     QStringList labels;
     labels << "Filename" << "Source URL";
@@ -176,7 +181,7 @@ void JobDefinitionWindow::setData()
     }
 
     ui->descriptionText->clear();
-    ui->descriptionText->setText(m_jobDefinition->xrslString());
+    ui->descriptionText->setText(m_jobDefinition->xrslStringParam(m_currentParam));
 
     ui->runtimesList->clear();
 
@@ -215,33 +220,6 @@ void JobDefinitionWindow::on_actionSaveJobDefinition_triggered()
     // egee:jdl
     // nordugrid:jsdl
     // emies:adl
-
-    //m_jobDescription.Identification.JobName = "Hello";
-
-    /*
-    m_jobDescription.Identification.JobName = "myjob";
-    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
-    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
-    m_jobDescription.DataStaging.InputFiles.push_back(Arc::InputFileType());
-    m_jobDescription.Application.Executable.Path = "executable";
-    m_jobDescription.Application.Executable.Argument.push_back("arg1");
-    m_jobDescription.Application.Executable.Argument.push_back("arg2");
-    m_jobDescription.Application.Executable.Argument.push_back("arg3");
-    m_jobDescription.DataStaging.OutputFiles.push_back(Arc::OutputFileType());
-    m_jobDescription.Resources.TotalWallTime.range = 2400;
-    m_jobDescription.Resources.RunTimeEnvironment.add(Arc::Software("SOFTWARE/HELLOWORLD-1.0.0"), Arc::Software::GREATERTHAN);
-
-    // Needed by the XRSLParser.
-    std::ofstream f("executable", std::ifstream::trunc);
-    f << "executable";
-    f.close();
-
-    //m_jobDescription.SaveToStream(std::cout, "userlong");
-
-    std::string xrsl;
-    m_jobDescription.UnParse(xrsl, "nordugrid:xrsl");
-    std::cout << xrsl << std::endl;
-    */
 
     this->getData();
 
@@ -455,4 +433,10 @@ void JobDefinitionWindow::on_outputFileTable_currentItemChanged(QTableWidgetItem
 
 void JobDefinitionWindow::on_inputFileTable_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
 {
+}
+
+void JobDefinitionWindow::on_scriptParamSpin_valueChanged(int arg1)
+{
+    m_currentParam = arg1;
+    this->setData();
 }

@@ -46,7 +46,7 @@ private:
 
     void setupJobDir(QString createPath = "");
     void setupParamDirs();
-    void setupJobDescription();
+    void setupJobDescription(int param = -1);
 public:
     explicit JobDefinitionBase(QObject *parent = 0, QString name = "");
 
@@ -110,6 +110,8 @@ public:
     void print();
 
     QString xrslString(QString jobName="");
+    QString xrslStringParam(int param);
+
     Arc::JobDescription& jobDescription();
 
     Arc::JobDescription& jobDescriptionParam(int i);
