@@ -334,14 +334,14 @@ void JobDefinitionBase::setupJobDir(QString createPath)
         QDir().mkdir(m_jobDir);
 }
 
-void JobDefinitionBase::setupJobDescription()
+void JobDefinitionBase::setupJobDescription(int param)
 {
     m_jobDescription.Identification.JobName = m_name.toStdString();
     m_jobDescription.Resources.IndividualPhysicalMemory = m_memory;
     m_jobDescription.Resources.TotalWallTime.range.max = m_wallTime;
     m_jobDescription.Resources.TotalWallTime.range.min = m_wallTime;
+    m_jobDescription.Resources.SlotRequirement.NumberOfSlots = m_processorCount;
 
-    //m_jobDescription.Resources.ParallelEnvironment.
     m_jobDescription.Application.Executable.Path = m_executable.toStdString();
     m_jobDescription.Application.Output = "stdout.txt";
     m_jobDescription.Application.Error = "stderr.txt";
@@ -349,27 +349,34 @@ void JobDefinitionBase::setupJobDescription()
     m_jobDescription.DataStaging.InputFiles.clear();
     for (int i=0; i<m_inputFiles.count(); i++)
     {
-        m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
+        QString inputFilename = m_inputFiles[i];
+        QString inputFileSource = m_inputFileUrls[i];
+        if (param!=-1)
+            this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name());
 
-        /*
-        QFileInfo fileInfo(m_inputFiles[i]);
-        QString destinationFile = m_jobDir + QDir::separator() + fileInfo.fileName();
-        */
-        //QFile::link(m_inputFiles[i], destinationFile);
-        m_jobDescription.DataStaging.InputFiles.front().Name = m_inputFiles[i].toStdString();
-        m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+m_inputFileUrls[i].toStdString()));
+        m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
+        m_jobDescription.DataStaging.InputFiles.front().Name = inputFilename.toStdString();
+        m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+inputFileSource.toStdString()));
     }    
 
     m_jobDescription.DataStaging.OutputFiles.clear();
     for (int i=0; i<m_outputFiles.count(); i++)
     {
+        QString outputFilename = m_outputFiles[i];
+        QString outputFileTarget = m_outputFileUrls[i];
+        if (param!=-1)
+            this->doProcessOutputFile(outputFilename, outputFileTarget, param, m_paramSize, this->name());
+
         m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
-        m_jobDescription.DataStaging.OutputFiles.front().Name = m_outputFiles[i].toStdString();
-        m_jobDescription.DataStaging.OutputFiles.front().Targets.push_back(Arc::URL(m_outputFileUrls[i].toStdString()));
+        m_jobDescription.DataStaging.OutputFiles.front().Name = outputFilename.toStdString();
+        m_jobDescription.DataStaging.OutputFiles.front().Targets.push_back(Arc::URL(outputFileTarget.toStdString()));
     }
 
-    m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
-    m_jobDescription.DataStaging.OutputFiles.front().Name = "/";
+    if (m_outputFiles.count()==0)
+    {
+        m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
+        m_jobDescription.DataStaging.OutputFiles.front().Name = "/";
+    }
     m_jobDescription.Application.LogDir = "joblog";
 
     m_jobDescription.Resources.RunTimeEnvironment.clear();
@@ -380,7 +387,7 @@ void JobDefinitionBase::setupJobDescription()
 
 Arc::JobDescription& JobDefinitionBase::jobDescriptionParam(int i)
 {
-    this->setupJobDescription();
+    this->setupJobDescription(i);
 
     QString numberString;
     numberString.sprintf("%03d", i);
@@ -425,12 +432,15 @@ void JobDefinitionBase::setupParamDirs()
 
         // Write job description file in parameter directory
 
+        /*
         QFile xrslFile(m_jobDir+"/"+paramDir+"/job.xrsl");
         xrslFile.open(QFile::WriteOnly);
         QTextStream out(&xrslFile);
         out << xrslString(jobName) << endl;
         xrslFile.close();
+        */
 
+        /*
         // Create symbolic links to input files
 
         for (int j=0; j<m_inputFiles.count(); j++)
@@ -442,7 +452,7 @@ void JobDefinitionBase::setupParamDirs()
                 QFile::link(m_inputFiles[j], destinationFile);
             }
         }
-
+        */
         // Create job script file
 
         this->doCreateRunScript(m_jobDir+"/"+paramDir+"/run.sh", i, m_paramSize, jobName);
@@ -597,6 +607,15 @@ QString JobDefinitionBase::xrslString(QString jobName)
     return returnString;
 }
 
+QString JobDefinitionBase::xrslStringParam(int param)
+{
+    this->setupJobDescription(param);
+    m_jobDescription.UnParse(m_xrsl, "nordugrid:xrsl");
+    QString returnString = m_xrsl.c_str();
+    return returnString;
+}
+
+
 void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName)
 {
     QFile scriptFile(scriptFilename);
@@ -612,12 +631,14 @@ void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumbe
 
 void JobDefinitionBase::doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName)
 {
-
+    inputFilename = inputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
+    inputSourceURL = inputSourceURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
 }
 
 void JobDefinitionBase::doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName)
 {
-
+    outputFilename = outputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
+    outputTargetURL = outputTargetURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
 }
 
 void JobDefinitionBase::doSaveSettings(QSettings& settings)

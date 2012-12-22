@@ -30,6 +30,8 @@ private:
 
     ArcSubmitController* m_submitController;
 
+    int m_currentParam;
+
     bool m_updatingTables;
 
     void handleDebugStreamEvent(const DebugStreamEvent *event);
@@ -99,6 +101,8 @@ private Q_SLOTS:
     void on_outputFileTable_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
 
     void on_inputFileTable_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
+
+    void on_scriptParamSpin_valueChanged(int arg1);
 
 private:
     Ui::JobDefinitionWindow *ui;
