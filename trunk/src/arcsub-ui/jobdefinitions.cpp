@@ -196,6 +196,98 @@ void JobDefinitionBase::setInputSourceAt(int idx, QString sourceLocation)
         m_inputFileUrls[idx] = sourceLocation;
 }
 
+int JobDefinitionBase::inputFileCount()
+{
+    return m_inputFiles.count();
+}
+
+QString JobDefinitionBase::inputFileAt(int idx)
+{
+    if ((idx>=0)&&(idx<m_inputFiles.count()))
+        return m_inputFiles.at(idx);
+}
+
+QString JobDefinitionBase::inputFileSourceAt(int idx)
+{
+    if ((idx>=0)&&(idx<m_inputFileUrls.count()))
+        return m_inputFileUrls.at(idx);
+}
+
+void JobDefinitionBase::removeInputFile(int idx)
+{
+    if ((idx>=0)&&(idx<m_inputFileUrls.count()))
+    {
+        m_inputFiles.removeAt(idx);
+        m_inputFileUrls.removeAt(idx);
+    }
+}
+
+//------
+
+void JobDefinitionBase::clearPerJobFiles()
+{
+    m_perJobFiles.clear();
+    m_perJobFileUrls.clear();
+}
+
+void JobDefinitionBase::addPerJobFile(QString filename, QString sourceLocation)
+{
+    if (sourceLocation.length()==0)
+    {
+        m_perJobFiles.append(QFileInfo(filename).fileName());
+        m_perJobFileUrls.append(filename);
+    }
+    else
+    {
+        m_perJobFiles.append(filename);
+        m_perJobFileUrls.append(sourceLocation);
+    }
+}
+
+void JobDefinitionBase::setPerJobFileAt(int idx, QString filename, QString sourceLocation)
+{
+    if ((idx>=0)&&(idx<m_perJobFiles.count()))
+    {
+        m_perJobFiles[idx] = filename;
+        if (sourceLocation.length()>0)
+            m_perJobFileUrls[idx] = sourceLocation;
+    }
+}
+
+void JobDefinitionBase::setPerJobSourceAt(int idx, QString sourceLocation)
+{
+    if ((idx>=0)&&(idx<m_perJobFiles.count()))
+        m_perJobFileUrls[idx] = sourceLocation;
+}
+
+int JobDefinitionBase::perJobFileCount()
+{
+    return m_perJobFiles.count();
+}
+
+QString JobDefinitionBase::perJobFileAt(int idx)
+{
+    if ((idx>=0)&&(idx<m_perJobFiles.count()))
+        return m_perJobFiles.at(idx);
+}
+
+QString JobDefinitionBase::perJobFileSourceAt(int idx)
+{
+    if ((idx>=0)&&(idx<m_perJobFileUrls.count()))
+        return m_perJobFileUrls.at(idx);
+}
+
+void JobDefinitionBase::removePerJobFile(int idx)
+{
+    if ((idx>=0)&&(idx<m_perJobFileUrls.count()))
+    {
+        m_perJobFiles.removeAt(idx);
+        m_perJobFileUrls.removeAt(idx);
+    }
+}
+
+//-----
+
 void JobDefinitionBase::clearOutputFiles()
 {
     m_outputFiles.clear();
@@ -224,31 +316,6 @@ void JobDefinitionBase::setOutputTargetAt(int idx, QString targetLocation)
         m_outputFileUrls[idx] = targetLocation;
 }
 
-int JobDefinitionBase::inputFileCount()
-{
-    return m_inputFiles.count();
-}
-
-QString JobDefinitionBase::inputFileAt(int idx)
-{
-    if ((idx>=0)&&(idx<m_inputFiles.count()))
-        return m_inputFiles.at(idx);
-}
-
-QString JobDefinitionBase::inputFileSourceAt(int idx)
-{
-    if ((idx>=0)&&(idx<m_inputFileUrls.count()))
-        return m_inputFileUrls.at(idx);
-}
-
-void JobDefinitionBase::removeInputFile(int idx)
-{
-    if ((idx>=0)&&(idx<m_inputFileUrls.count()))
-    {
-        m_inputFiles.removeAt(idx);
-        m_inputFileUrls.removeAt(idx);
-    }
-}
 
 int JobDefinitionBase::outputFileCount()
 {
@@ -356,8 +423,30 @@ void JobDefinitionBase::setupJobDescription(int param)
 
         m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
         m_jobDescription.DataStaging.InputFiles.front().Name = inputFilename.toStdString();
-        m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+inputFileSource.toStdString()));
-    }    
+        if (!inputFileSource.contains(":"))
+            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+inputFileSource.toStdString()));
+        else
+            m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL(inputFileSource.toStdString()));
+
+    }
+
+    if ((m_perJobFiles.count()>0)&&(param!=-1))
+    {
+        if (param<m_perJobFiles.count())
+        {
+            QString inputFilename = m_perJobFiles[param];
+            QString inputFileSource = m_perJobFileUrls[param];
+            if (param!=-1)
+                this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name());
+
+            m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
+            m_jobDescription.DataStaging.InputFiles.front().Name = inputFilename.toStdString();
+            if (!inputFileSource.contains(":"))
+                m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL("file:////"+inputFileSource.toStdString()));
+            else
+                m_jobDescription.DataStaging.InputFiles.front().Sources.push_back(Arc::URL(inputFileSource.toStdString()));
+        }
+    }
 
     m_jobDescription.DataStaging.OutputFiles.clear();
     for (int i=0; i<m_outputFiles.count(); i++)
@@ -455,7 +544,23 @@ void JobDefinitionBase::setupParamDirs()
         */
         // Create job script file
 
-        this->doCreateRunScript(m_jobDir+"/"+paramDir+"/run.sh", i, m_paramSize, jobName);
+        QString perJobFilename;
+        if (i<m_perJobFiles.count())
+            perJobFilename = m_perJobFiles.at(i);
+        else
+            perJobFilename = "";
+
+        QString script;
+
+        QFile scriptFile(m_jobDir+"/"+paramDir+"/run.sh");
+        scriptFile.open(QFile::WriteOnly);
+
+        QTextStream out(&scriptFile);
+
+        this->doCreateRunScript(i, m_paramSize, jobName, perJobFilename, script);
+        out << script;
+
+        scriptFile.close();
     }
 }
 
@@ -503,6 +608,16 @@ bool JobDefinitionBase::load(QString jobDefDir)
                 QString inputFileSource = jobDefConfig.value("InputFileSource"+QString::number(i), "").toString();
                 if (inputFile.length()!=0)
                     this->addInputFile(inputFile, inputFileSource);
+            }
+            jobDefConfig.endGroup();
+
+            jobDefConfig.beginGroup("PerJobFiles");
+            for (int i=0; i<jobDefConfig.childKeys().count()/2; i++)
+            {
+                QString inputFile = jobDefConfig.value("InputFile"+QString::number(i), "").toString();
+                QString inputFileSource = jobDefConfig.value("InputFileSource"+QString::number(i), "").toString();
+                if (inputFile.length()!=0)
+                    this->addPerJobFile(inputFile, inputFileSource);
             }
             jobDefConfig.endGroup();
 
@@ -566,6 +681,14 @@ bool JobDefinitionBase::save(QString saveDir)
     }
     jobDefConfig.endGroup();
 
+    jobDefConfig.beginGroup("PerJobFiles");
+    for (int i=0; i<m_perJobFiles.count(); i++)
+    {
+        jobDefConfig.setValue("InputFile"+QString::number(i), m_perJobFiles[i]);
+        jobDefConfig.setValue("InputFileSource"+QString::number(i), m_perJobFileUrls[i]);
+    }
+    jobDefConfig.endGroup();
+
     jobDefConfig.beginGroup("OutputFiles");
     for (int i=0; i<m_outputFiles.count(); i++)
     {
@@ -615,18 +738,44 @@ QString JobDefinitionBase::xrslStringParam(int param)
     return returnString;
 }
 
-
-void JobDefinitionBase::doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName)
+QString JobDefinitionBase::runScript(int param)
 {
+    this->setupJobDescription(param);
+    QString runScript;
+
+    // Create job script file
+
+    QString perJobFilename;
+    if (param<m_perJobFiles.count())
+        perJobFilename = m_perJobFiles.at(param);
+    else
+        perJobFilename = "";
+
+    this->doCreateRunScript(param, m_paramSize, m_name, perJobFilename, runScript);
+
+    return runScript;
+}
+
+
+
+void JobDefinitionBase::doCreateRunScript(int paramNumber, int paramSize, QString jobName, QString perJobFilename, QString& script)
+{
+    /*
     QFile scriptFile(scriptFilename);
     scriptFile.open(QFile::WriteOnly);
     QTextStream out(&scriptFile);
+    */
 
+    script = "";
+
+    QTextStream out(&script);
     out << "#!/bin/sh" << endl;
     out << "echo Job : " << jobName << endl;
     out << "echo I am " << paramNumber << " of " << paramSize << endl;
 
+    /*
     scriptFile.close();
+    */
 }
 
 void JobDefinitionBase::doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName)
@@ -669,15 +818,18 @@ QString ShellScriptDefinition::script()
     return m_script;
 }
 
-void ShellScriptDefinition::doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName)
+void ShellScriptDefinition::doCreateRunScript(int paramNumber, int paramSize, QString jobName, QString perJobFilename, QString& script)
 {
+    /*
     QFile scriptFile(scriptFilename);
     scriptFile.open(QFile::WriteOnly);
     QTextStream out(&scriptFile);
+    */
+    script = m_script.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
 
-    out << m_script.arg(QString::number(paramNumber), QString::number(paramSize), jobName) << endl;
-
+    /*
     scriptFile.close();
+    */
 }
 
 void ShellScriptDefinition::doSaveSettings(QSettings& settings)

@@ -245,3 +245,8 @@ void JobStatusWindow::on_actionRemoveJobList_triggered()
 {
     m_jobController->removeSelectedJobList();
 }
+
+void JobStatusWindow::on_actionShowFiles_triggered()
+{
+    m_jobController->openSessionDir();
+}

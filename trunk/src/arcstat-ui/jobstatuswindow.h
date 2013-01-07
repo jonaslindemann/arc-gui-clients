@@ -61,6 +61,8 @@ private Q_SLOTS:
 
     void on_actionRemoveJobList_triggered();
 
+    void on_actionShowFiles_triggered();
+
 private:
     Ui::JobStatusWindow *ui;
 };
