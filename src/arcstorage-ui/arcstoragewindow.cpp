@@ -7,6 +7,7 @@
 #include <QVariant>
 #include <QInputDialog>
 #include <QSpacerItem>
+#include <QApplication>
 #include <iostream>
 #include "arcstoragewindow.h"
 #include "ui_arcstoragewindow.h"
@@ -39,14 +40,20 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     QMainWindow(parent),
     ui(new Ui::ArcStorageWindow)
 {
-    if (!m_childWindow)
-        m_windowId = 0;
+
     qDebug() << "ArcStorageWindow()";
 
-    GlobalStateInfo::instance()->setMainWindow(this);
-    ARCTools::instance()->initUserConfig();
+    if (!childWindow)
+    {
+        GlobalStateInfo::instance()->setMainWindow(this);
+        ARCTools::instance()->initUserConfig();
+    }
 
     m_childWindow = childWindow;
+
+    if (!m_childWindow)
+        m_windowId = -1;
+
     Settings::loadFromDisk();
     QVariant qvar = Settings::getValue("urlList");
     QList<QVariant> urlList = qvar.toList();
@@ -114,9 +121,9 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     if (!m_childWindow) {
         m_debugStream = new QDebugStream(std::cout, ui->textOutput);
         m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+        ui->textOutput->clear();
     }
 
-    ui->textOutput->clear();
 
     // Redirect ARC logging to std::cout (in main window)
 
@@ -175,9 +182,9 @@ ArcStorageWindow::~ArcStorageWindow()
 
     // Disconnect log streams
 
-    Arc::Logger::getRootLogger().removeDestinations();
     if (!m_childWindow)
     {
+        Arc::Logger::getRootLogger().removeDestinations();
         delete m_logStream;
         delete m_debugStream;
         delete m_debugStream2;
@@ -205,14 +212,17 @@ void ArcStorageWindow::writeSettings()
     {
         GlobalStateInfo::instance()->writeSettings();
 
-        settings.remove("ArcStorageWindow");
-        settings.beginGroup("ArcStorageWindow");
+        settings.remove("MainWindow");
+        settings.beginGroup("MainWindow");
         settings.setValue("size", size());
         settings.setValue("pos", pos());
         settings.setValue("url", this->m_currentFileServer->getCurrentURL());
         settings.endGroup();
 
         int i;
+
+        for (i=0; i<10; i++)
+            settings.remove("ChildWindow"+QString::number(i));
 
         for (i=0; i<GlobalStateInfo::instance()->childWindowCount(); i++)
         {
@@ -237,7 +247,7 @@ void ArcStorageWindow::readSettings()
     {
         GlobalStateInfo::instance()->readSettings();
 
-        if (!settings.childGroups().contains("ArcStorageWindow"))
+        if (!settings.childGroups().contains("MainWindow"))
         {
             this->setGeometry(
                         QStyle::alignedRect(
@@ -250,13 +260,12 @@ void ArcStorageWindow::readSettings()
         }
         else
         {
-            settings.beginGroup("ArcStorageWindow");
+            settings.beginGroup("MainWindow");
             resize(settings.value("size", QSize(this->width(), this->height())).toSize());
             move(settings.value("pos", QPoint(this->x(), this->y())).toPoint());
             m_startUrl = settings.value("url", "").toString();
             settings.endGroup();
         }
-
 
         for (i=0; i<10; i++)
         {
@@ -292,6 +301,33 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
 
     m_currentFileServer->updateFileList(m_startUrl);
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+
+    if (!m_childWindow)
+    {
+        if (QApplication::argc()>1)
+        {
+            QString url = QApplication::arguments().at(1);
+            qDebug() << "URL to open: " << url;
+
+
+            /*
+            ArcStorageWindow* window = new ArcStorageWindow(0, true, url);
+            QRect r = this->geometry();
+            r.setLeft(this->geometry().left()+150);
+            r.setTop(this->geometry().top()+150);
+            r.setRight(this->geometry().right()+150);
+            r.setBottom(this->geometry().bottom()+150);
+
+            qDebug() << r;
+            window->setGeometry(r);
+            window->show();
+
+            GlobalStateInfo::instance()->addChildWindow(window);
+            */
+
+            this->openUrl(url);
+        }
+    }
 }
 
 void ArcStorageWindow::closeEvent(QCloseEvent *e)

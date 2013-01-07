@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>NorduGrid ARC Job manager</string>
+   <string>Job Manager</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -165,6 +165,7 @@
    <addaction name="actionKillSelected"/>
    <addaction name="actionCleanSelected"/>
    <addaction name="actionResubmitSelected"/>
+   <addaction name="actionShowFiles"/>
    <addaction name="actionDownloadSelected"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -277,6 +278,18 @@
    </property>
    <property name="text">
     <string>Remove job list</string>
+   </property>
+  </action>
+  <action name="actionShowFiles">
+   <property name="icon">
+    <iconset resource="arcstat-ui.qrc">
+     <normaloff>:/arcstat-ui/images/document-open.png</normaloff>:/arcstat-ui/images/document-open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show files</string>
+   </property>
+   <property name="toolTip">
+    <string>Show files in job directory</string>
    </property>
   </action>
  </widget>

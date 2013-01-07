@@ -74,6 +74,8 @@ public:
     void selectAllJobs();
     void clearSelection();
 
+    void openSessionDir();
+
     void saveState();
     void loadState();
 

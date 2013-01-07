@@ -5,6 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QSettings>
+#include <QList>
 
 #include <arc/client/JobDescription.h>
 
@@ -33,6 +34,8 @@ private:
     QString m_jobDir;
     QStringList m_inputFiles;
     QStringList m_inputFileUrls;
+    QStringList m_perJobFiles;
+    QStringList m_perJobFileUrls;
     QStringList m_outputFiles;
     QStringList m_outputFileUrls;
     QStringList m_runtimeEnvironments;
@@ -80,6 +83,15 @@ public:
     QString inputFileSourceAt(int idx);
     void removeInputFile(int idx);
 
+    void clearPerJobFiles();
+    void addPerJobFile(QString filename, QString sourceLocation = "");
+    void setPerJobFileAt(int idx, QString filename, QString sourceLocation = "");
+    void setPerJobSourceAt(int idx, QString sourceLocation);
+    int perJobFileCount();
+    QString perJobFileAt(int idx);
+    QString perJobFileSourceAt(int idx);
+    void removePerJobFile(int idx);
+
     void clearOutputFiles();
     void addOutputFile(QString filename, QString targetLocation = "");
     void setOutputFileAt(int idx, QString filename, QString targetLocation = "");
@@ -111,13 +123,14 @@ public:
 
     QString xrslString(QString jobName="");
     QString xrslStringParam(int param);
+    QString runScript(int param);
 
     Arc::JobDescription& jobDescription();
 
     Arc::JobDescription& jobDescriptionParam(int i);
 
 protected:
-    virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
+    virtual void doCreateRunScript(int paramNumber, int paramSize, QString jobName, QString perJobFilename, QString& script);
     virtual void doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName);
     virtual void doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName);
     virtual void doSaveSettings(QSettings& settings);
@@ -141,7 +154,7 @@ public:
     QString script();
 
 protected:
-    virtual void doCreateRunScript(QString scriptFilename, int paramNumber, int paramSize, QString jobName);
+    virtual void doCreateRunScript(int paramNumber, int paramSize, QString jobName, QString perJobFilename, QString& script);
     virtual void doSaveSettings(QSettings& settings);
     virtual void doLoadSettings(QSettings& settings);
 };

@@ -150,11 +150,33 @@ void JobDefinitionWindow::setData()
     ui->inputFileTable->setSelectionBehavior(QTableWidget::SelectRows);
     //ui->inputFileTable->setSelectionMode(QAbstractItemView::MultiSelection);
 
-
     for (int i=0; i<m_jobDefinition->inputFileCount(); i++)
     {
         ui->inputFileTable->setItem(i, 0, new QTableWidgetItem(m_jobDefinition->inputFileAt(i)));
         ui->inputFileTable->setItem(i, 1, new QTableWidgetItem(m_jobDefinition->inputFileSourceAt(i)));
+        //ui->inputFileTable->addItem(m_jobDefinition->inputFileAt(i));
+    }
+
+    ui->perJobFileTable->clear();
+    ui->perJobFileTable->setRowCount(m_jobDefinition->inputFileCount());
+    ui->perJobFileTable->setColumnCount(2);
+
+    labels.clear();
+    labels << "Filename" << "Source URL";
+    ui->perJobFileTable->setHorizontalHeaderLabels(labels);
+    ui->perJobFileTable->horizontalHeader()->setResizeMode(0, QHeaderView::Interactive);
+    ui->perJobFileTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+    ui->perJobFileTable->verticalHeader()->hide();
+    ui->perJobFileTable->setShowGrid(true);
+    ui->perJobFileTable->setFrameStyle(QFrame::NoFrame);
+    ui->perJobFileTable->setSelectionBehavior(QTableWidget::SelectRows);
+    //ui->inputFileTable->setSelectionMode(QAbstractItemView::MultiSelection);
+
+
+    for (int i=0; i<m_jobDefinition->perJobFileCount(); i++)
+    {
+        ui->perJobFileTable->setItem(i, 0, new QTableWidgetItem(m_jobDefinition->perJobFileAt(i)));
+        ui->perJobFileTable->setItem(i, 1, new QTableWidgetItem(m_jobDefinition->perJobFileSourceAt(i)));
         //ui->inputFileTable->addItem(m_jobDefinition->inputFileAt(i));
     }
 
@@ -182,6 +204,9 @@ void JobDefinitionWindow::setData()
 
     ui->descriptionText->clear();
     ui->descriptionText->setText(m_jobDefinition->xrslStringParam(m_currentParam));
+
+    ui->runScriptPreviewText->clear();
+    ui->runScriptPreviewText->setText(m_jobDefinition->runScript(m_currentParam));
 
     ui->runtimesList->clear();
 
@@ -439,4 +464,49 @@ void JobDefinitionWindow::on_scriptParamSpin_valueChanged(int arg1)
 {
     m_currentParam = arg1;
     this->setData();
+}
+
+void JobDefinitionWindow::on_addPerJobFileButton_clicked()
+{
+    QStringList filenames = QFileDialog::getOpenFileNames(this, "Add per job input files");
+
+    if (filenames.count()>0)
+    {
+        for (int i=0; i<filenames.count(); i++)
+            m_jobDefinition->addPerJobFile(filenames[i]);
+
+    }
+    this->setData();
+}
+
+void JobDefinitionWindow::on_removePerJobFileButton_clicked()
+{
+    int selectedItem = ui->outputFileTable->currentRow();
+    m_jobDefinition->removeOutputFile(selectedItem);
+    this->setData();
+}
+
+void JobDefinitionWindow::on_clearPerJobFileButton_clicked()
+{
+    m_jobDefinition->clearPerJobFiles();
+    this->setData();
+}
+
+void JobDefinitionWindow::on_perJobFileTable_itemChanged(QTableWidgetItem *item)
+{
+    if (!m_updatingTables)
+    {
+        qDebug() << "per job file current item changed.";
+        if (item->column()==0)
+            m_jobDefinition->setPerJobFileAt(item->row(), item->text());
+
+        if (item->column()==1)
+            m_jobDefinition->setPerJobSourceAt(item->row(), item->text());
+    }
+}
+
+void JobDefinitionWindow::on_addPerFileButton_clicked()
+{
+    ui->scriptEditor->insertPlainText("%4");
+    ui->scriptEditor->setFocus();
 }

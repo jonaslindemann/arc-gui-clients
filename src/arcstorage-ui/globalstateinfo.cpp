@@ -96,11 +96,13 @@ void GlobalStateInfo::addChildWindow(ArcStorageWindow* window)
 {
     m_childWindows.append(window);
 
+    /*
     for (int i=0; i<m_childWindows.count(); i++)
         this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
+    */
 
     this->enumerateWindows();
-    this->updateWindowList(m_mainWindow->getWindowListMenu());
+    //this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::removeChildWindow(ArcStorageWindow* window)
@@ -108,11 +110,13 @@ void GlobalStateInfo::removeChildWindow(ArcStorageWindow* window)
     m_childWindows.removeOne(window);
     delete window;
 
+    /*
     for (int i=0; i<m_childWindows.count(); i++)
         this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
+    */
 
     this->enumerateWindows();
-    this->updateWindowList(m_mainWindow->getWindowListMenu());
+    //this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::closeChildWindows()

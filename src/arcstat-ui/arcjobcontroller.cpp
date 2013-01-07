@@ -35,6 +35,7 @@
 #include <QPainter>
 #include <QLabel>
 #include <QSettings>
+#include <QProcess>
 
 #include "qdebugstream.h"
 
@@ -325,54 +326,6 @@ void ArcJobController::setDownloadDir(const QString& downloadDir)
 
 void ArcJobController::queryJobStatus(JmJobList* jobList)
 {
-#ifndef ARC_VERSION_2
-    // Read existing jobs from job list file
-
-    Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
-
-    // Clear the current JmJobList;
-
-    jobList->clear();
-
-    // Create an initial JmJobList will _all_ jobs in ARC joblist
-
-    std::list<Arc::Job>::iterator jli;
-
-    for (jli=m_arcJobList.begin(); jli!=m_arcJobList.end(); jli++) {
-        QString jobId = (*jli).JobID.fullstr().c_str();
-        QString jobName = (*jli).Name.c_str();
-        jobList->add(jobId, jobName, "Unknown");
-    }
-
-    // Create job supervisor and job controllers
-
-    if (m_jobSupervisor!=0)
-        delete m_jobSupervisor;
-
-    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
-    std::list<Arc::JobController*> jobControllers = m_jobSupervisor->GetJobControllers();
-
-    // Query status
-
-    std::list<std::string> status;
-    std::vector<const Arc::Job*> jobs;
-    std::list<Arc::JobController*>::iterator cit;
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        //cout << "Querying job controller." << endl;
-        (*cit)->FetchJobs(status, jobs);
-    }
-
-    // Update JmJobList
-
-    std::vector<const Arc::Job*>::iterator sit;
-
-    for (sit=jobs.begin(); sit!=jobs.end(); sit++) {
-        QString jobId = (*sit)->JobID.fullstr().c_str();
-        QString jobState = (*sit)->State.GetGeneralState().c_str();
-        jobList->fromJobId(jobId)->setState(jobState);
-    }
-#else
-
     // Read existing jobs from job list file
 
     Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
@@ -416,7 +369,6 @@ void ArcJobController::queryJobStatus(JmJobList* jobList)
         QString jobState = (*sit).State.GetGeneralState().c_str();
         jobList->fromJobId(jobId)->setState(jobState);
     }
-#endif
 }
 
 void ArcJobController::queryJobStatus()
@@ -530,30 +482,29 @@ void ArcJobController::clearSelection()
     m_jobTable->clearSelection();
 }
 
-void ArcJobController::cleanJobs()
+void ArcJobController::openSessionDir()
 {
     // Return if nothing is selected
 
     if (m_selectedJobIds.size()==0)
         return;
 
-#ifndef ARC_VERSION_2
+    if (m_selectedJobIds.size()!=1)
+        return;
 
-    // Create job supervisor and job controllers
+    QProcess process;
+    std::list<std::string>::iterator jli = m_selectedJobIds.begin();
+    QString commandLine = (*jli).c_str();
+    commandLine = "arcstorage-ui " + commandLine;
+    process.startDetached(commandLine);
+}
 
-    qDebug() << "Creating job supervisor...";
-    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
-    qDebug() << "Getting job controllers...";
-    std::list<Arc::JobController*> jobControllers = jobSupervisor.GetJobControllers();
-    std::list<Arc::JobController*>::iterator cit;
+void ArcJobController::cleanJobs()
+{
+    // Return if nothing is selected
 
-    std::list<std::string> status;
-
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        qDebug() << "Cleaning job...";
-        (*cit)->Clean(status, false);
-    }
-#else
+    if (m_selectedJobIds.size()==0)
+        return;
 
     // Read existing jobs from job list file
 
@@ -608,7 +559,6 @@ void ArcJobController::cleanJobs()
 
     if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cleaned))
         std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
-#endif
 }
 
 void ArcJobController::resubmitJobs()
@@ -800,23 +750,6 @@ void ArcJobController::killJobs()
     if (m_selectedJobIds.size()==0)
         return;
 
-#ifndef ARC_VERSION_2
-
-    // Create job supervisor and job controllers
-
-    qDebug() << "Creating job supervisor...";
-    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
-    qDebug() << "Getting job controllers...";
-    std::list<Arc::JobController*> jobControllers = jobSupervisor.GetJobControllers();
-    std::list<Arc::JobController*>::iterator cit;
-
-    std::list<std::string> status;
-
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        qDebug() << "Kill job...";
-        (*cit)->Kill(status, false);
-    }
-#else
     // Read existing jobs from job list file
 
     Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
@@ -870,8 +803,6 @@ void ArcJobController::killJobs()
 
     if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cleaned))
         std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
-
-#endif
 }
 
 void ArcJobController::getJobs()
@@ -886,25 +817,75 @@ void ArcJobController::getJobs()
     if (m_downloadDir == "")
         return;
 
-#ifndef ARC_VERSION_2
+    Arc::JobSupervisor jobSupervisor(m_userConfig, m_arcJobList);
 
-    // Create job supervisor and job controllers
+    jobSupervisor.Update();
+    jobSupervisor.SelectValid();
 
-    qDebug() << "Creating job supervisor...";
-    Arc::JobSupervisor jobSupervisor(m_userConfig, m_selectedJobIds);
-    qDebug() << "Getting job controllers...";
-    std::list<Arc::JobController*> jobControllers = jobSupervisor.GetJobControllers();
-    std::list<Arc::JobController*>::iterator cit;
+    std::list<std::string>::iterator sli;
+    std::list<Arc::URL> jobIds;
+    std::list<Arc::URL>::iterator jii;
 
-    std::list<std::string> status;
+    for (sli=m_selectedJobIds.begin(); sli!=m_selectedJobIds.end(); sli++)
+        jobIds.push_back(Arc::URL(*sli));
 
-    for (cit=jobControllers.begin(); cit!=jobControllers.end(); cit++) {
-        qDebug() << "Get job...";
-        (*cit)->Get(status, m_downloadDir.toStdString(), false, false);
+    std::cout << "Job ids to download -->" << std::endl;
+    for (jii=jobIds.begin(); jii!=jobIds.end(); jii++)
+        std::cout << (*jii) << std::endl;
+    std::cout << "<--" << std::endl;
+
+    jobSupervisor.ClearSelection();
+    jobSupervisor.SelectByID(jobIds);
+
+    /*
+    if (!opt.status.empty()) {
+      jobmaster.SelectByStatus(opt.status);
     }
-#else
+    */
 
-#endif
+    if (jobSupervisor.GetSelectedJobs().empty()) {
+      std::cout << Arc::IString("No jobs") << std::endl;
+      return;
+    }
+
+    std::list<std::string> downloaddirectories;
+    int retval = (int)!jobSupervisor.Retrieve(m_downloadDir.toStdString(), true, false, downloaddirectories);
+
+    for (std::list<std::string>::const_iterator it = downloaddirectories.begin();
+         it != downloaddirectories.end(); ++it) {
+      std::cout << Arc::IString("Results stored at: %s", *it) << std::endl;
+    }
+
+    unsigned int retrieved_num = jobSupervisor.GetIDsProcessed().size();
+    unsigned int notretrieved_num = jobSupervisor.GetIDsNotProcessed().size();
+    unsigned int cleaned_num = 0;
+
+    bool keepFiles= false;
+
+    if (!keepFiles) {
+      std::list<Arc::URL> retrieved = jobSupervisor.GetIDsProcessed();
+      // No need to clean selection because retrieved is subset of selected
+      jobSupervisor.SelectByID(retrieved);
+      if(!jobSupervisor.Clean()) {
+        std::cout << Arc::IString("Warning: Some jobs were not removed from server") << std::endl;
+        std::cout << Arc::IString("         Use arclean to remove retrieved jobs from job list", m_userConfig.JobListFile()) << std::endl;
+        retval = 1;
+      }
+      cleaned_num = jobSupervisor.GetIDsProcessed().size();
+
+      if (!Arc::Job::RemoveJobsFromFile(m_userConfig.JobListFile(), jobSupervisor.GetIDsProcessed())) {
+        std::cout << Arc::IString("Warning: Failed to lock job list file %s", m_userConfig.JobListFile()) << std::endl;
+        std::cout << Arc::IString("         Use arclean to remove retrieved jobs from job list", m_userConfig.JobListFile()) << std::endl;
+        retval = 1;
+      }
+
+      std::cout << Arc::IString("Jobs processed: %d, successfully retrieved: %d, successfully cleaned: %d", retrieved_num+notretrieved_num, retrieved_num, cleaned_num) << std::endl;
+
+    } else {
+
+      std::cout << Arc::IString("Jobs processed: %d, successfully retrieved: %d", retrieved_num+notretrieved_num, retrieved_num) << std::endl;
+
+    }
 }
 
 void ArcJobController::jobTableSelectionChanged()

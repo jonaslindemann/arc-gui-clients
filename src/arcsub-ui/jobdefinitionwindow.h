@@ -104,6 +104,16 @@ private Q_SLOTS:
 
     void on_scriptParamSpin_valueChanged(int arg1);
 
+    void on_addPerJobFileButton_clicked();
+
+    void on_removePerJobFileButton_clicked();
+
+    void on_clearPerJobFileButton_clicked();
+
+    void on_perJobFileTable_itemChanged(QTableWidgetItem *item);
+
+    void on_addPerFileButton_clicked();
+
 private:
     Ui::JobDefinitionWindow *ui;
 };
