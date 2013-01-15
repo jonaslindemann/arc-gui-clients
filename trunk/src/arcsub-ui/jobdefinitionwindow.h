@@ -5,7 +5,13 @@
 #include <QDebug>
 #include <QTableWidget>
 
+#include "arc-gui-config.h"
+
+#ifdef ARC_VERSION_3
+#include <arc/compute/JobDescription.h>
+#else
 #include <arc/client/JobDescription.h>
+#endif
 
 #include "qdebugstream.h"
 
@@ -113,6 +119,20 @@ private Q_SLOTS:
     void on_perJobFileTable_itemChanged(QTableWidgetItem *item);
 
     void on_addPerFileButton_clicked();
+
+    void on_adPerJobUrlButton_clicked();
+
+    void on_addInputUrlButton_clicked();
+
+    void on_addPerJobRowButton_clicked();
+
+    void on_addInputFileRowButton_clicked();
+
+    void on_addOutputFileRowButton_clicked();
+
+    void on_pastePerJobFileButton_clicked();
+
+    void on_pasteInputURLButton_clicked();
 
 private:
     Ui::JobDefinitionWindow *ui;

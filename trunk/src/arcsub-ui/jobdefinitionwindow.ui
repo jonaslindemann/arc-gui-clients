@@ -363,6 +363,27 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="adPerJobUrlButton">
+               <property name="text">
+                <string>Add URL...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addPerJobRowButton">
+               <property name="text">
+                <string>Add row</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pastePerJobFileButton">
+               <property name="text">
+                <string>Paste URL</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="removePerJobFileButton">
                <property name="text">
                 <string>Remove</string>
@@ -439,6 +460,27 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="addInputUrlButton">
+               <property name="text">
+                <string>Add URL...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addInputFileRowButton">
+               <property name="text">
+                <string>Add row</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pasteInputURLButton">
+               <property name="text">
+                <string>Paste URL</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="removeInputFileButton">
                <property name="text">
                 <string>Remove</string>
@@ -498,6 +540,13 @@
               <widget class="QPushButton" name="addOutputFileButton">
                <property name="text">
                 <string>Add...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="addOutputFileRowButton">
+               <property name="text">
+                <string>Add row</string>
                </property>
               </widget>
              </item>
@@ -808,7 +857,7 @@
      <x>0</x>
      <y>0</y>
      <width>743</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

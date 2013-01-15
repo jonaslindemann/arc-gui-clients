@@ -165,7 +165,11 @@ bool FileTransfer::execute()
 
     // Make sure credentials are ok if one of the protocols are secure
 
+#ifdef ARC_VERSION_3
+    if (m_sourceHandle->RequiresCredentials() || m_destHandle->RequiresCredentials())
+#else
     if (m_sourceUrl.IsSecureProtocol() || m_destUrl.IsSecureProtocol())
+#endif
     {
         m_config->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
         if (!Arc::Credential::IsCredentialsValid(*m_config))

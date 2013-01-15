@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "arc-gui-config.h"
+
 #include <arc/Thread.h>
 
 #include <arc/ArcLocation.h>

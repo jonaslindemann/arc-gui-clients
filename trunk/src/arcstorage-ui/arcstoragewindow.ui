@@ -168,7 +168,7 @@
      <x>0</x>
      <y>0</y>
      <width>814</width>
-     <height>28</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -439,6 +439,25 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionCopyURL">
+   <property name="text">
+    <string>Copy URL</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy URL to clipboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionCopyURLFilename">
+   <property name="text">
+    <string>Copy URL filename</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy filename from URL</string>
    </property>
   </action>
  </widget>
