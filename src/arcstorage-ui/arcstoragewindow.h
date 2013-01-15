@@ -130,6 +130,14 @@ private Q_SLOTS:
 
     void on_actionSettings_triggered();
 
+    void on_filesTreeWidget_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionCopyURL_triggered();
+
+    void on_filesTreeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
+    void on_actionCopyURLFilename_triggered();
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);

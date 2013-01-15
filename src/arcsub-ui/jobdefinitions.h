@@ -7,7 +7,13 @@
 #include <QSettings>
 #include <QList>
 
+#include "arc-gui-config.h"
+
+#ifdef ARC_VERSION_3
+#include <arc/compute/JobDescription.h>
+#else
 #include <arc/client/JobDescription.h>
+#endif
 
 // Directory/file structure
 //

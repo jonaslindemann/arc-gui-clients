@@ -10,11 +10,16 @@
 #include <QSet>
 #include <QTableWidgetItem>
 
+#include "arc-gui-config.h"
+
 #include <arc/UserConfig.h>
+#ifdef ARC_VERSION_3
+#include <arc/compute/Job.h>
+#include <arc/compute/JobSupervisor.h>
+#else
 #include <arc/client/Job.h>
 #include <arc/client/JobSupervisor.h>
-
-#define ARC_VERSION_2
+#endif
 
 #include "JmBase.h"
 

@@ -5,6 +5,9 @@
 #include <QProcess>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QUrl>
+#include <QClipboard>
+#include <QApplication>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -158,7 +161,7 @@ void JobDefinitionWindow::setData()
     }
 
     ui->perJobFileTable->clear();
-    ui->perJobFileTable->setRowCount(m_jobDefinition->inputFileCount());
+    ui->perJobFileTable->setRowCount(m_jobDefinition->perJobFileCount());
     ui->perJobFileTable->setColumnCount(2);
 
     labels.clear();
@@ -481,8 +484,8 @@ void JobDefinitionWindow::on_addPerJobFileButton_clicked()
 
 void JobDefinitionWindow::on_removePerJobFileButton_clicked()
 {
-    int selectedItem = ui->outputFileTable->currentRow();
-    m_jobDefinition->removeOutputFile(selectedItem);
+    int selectedItem = ui->perJobFileTable->currentRow();
+    m_jobDefinition->removePerJobFile(selectedItem);
     this->setData();
 }
 
@@ -509,4 +512,64 @@ void JobDefinitionWindow::on_addPerFileButton_clicked()
 {
     ui->scriptEditor->insertPlainText("%4");
     ui->scriptEditor->setFocus();
+}
+
+void JobDefinitionWindow::on_adPerJobUrlButton_clicked()
+{
+    QString inputFilename = QInputDialog::getText(this, "Input file", "Filename");
+
+    if (inputFilename.length()!=0)
+    {
+        QString url = QInputDialog::getText(this, "Input file", "URL");
+        m_jobDefinition->addPerJobFile(inputFilename, url);
+        this->setData();
+    }
+}
+
+void JobDefinitionWindow::on_addInputUrlButton_clicked()
+{
+    QString inputFilename = QInputDialog::getText(this, "Input file", "Filename");
+
+    if (inputFilename.length()!=0)
+    {
+        QString url = QInputDialog::getText(this, "Input file", "URL");
+        m_jobDefinition->addInputFile(inputFilename, url);
+        this->setData();
+    }
+}
+
+void JobDefinitionWindow::on_addPerJobRowButton_clicked()
+{
+    m_jobDefinition->addPerJobFile("", "");
+    this->setData();
+}
+
+void JobDefinitionWindow::on_addInputFileRowButton_clicked()
+{
+    m_jobDefinition->addInputFile("", "");
+    this->setData();
+}
+
+void JobDefinitionWindow::on_addOutputFileRowButton_clicked()
+{
+    m_jobDefinition->addOutputFile("", "");
+    this->setData();
+}
+
+void JobDefinitionWindow::on_pastePerJobFileButton_clicked()
+{
+    QString clipboardString = QApplication::clipboard()->text();
+    QUrl url = clipboardString;
+    QString filename = url.path().split("/").last();
+    m_jobDefinition->addPerJobFile(filename, url.toString());
+    this->setData();
+}
+
+void JobDefinitionWindow::on_pasteInputURLButton_clicked()
+{
+    QString clipboardString = QApplication::clipboard()->text();
+    QUrl url = clipboardString;
+    QString filename = url.path().split("/").last();
+    m_jobDefinition->addInputFile(filename, url.toString());
+    this->setData();
 }

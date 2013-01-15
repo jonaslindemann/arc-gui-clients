@@ -15,6 +15,8 @@
 #include <glibmm.h>
 #include <unistd.h>
 
+#include "arc-gui-config.h"
+
 #include <arc/ArcLocation.h>
 #include <arc/DateTime.h>
 #include <arc/delegation/DelegationInterface.h>
@@ -23,7 +25,11 @@
 #include <arc/User.h>
 #include <arc/Utils.h>
 #include <arc/UserConfig.h>
+#ifdef ARC_VERSION_3
+#include <arc/communication/ClientInterface.h>
+#else
 #include <arc/client/ClientInterface.h>
+#endif
 #include <arc/credential/VOMSAttribute.h>
 #include <arc/credential/VOMSUtil.h>
 #include <arc/credential/Credential.h>

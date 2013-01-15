@@ -9,6 +9,8 @@
 #include <qurl.h>
 #include <QDebug>
 
+#include "arc-gui-config.h"
+
 #include <arc/ArcLocation.h>
 #include <arc/Logger.h>
 #include <arc/StringConv.h>
@@ -127,7 +129,11 @@ void SRMFileServer::updateFileList(QString URL)
                 QString fileNameQS(filename);
 
                 QDateTime timeCreated;
+#ifdef ARC_VERSION_3
+                time_t timet = arcFile->GetModified().GetTime();
+#else
                 time_t timet = arcFile->GetCreated().GetTime();
+#endif
                 timeCreated.setTime_t(timet);
 
                 if (!fileNameQS.indexOf(".")==0) // Don't show hidden files.

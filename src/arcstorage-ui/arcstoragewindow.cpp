@@ -300,6 +300,7 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
     QMainWindow::showEvent(e);
 
     m_currentFileServer->updateFileList(m_startUrl);
+
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
     if (!m_childWindow)
@@ -308,26 +309,11 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
         {
             QString url = QApplication::arguments().at(1);
             qDebug() << "URL to open: " << url;
-
-
-            /*
-            ArcStorageWindow* window = new ArcStorageWindow(0, true, url);
-            QRect r = this->geometry();
-            r.setLeft(this->geometry().left()+150);
-            r.setTop(this->geometry().top()+150);
-            r.setRight(this->geometry().right()+150);
-            r.setBottom(this->geometry().bottom()+150);
-
-            qDebug() << r;
-            window->setGeometry(r);
-            window->show();
-
-            GlobalStateInfo::instance()->addChildWindow(window);
-            */
-
             this->openUrl(url);
         }
     }
+
+    this->updateFoldersTree();
 }
 
 void ArcStorageWindow::closeEvent(QCloseEvent *e)
@@ -730,14 +716,14 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
         case CUFLM_noUpdate:
             break;
         case CUFLM_clickedBrowse:
-            updateFoldersTree();
+            //---updateFoldersTree();
             updateFileTree();
             break;
         case CUFLM_clickedFolder:
             updateFileTree();
             break;
         case CUFLM_clickedUp:
-            updateFoldersTree();
+            //---updateFoldersTree();
             updateFileTree();
             break;
         case CUFLM_expandedFolder:
@@ -1229,5 +1215,51 @@ void ArcStorageWindow::on_actionSettings_triggered()
     int dialogReturnValue = dialog.exec();
     if (dialogReturnValue != 0)
     {
+    }
+}
+
+void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu menu(this);
+    QList<QAction*> actions;
+    actions.append(ui->actionCopyURL);
+    actions.append(ui->actionCopyURLFilename);
+    menu.addActions(actions);
+    QPoint globalPos = ui->filesTreeWidget->mapToGlobal(pos);
+    menu.exec(globalPos);
+}
+
+void ArcStorageWindow::on_actionCopyURL_triggered()
+{
+    qDebug() << "copyURL selected.";
+
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.size() != 0)
+    {
+        QTreeWidgetItem* item = selectedItems.at(0);
+        QApplication::clipboard()->clear();
+        QApplication::clipboard()->setText(getURLOfItem(item));
+    }
+}
+
+void ArcStorageWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem *item, int column)
+{
+}
+
+void ArcStorageWindow::on_actionCopyURLFilename_triggered()
+{
+    qDebug() << "copyURL filename selected.";
+
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.size() != 0)
+    {
+        QTreeWidgetItem* item = selectedItems.at(0);
+        QApplication::clipboard()->clear();
+
+        QUrl url = getURLOfItem(item);
+
+        QApplication::clipboard()->setText(url.path().split("/").last());
     }
 }
