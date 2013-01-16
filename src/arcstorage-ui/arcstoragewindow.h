@@ -20,6 +20,7 @@ namespace Ui {
 
 
 enum updateFileListsMode { CUFLM_noUpdate,
+                           CUFLM_syncBoth,
                            CUFLM_clickedBrowse,
                            CUFLM_clickedUp,
                            CUFLM_expandedFolder,
@@ -56,6 +57,7 @@ private:
     QComboBox m_urlComboBox;
 
     SRMFileServer *m_currentFileServer;
+    QString m_folderListUrl;
     QString m_startUrl;
 
     static const QString COPY_TO_TEXT;

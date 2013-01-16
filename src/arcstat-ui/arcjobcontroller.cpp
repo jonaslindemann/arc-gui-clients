@@ -23,7 +23,7 @@
 #include <arc/compute/Submitter.h>
 #include <arc/compute/JobSupervisor.h>
 #else
-#include <arc/client/TargetGenerator.h>
+#include <arc/client/ComputingServiceRetriever.h>
 #include <arc/client/Submitter.h>
 #include <arc/client/JobSupervisor.h>
 #include <arc/client/Broker.h>
@@ -754,6 +754,66 @@ void ArcJobController::resubmitJobs()
     std::string debug;
     std::string broker;
 
+    if (m_jobSupervisor!=0)
+        delete m_jobSupervisor;
+
+    // Read existing jobs from job list file
+
+    Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
+
+    m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
+    m_jobSupervisor->Update();
+    m_jobSupervisor->ClearSelection();
+
+    std::list<Arc::URL> jobIds;
+    std::list<Arc::URL>::iterator uit;
+    std::list<std::string>::iterator sit;
+
+    for (sit=m_selectedJobIds.begin(); sit!=m_selectedJobIds.end(); sit++)
+        jobIds.push_back(Arc::URL(*sit));
+
+    m_jobSupervisor->SelectByID(jobIds);
+
+    if (!m_jobSupervisor->GetSelectedJobs().size() == 0)
+    {
+      std::cout << Arc::IString("No jobs") << std::endl;
+      return;
+    }
+
+    std::list<Arc::Endpoint> endPoints;
+    std::list<Arc::Job> resubmittedJobs;
+
+    m_jobSupervisor->Resubmit(2, endPoints, resubmittedJobs);
+
+    // Clearing jobs.
+
+    m_selectedJobIds.clear();
+
+    /*
+
+    // Return if nothing is selected
+
+    if (m_selectedJobIds.size()==0)
+        return;
+
+    //-------------------------------------------------
+
+    bool all = false;
+    std::string joblist;
+    std::string jobidfileout;
+    std::list<std::string> jobidfilesin;
+    std::list<std::string> clusters;
+    std::list<std::string> qlusters;
+    std::list<std::string> indexurls;
+    bool keep = false;
+    bool same = false;
+    std::list<std::string> status;
+    bool show_plugins = false;
+    int timeout = -1;
+    std::string conffile;
+    std::string debug;
+    std::string broker;
+
     // Different selected services are needed in two different context,
     // so the two copies of UserConfig objects will contain different
     // selected services.
@@ -904,6 +964,7 @@ void ArcJobController::resubmitJobs()
           qDebug() << "Job could not be killed or cleaned";
       }
     }
+    */
 }
 #endif
 

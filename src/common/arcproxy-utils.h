@@ -7,13 +7,13 @@
 #include <QString>
 #include <QList>
 
+#include "arc-gui-config.h"
+
 #include <arc/Logger.h>
 #include <arc/UserConfig.h>
 
 class ProxyWindow;
 class QApplication;
-
-#define ARC_VERSION_2 1
 
 class VomsListEntry : public QObject
 {
