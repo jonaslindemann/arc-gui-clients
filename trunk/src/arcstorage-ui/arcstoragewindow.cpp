@@ -583,6 +583,7 @@ void ArcStorageWindow::updateFoldersTree()
     logger.msg(Arc::INFO, "Updating folder tree.");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
+    m_folderListUrl = m_currentFileServer->getCurrentURL();
 
     ui->foldersTreeWidget->clear();
 
@@ -701,6 +702,9 @@ void ArcStorageWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 
 void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
 {
+    qDebug() << "folder list URL = " << m_folderListUrl;
+    qDebug() << "file list URL   = " << m_currentFileServer->getCurrentURL();
+
     setBusyUI(false);
 
     if (error == true)
@@ -715,6 +719,10 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
         {
         case CUFLM_noUpdate:
             break;
+        case CUFLM_syncBoth:
+            updateFoldersTree();
+            updateFileTree();
+            break;
         case CUFLM_clickedBrowse:
             //---updateFoldersTree();
             updateFileTree();
@@ -725,6 +733,10 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
         case CUFLM_clickedUp:
             //---updateFoldersTree();
             updateFileTree();
+
+            if (m_folderListUrl.length()>m_currentFileServer->getCurrentURL().length())
+                updateFoldersTree();
+
             break;
         case CUFLM_expandedFolder:
             expandFolderTreeWidget(m_folderWidgetBeingUpdated);
@@ -991,7 +1003,7 @@ void ArcStorageWindow::on_foldersTreeWidget_clicked(QModelIndex index)
 void ArcStorageWindow::on_actionAbout_ARC_File_Navigator_triggered()
 {
     QMessageBox msgBox;
-    msgBox.setText("ARC Storage Explorer\n\nCopyright (C) 2011-2012 Lunarc, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
+    msgBox.setText("ARC Storage Explorer\n\nCopyright (C) 2011-2013 Lunarc, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
     msgBox.exec();
 }
 
@@ -1146,7 +1158,7 @@ void ArcStorageWindow::on_actionSRM_Preferences_triggered()
 void ArcStorageWindow::openUrl(QString url)
 {
     setBusyUI(true);
-    m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
+    m_currentUpdateFileListsMode = CUFLM_syncBoth;
 
     // Delete previous file server
 
@@ -1172,9 +1184,12 @@ void ArcStorageWindow::openUrl(QString url)
 
     while (url.endsWith('/')) { url = url.left(url.length() - 1); }  // Get rid of trailing /
 
+    m_folderListUrl = url;
     m_currentFileServer->updateFileList(url);
 
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
+
+
 }
 
 void ArcStorageWindow::on_actionReload_triggered()

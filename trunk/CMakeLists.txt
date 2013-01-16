@@ -11,8 +11,9 @@ find_package(LibXml2 REQUIRED)
 find_package(Glibmm REQUIRED)
 find_package(Arc REQUIRED)
 
+configure_file(${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h.in ${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h)
+
 include(${QT_USE_FILE})
-#message(${QT_USE_FILE})
 
 subdirs(src)
 
