@@ -419,7 +419,15 @@ void JobDefinitionBase::setupJobDescription(int param)
         QString inputFilename = m_inputFiles[i];
         QString inputFileSource = m_inputFileUrls[i];
         if (param!=-1)
-            this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name());
+        {
+            QString perJobFilename;
+            if (param<m_perJobFiles.count())
+                perJobFilename = m_perJobFiles[param];
+            else
+                perJobFilename = "";
+
+            this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name(), perJobFilename);
+        }
 
         m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
         m_jobDescription.DataStaging.InputFiles.front().Name = inputFilename.toStdString();
@@ -437,7 +445,7 @@ void JobDefinitionBase::setupJobDescription(int param)
             QString inputFilename = m_perJobFiles[param];
             QString inputFileSource = m_perJobFileUrls[param];
             if (param!=-1)
-                this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name());
+                this->doProcessInputFile(inputFilename, inputFileSource, param, m_paramSize, this->name(), "");
 
             m_jobDescription.DataStaging.InputFiles.push_front(Arc::InputFileType());
             m_jobDescription.DataStaging.InputFiles.front().Name = inputFilename.toStdString();
@@ -454,7 +462,15 @@ void JobDefinitionBase::setupJobDescription(int param)
         QString outputFilename = m_outputFiles[i];
         QString outputFileTarget = m_outputFileUrls[i];
         if (param!=-1)
-            this->doProcessOutputFile(outputFilename, outputFileTarget, param, m_paramSize, this->name());
+        {
+            QString perJobFilename;
+            if (param<m_perJobFiles.count())
+                perJobFilename = m_perJobFiles[param];
+            else
+                perJobFilename = "";
+
+            this->doProcessInputFile(outputFilename, outputFileTarget, param, m_paramSize, this->name(), perJobFilename);
+        }
 
         m_jobDescription.DataStaging.OutputFiles.push_front(Arc::OutputFileType());
         m_jobDescription.DataStaging.OutputFiles.front().Name = outputFilename.toStdString();
@@ -778,16 +794,34 @@ void JobDefinitionBase::doCreateRunScript(int paramNumber, int paramSize, QStrin
     */
 }
 
-void JobDefinitionBase::doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName)
+void JobDefinitionBase::doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName, QString perJobFilename)
 {
-    inputFilename = inputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
-    inputSourceURL = inputSourceURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
+    inputFilename.replace("%1", QString::number(paramNumber));
+    inputFilename.replace("%2", QString::number(paramSize));
+    inputFilename.replace("%3", jobName);
+    inputFilename.replace("%4", perJobFilename);
+    //inputFilename = inputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
+
+    inputSourceURL.replace("%1", QString::number(paramNumber));
+    inputSourceURL.replace("%2", QString::number(paramSize));
+    inputSourceURL.replace("%3", jobName);
+    inputSourceURL.replace("%4", perJobFilename);
+    //inputSourceURL = inputSourceURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
 }
 
-void JobDefinitionBase::doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName)
+void JobDefinitionBase::doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName, QString perJobFilename)
 {
-    outputFilename = outputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
-    outputTargetURL = outputTargetURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName);
+    outputFilename.replace("%1", QString::number(paramNumber));
+    outputFilename.replace("%2", QString::number(paramSize));
+    outputFilename.replace("%3", jobName);
+    outputFilename.replace("%4", perJobFilename);
+    //inputFilename = inputFilename.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
+
+    outputTargetURL.replace("%1", QString::number(paramNumber));
+    outputTargetURL.replace("%2", QString::number(paramSize));
+    outputTargetURL.replace("%3", jobName);
+    outputTargetURL.replace("%4", perJobFilename);
+    //inputSourceURL = inputSourceURL.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
 }
 
 void JobDefinitionBase::doSaveSettings(QSettings& settings)
@@ -825,7 +859,15 @@ void ShellScriptDefinition::doCreateRunScript(int paramNumber, int paramSize, QS
     scriptFile.open(QFile::WriteOnly);
     QTextStream out(&scriptFile);
     */
-    script = m_script.arg(QString::number(paramNumber), QString::number(paramSize), jobName, perJobFilename);
+
+    QString tempScript = m_script;
+
+    tempScript.replace("%1", QString::number(paramNumber));
+    tempScript.replace("%2", QString::number(paramSize));
+    tempScript.replace("%3", jobName);
+    tempScript.replace("%4", perJobFilename);
+
+    script = tempScript;
 
     /*
     scriptFile.close();

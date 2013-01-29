@@ -27,6 +27,9 @@ SRMFileServer::SRMFileServer()
 {
     m_usercfg = NULL;
     m_notifyParent = true;
+
+    connect(&m_updateFileListWatcher, SIGNAL(finished()), this, SLOT(onUpdateFileListFinished()));
+
 }
 
 QStringList SRMFileServer::getFileInfoLabels()
@@ -51,6 +54,11 @@ void SRMFileServer::updateFileListSilent(QString URL)
     m_notifyParent = false;
     this->updateFileList(URL);
     m_notifyParent = saveState;
+}
+
+void SRMFileServer::startUpdateFileList(QString URL)
+{
+    m_updateFileListWatcher.setFuture(QtConcurrent::run(this, &SRMFileServer::updateFileList, URL));
 }
 
 void SRMFileServer::updateFileList(QString URL)

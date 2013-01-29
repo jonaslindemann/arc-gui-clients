@@ -82,6 +82,8 @@ private:
 
     QStringList fileTreeHeaderLabels;
 
+    QStringList m_breadCrumbItems;
+
     Arc::LogStream* m_logStream;
     QDebugStream* m_debugStream;
     QDebugStream* m_debugStream2;
@@ -101,6 +103,7 @@ private Q_SLOTS:
     void onURLEditReturnPressed();
     void onContextMenu(const QPoint& pos);
     void onUrlComboBoxCurrentIndexChanged(int index);
+    void onBreadCrumbTriggered();
 
     void on_actionDelete_triggered();
     void on_actionQuit_triggered();
