@@ -7,6 +7,14 @@
 
 #include <arc/credential/Credential.h>
 
+#define ARCGUI_DEVEL
+
+#ifdef ARCGUI_DEVEL
+#define ARCGUI_BUILDDIR /home/jonas/Development/arc-gui-clients-build
+#else
+#define ARCGUI_BUILDDIR
+#endif
+
 ARCTools* ARCTools::m_instance = 0;
 
 ARCTools::ARCTools()
@@ -131,20 +139,35 @@ void ARCTools::certConversionTool()
 void ARCTools::jobManagerTool()
 {
     QProcess process;
+#ifdef ARCGUI_DEVEL
     if (m_jobListFile.length()==0)
         process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcstat-ui/arcstat-ui");
     else
         process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcstat-ui/arcstat-ui "+m_jobListFile);
+#else
+    if (m_jobListFile.length()==0)
+        process.startDetached("arcstat-ui");
+    else
+        process.startDetached("arcstat-ui "+m_jobListFile);
+#endif
 }
 
 void ARCTools::submissionTool()
 {
     QProcess process;
+#ifdef ARCGUI_DEVEL
+    process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcsub-ui/arcsub-ui");
+#else
     process.startDetached("arcsub-ui");
+#endif
 }
 
 void ARCTools::storageTool()
 {
     QProcess process;
+#ifdef ARCGUI_DEVEL
+    process.startDetached("/home/jonas/Development/arc-gui-clients-build/src/arcstorage-ui/arcstorage-ui");
+#else
     process.startDetached("arcstorage-ui");
+#endif
 }

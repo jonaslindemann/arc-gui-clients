@@ -559,17 +559,27 @@ void JobDefinitionWindow::on_addOutputFileRowButton_clicked()
 void JobDefinitionWindow::on_pastePerJobFileButton_clicked()
 {
     QString clipboardString = QApplication::clipboard()->text();
-    QUrl url = clipboardString;
-    QString filename = url.path().split("/").last();
-    m_jobDefinition->addPerJobFile(filename, url.toString());
+    QStringList rows = clipboardString.split("\n");
+
+    for (int i=0; i<rows.count(); i++)
+    {
+        QUrl url = rows.at(i);
+        QString filename = url.path().split("/").last();
+        m_jobDefinition->addPerJobFile(filename, url.toString());
+    }
     this->setData();
 }
 
 void JobDefinitionWindow::on_pasteInputURLButton_clicked()
 {
     QString clipboardString = QApplication::clipboard()->text();
-    QUrl url = clipboardString;
-    QString filename = url.path().split("/").last();
-    m_jobDefinition->addInputFile(filename, url.toString());
+    QStringList rows = clipboardString.split("\n");
+
+    for (int i=0; i<rows.count(); i++)
+    {
+        QUrl url = rows.at(i);
+        QString filename = url.path().split("/").last();
+        m_jobDefinition->addInputFile(filename, url.toString());
+    }
     this->setData();
 }

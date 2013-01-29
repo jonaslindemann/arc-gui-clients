@@ -133,7 +133,7 @@ int ArcSubmitController::submit()
     std::list<std::string> computingelements;
     std::list<Arc::Endpoint> services = getServicesFromUserConfigAndCommandLine(usercfg, registries, computingelements);
 
-    HandleSubmittedJobs hsj("", usercfg.JobListFile());
+    HandleSubmittedJobs hsj("", m_jobListFilename.toStdString());
     Arc::Submitter s(usercfg);
     s.addConsumer(hsj);
 

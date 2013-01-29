@@ -2,6 +2,7 @@
 #define SRMFILESERVER_H
 
 #include <QObject>
+#include <QFutureWatcher>
 #include <arc/UserConfig.h>
 #include "fileserver.h"
 #include "filetransfer.h"
@@ -19,11 +20,17 @@ private:
     void updateFileListSilent(QString URL);
     void listFiles(QList<QUrl> &urlList, QString currentDir);
 
+    QFutureWatcher<void> m_updateFileListWatcher;
+
 public:
     explicit SRMFileServer();
 
     QStringList getFileInfoLabels();
+
+    void startUpdateFileList(QString URL);
     void updateFileList(QString URL);
+
+
     QVector<ARCFileElement*> &getFileList() { return fileList; }
     bool goUpOneFolder();
     QString getCurrentURL();
@@ -44,6 +51,8 @@ Q_SIGNALS:
     void onDeleteFinished(bool error);
     void onMakeDirFinished(bool error);
     void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
+
+    void onUpdateFileListFinished();
 
 public Q_SLOTS:
     void onCompleted(FileTransfer* fileTransfer, bool success, QString error);

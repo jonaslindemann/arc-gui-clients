@@ -137,8 +137,8 @@ public:
 
 protected:
     virtual void doCreateRunScript(int paramNumber, int paramSize, QString jobName, QString perJobFilename, QString& script);
-    virtual void doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName);
-    virtual void doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName);
+    virtual void doProcessInputFile(QString& inputFilename, QString& inputSourceURL, int paramNumber, int paramSize, QString jobName, QString perJobFilename);
+    virtual void doProcessOutputFile(QString& outputFilename, QString& outputTargetURL, int paramNumber, int paramSize, QString jobName, QString perJobFilename);
     virtual void doSaveSettings(QSettings& settings);
     virtual void doLoadSettings(QSettings& settings);
     
