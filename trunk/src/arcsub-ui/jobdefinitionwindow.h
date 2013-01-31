@@ -7,7 +7,7 @@
 
 #include "arc-gui-config.h"
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/compute/JobDescription.h>
 #else
 #include <arc/client/JobDescription.h>

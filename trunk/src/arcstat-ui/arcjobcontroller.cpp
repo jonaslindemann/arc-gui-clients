@@ -13,7 +13,7 @@
 #include <arc/UserConfig.h>
 #include <arc/Utils.h>
 #include <arc/XMLNode.h>
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/compute/Broker.h>
 #include <arc/compute/ComputingServiceRetriever.h>
 #include <arc/compute/ExecutionTarget.h>
@@ -335,12 +335,16 @@ void ArcJobController::setDownloadDir(const QString& downloadDir)
     m_downloadDir = downloadDir;
 }
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 void ArcJobController::queryJobStatus(JmJobList* jobList)
 {
     // Read existing jobs from job list file
 
-    Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
+    //Arc::Job::ReadJobIDsFromFile(jobList->filename().toStdString(), m_arcJobList);
+    //Arc::Job::ReadAllJobsFromFile(jobList->filename().toStdString(), m_arcJobList);
+
+    Arc::JobInformationStorageXML jobStorage(jobList->filename().toStdString());
+    jobStorage.ReadAll(m_arcJobList);
 
     // Clear the current JmJobList;
 
@@ -550,7 +554,7 @@ void ArcJobController::openSessionDir()
     process.startDetached(commandLine);
 }
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 void ArcJobController::cleanJobs()
 {
     // Return if nothing is selected
@@ -560,7 +564,10 @@ void ArcJobController::cleanJobs()
 
     // Read existing jobs from job list file
 
-    Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
+    //Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
+
+    Arc::JobInformationStorageXML jobStorage(m_currentJmJobList->filename().toStdString());
+    jobStorage.ReadAll(m_arcJobList);
 
     // Create job supervisor and job controllers
 
@@ -608,7 +615,9 @@ void ArcJobController::cleanJobs()
     std::cout << "Jobs to be cleaned = " << cleaned.size() << std::endl;
     std::cout << "Jobs to not cleaned = " << notcleaned.size() << std::endl;
 
-    if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cleaned))
+    jobStorage.Remove(cleaned);
+
+    if (jobStorage.Remove(cleaned))
         std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
 }
 #else
@@ -675,7 +684,7 @@ void ArcJobController::cleanJobs()
 }
 #endif
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 void ArcJobController::resubmitJobs()
 {
     // Return if nothing is selected
@@ -706,7 +715,8 @@ void ArcJobController::resubmitJobs()
 
     // Read existing jobs from job list file
 
-    Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
+    Arc::JobInformationStorageXML jobStorage(m_currentJmJobList->filename().toStdString());
+    jobStorage.ReadAll(m_arcJobList);
 
     m_jobSupervisor = new Arc::JobSupervisor(m_userConfig, m_arcJobList);
     m_jobSupervisor->Update();
@@ -968,7 +978,7 @@ void ArcJobController::resubmitJobs()
 }
 #endif
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 void ArcJobController::killJobs()
 {
     // Return if nothing is selected
@@ -978,7 +988,8 @@ void ArcJobController::killJobs()
 
     // Read existing jobs from job list file
 
-    Arc::Job::ReadAllJobsFromFile(m_currentJmJobList->filename().toStdString(), m_arcJobList);
+    Arc::JobInformationStorageXML jobStorage(m_currentJmJobList->filename().toStdString());
+    jobStorage.ReadAll(m_arcJobList);
 
     // Create job supervisor and job controllers
 
@@ -1006,7 +1017,7 @@ void ArcJobController::killJobs()
     std::cout << "Jobs to be cancelled = " << cleaned.size() << std::endl;
     std::cout << "Jobs to not cancelled = " << notcleaned.size() << std::endl;
 
-    if (Arc::Job::RemoveJobsFromFile(m_currentJmJobList->filename().toStdString(), cleaned))
+    if (jobStorage.Remove(cleaned))
         std::cout << "Succesfully removed jobs from " << m_currentJmJobList->filename().toStdString() << std::endl;
 }
 #else
@@ -1073,7 +1084,7 @@ void ArcJobController::killJobs()
 }
 #endif
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 void ArcJobController::getJobs()
 {
     // Return if nothing is selected
@@ -1129,7 +1140,9 @@ void ArcJobController::getJobs()
       }
       cleaned_num = jobSupervisor.GetIDsProcessed().size();
 
-      if (!Arc::Job::RemoveJobsFromFile(m_userConfig.JobListFile(), jobSupervisor.GetIDsProcessed())) {
+      Arc::JobInformationStorageXML jobStorage(m_currentJmJobList->filename().toStdString());
+
+      if (!jobStorage.Remove(jobSupervisor.GetIDsProcessed())) {
         std::cout << Arc::IString("Warning: Failed to lock job list file %s", m_userConfig.JobListFile()) << std::endl;
         std::cout << Arc::IString("         Use arclean to remove retrieved jobs from job list", m_userConfig.JobListFile()) << std::endl;
         retval = 1;

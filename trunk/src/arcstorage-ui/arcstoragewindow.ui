@@ -472,6 +472,11 @@
     <string>Copy filename from URL</string>
    </property>
   </action>
+  <action name="actionShowFileProperties">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

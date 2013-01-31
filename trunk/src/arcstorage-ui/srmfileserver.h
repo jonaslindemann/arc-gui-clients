@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFutureWatcher>
+#include <QMap>
 #include <arc/UserConfig.h>
 #include "fileserver.h"
 #include "filetransfer.h"
@@ -43,6 +44,8 @@ public:
     bool makeDir(QString path);
     unsigned int getFilePermissions(QString path);
     void setFilePermissions(QString path, unsigned int permissions);
+
+    QMap<QString, QString> fileProperties(QString URL);
 
 Q_SIGNALS:
     void onFileListFinished(bool error, QString errorMsg);

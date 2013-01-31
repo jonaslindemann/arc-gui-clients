@@ -13,7 +13,7 @@
 #include "arc-gui-config.h"
 
 #include <arc/UserConfig.h>
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/compute/Job.h>
 #include <arc/compute/JobSupervisor.h>
 #else

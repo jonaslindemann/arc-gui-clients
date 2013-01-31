@@ -3,7 +3,7 @@
 #include "arc-gui-config.h"
 
 #include <arc/UserConfig.h>
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/compute/ComputingServiceRetriever.h>
 #include <arc/compute/Broker.h>
 #include <arc/compute/Job.h>
@@ -14,7 +14,7 @@
 #include <arc/client/Job.h>
 #endif
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 std::list<Arc::Endpoint> getServicesFromUserConfigAndCommandLine(Arc::UserConfig usercfg, std::list<std::string> registries, std::list<std::string> computingelements, std::string requestedSubmissionInterfaceName, std::string infointerface) {
     std::list<Arc::Endpoint> services;
     if (computingelements.empty() && registries.empty()) {

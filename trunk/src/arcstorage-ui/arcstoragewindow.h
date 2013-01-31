@@ -17,6 +17,8 @@ namespace Ui {
 #include "filetransferlist.h"
 #include "srmfileserver.h"
 
+#include "filepropertyinspector.h"
+
 
 
 enum updateFileListsMode { CUFLM_noUpdate,
@@ -92,6 +94,7 @@ private:
     int m_windowId;
 
     TransferListWindow* m_transferWindow;
+    FilePropertyInspector* m_filePropertyInspector;
 
     FileTransferProcessingThread* m_fileProcessingThread;
 
@@ -142,6 +145,8 @@ private Q_SLOTS:
     void on_filesTreeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
     void on_actionCopyURLFilename_triggered();
+
+    void on_actionShowFileProperties_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);

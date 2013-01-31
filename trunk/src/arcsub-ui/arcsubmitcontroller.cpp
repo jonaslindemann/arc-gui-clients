@@ -5,7 +5,7 @@
 
 #include <arc/UserConfig.h>
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/compute/Broker.h>
 #include <arc/compute/ComputingServiceRetriever.h>
 #include <arc/compute/ExecutionTarget.h>
@@ -63,7 +63,7 @@ void ArcSubmitController::submissionFinished()
 
 static Arc::Logger logger(Arc::Logger::getRootLogger(), "ArcSub-UI");
 
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 
 class HandleSubmittedJobs : public Arc::EntityConsumer<Arc::Job> {
 public:
@@ -78,7 +78,10 @@ public:
     if (!jobidfile.empty() && !Arc::Job::WriteJobIDsToFile(submittedJobs, jobidfile)) {
       logger.msg(Arc::WARNING, "Cannot write jobids to file (%s)", jobidfile);
     }
-    if (!Arc::Job::WriteJobsToFile(joblist, submittedJobs)) {
+
+    Arc::JobInformationStorageXML jobStorage(joblist);
+
+    if (!jobStorage.Write(submittedJobs)) {
       std::cout << Arc::IString("Warning: Failed to lock job list file %s", joblist)
                 << std::endl;
       std::cout << Arc::IString("To recover missing jobs, run arcsync") << std::endl;
