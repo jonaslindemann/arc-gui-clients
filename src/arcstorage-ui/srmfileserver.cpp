@@ -23,6 +23,97 @@
 #include <arc/OptionParser.h>
 #include <arc/FileUtils.h>
 
+#include <map>
+
+void print_urls(const Arc::FileInfo& file) {
+  for (std::list<Arc::URL>::const_iterator u = file.GetURLs().begin();
+       u != file.GetURLs().end(); u++)
+    std::cout << "\t" << *u << std::endl;
+}
+
+void print_meta(const Arc::FileInfo& file) {
+  std::map<std::string, std::string> md = file.GetMetaData();
+  for (std::map<std::string, std::string>::iterator mi = md.begin(); mi != md.end(); ++mi)
+    std::cout<<mi->first<<":"<<mi->second<<std::endl;
+}
+
+// formatted output of details when long list is requested
+void print_details(const std::list<Arc::FileInfo>& files, bool show_urls, bool show_meta) {
+
+  if (files.empty()) return;
+
+  unsigned int namewidth = 0;
+  unsigned int sizewidth = 0;
+  unsigned int csumwidth = 0;
+
+  // find longest length of each field to align the output
+  for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
+      i != files.end(); i++) {
+    if (i->GetName().length() > namewidth) namewidth = i->GetName().length();
+    if (i->CheckSize() && i->GetSize() > 0 && // log(0) not good!
+        (unsigned int)(log10(i->GetSize()))+1 > sizewidth) sizewidth = (unsigned int)(log10(i->GetSize()))+1;
+    if (i->CheckCheckSum() && i->GetCheckSum().length() > csumwidth) csumwidth = i->GetCheckSum().length();
+  }
+  std::cout << std::setw(namewidth) << std::left << "<Name> ";
+  std::cout << "<Type>  ";
+  std::cout << std::setw(sizewidth + 4) << std::left << "<Size>     ";
+  std::cout << "<Modified>      ";
+  std::cout << "<Validity> ";
+  std::cout << "<CheckSum> ";
+  std::cout << std::setw(csumwidth) << std::right << "<Latency>";
+  std::cout << std::endl;
+
+  // set minimum widths to accommodate headers
+  if (namewidth < 7) namewidth = 7;
+  if (sizewidth < 7) sizewidth = 7;
+  if (csumwidth < 8) csumwidth = 8;
+  for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
+       i != files.end(); i++) {
+    std::cout << std::setw(namewidth) << std::left << i->GetName();
+    switch (i->GetType()) {
+      case Arc::FileInfo::file_type_file:
+        std::cout << "  file";
+        break;
+
+      case Arc::FileInfo::file_type_dir:
+        std::cout << "   dir";
+        break;
+
+      default:
+        std::cout << " (n/a)";
+        break;
+    }
+    if (i->CheckSize()) {
+      std::cout << " " << std::setw(sizewidth) << std::right << Arc::tostring(i->GetSize());
+    } else {
+      std::cout << " " << std::setw(sizewidth) << std::right << "  (n/a)";
+    }
+    if (i->CheckModified()) {
+      std::cout << " " << i->GetModified();
+    } else {
+      std::cout << "       (n/a)        ";
+    }
+    if (i->CheckValid()) {
+      std::cout << " " << i->GetValid();
+    } else {
+      std::cout << "   (n/a)  ";
+    }
+    if (i->CheckCheckSum()) {
+      std::cout << " " << std::setw(csumwidth) << std::left << i->GetCheckSum();
+    } else {
+      std::cout << " " << std::setw(csumwidth) << std::left << "   (n/a)";
+    }
+    if (i->CheckLatency()) {
+      std::cout << "    " << i->GetLatency();
+    } else {
+      std::cout << "      (n/a)";
+    }
+    std::cout << std::endl;
+    if (show_urls) print_urls(*i);
+    if (show_meta) print_meta(*i);
+  }
+}
+
 SRMFileServer::SRMFileServer()
 {
     m_usercfg = NULL;
@@ -35,8 +126,9 @@ SRMFileServer::SRMFileServer()
 QStringList SRMFileServer::getFileInfoLabels()
 {
     QStringList labels;
-    labels << "File" << "Size" << "Type" << "Last modified" << "Owner" << "Group" << "Permissions" <<
-              "Last read";
+    //labels << "File" << "Size" << "Type" << "Last modified" << "Owner" << "Group" << "Permissions" <<
+    //          "Last read";
+    labels << "File" << "Size" << "Type" << "Last modified";
     return labels;
 }
 
@@ -137,7 +229,7 @@ void SRMFileServer::updateFileList(QString URL)
                 QString fileNameQS(filename);
 
                 QDateTime timeCreated;
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
                 time_t timet = arcFile->GetModified().GetTime();
 #else
                 time_t timet = arcFile->GetCreated().GetTime();
@@ -475,6 +567,50 @@ unsigned int SRMFileServer::getFilePermissions(QString path)
 void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
 {
 
+}
+
+QMap<QString, QString> SRMFileServer::fileProperties(QString URL)
+{
+    QMap<QString, QString> propertyMap;
+
+    Arc::URL arcUrl = URL.toStdString();
+
+    // What information to retrieve
+    Arc::DataPoint::DataPointInfoType verb = (Arc::DataPoint::DataPointInfoType)
+            (Arc::DataPoint::INFO_TYPE_MINIMAL |
+             Arc::DataPoint::INFO_TYPE_NAME |
+             Arc::DataPoint::INFO_TYPE_STRUCT |
+             Arc::DataPoint::INFO_TYPE_ALL |
+             Arc::DataPoint::INFO_TYPE_TYPE |
+             Arc::DataPoint::INFO_TYPE_TIMES |
+             Arc::DataPoint::INFO_TYPE_CONTENT |
+             Arc::DataPoint::INFO_TYPE_ACCESS);
+
+    Arc::DataStatus arcResult;
+    std::list<Arc::FileInfo> arcFiles;
+
+    Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
+    if (!dataHandle)
+    {
+        logger.msg(Arc::ERROR, "Unsupported URL given");
+        Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
+    }
+    else
+    {
+        Arc::FileInfo file;
+        dataHandle->Stat(file);
+
+        std::map<std::string, std::string> md = file.GetMetaData();
+
+        for (std::map<std::string, std::string>::iterator mi = md.begin(); mi != md.end(); ++mi)
+        {
+            QString property = mi->first.c_str();
+            QString value = mi->second.c_str();
+            propertyMap[property] = value;
+        }
+    }
+
+    return propertyMap;
 }
 
 void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)

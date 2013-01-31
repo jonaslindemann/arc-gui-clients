@@ -26,7 +26,7 @@
 #include <arc/User.h>
 #include <arc/Utils.h>
 #include <arc/UserConfig.h>
-#ifdef ARC_VERSION_3
+#if ARC_VERSION_MAJOR >= 3
 #include <arc/communication/ClientInterface.h>
 #else
 #include <arc/client/ClientInterface.h>

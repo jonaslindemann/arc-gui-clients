@@ -1,6 +1,17 @@
 #ifndef __arc_gui_config_h__
 #define __arc_gui_config_h__
 
+
 #define ARC_VERSION_@Arc_VERSION@
+
+#ifdef ARC_VERSION_3
+#include <arc/ArcVersion.h>
+#else
+#define ARC_VERSION "2.0.0"
+#define ARC_VERSION_NUM 0x020000
+#define ARC_VERSION_MAJOR 2
+#define ARC_VERSION_MINOR 0
+#define ARC_VERSION_PATCH 0
+#endif
 
 #endif

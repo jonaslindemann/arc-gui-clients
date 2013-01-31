@@ -69,6 +69,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     m_folderWidgetBeingUpdated = NULL;
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
     m_transferWindow = 0;
+    m_filePropertyInspector = 0;
     m_startUrl = Url;
 
     // Initialise Qt user interface
@@ -602,12 +603,12 @@ void ArcStorageWindow::updateFileTree()
         else
             item->setText(2, "file");
         item->setText(3, AFE->getLastModfied().toString());
-        item->setText(4, AFE->getOwner());
-        item->setText(5, AFE->getGroup());
-        QString tmpStr;
-        tmpStr.sprintf("%x", AFE->getPermissions());
-        item->setText(6, tmpStr);
-        item->setText(7, AFE->getLastRead().toString());
+        //item->setText(4, AFE->getOwner());
+        //item->setText(5, AFE->getGroup());
+        //QString tmpStr;
+        //tmpStr.sprintf("%x", AFE->getPermissions());
+        //item->setText(6, tmpStr);
+        //item->setText(7, AFE->getLastRead().toString());
         setURLOfItem(item, AFE->getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }
@@ -1283,6 +1284,7 @@ void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoin
     QList<QAction*> actions;
     actions.append(ui->actionCopyURL);
     actions.append(ui->actionCopyURLFilename);
+    actions.append(ui->actionShowFileProperties);
     menu.addActions(actions);
     QPoint globalPos = ui->filesTreeWidget->mapToGlobal(pos);
     menu.exec(globalPos);
@@ -1308,6 +1310,19 @@ void ArcStorageWindow::on_actionCopyURL_triggered()
 
 void ArcStorageWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.size() != 0)
+    {
+        if (m_filePropertyInspector != 0)
+        {
+            if (m_filePropertyInspector->isVisible())
+            {
+                QMap<QString, QString> propertyMap = m_currentFileServer->fileProperties(getURLOfItem(selectedItems.at(0)));
+                m_filePropertyInspector->setProperties(propertyMap);
+            }
+        }
+    }
 }
 
 void ArcStorageWindow::on_actionCopyURLFilename_triggered()
@@ -1324,5 +1339,20 @@ void ArcStorageWindow::on_actionCopyURLFilename_triggered()
         QUrl url = getURLOfItem(item);
 
         QApplication::clipboard()->setText(url.path().split("/").last());
+    }
+}
+
+void ArcStorageWindow::on_actionShowFileProperties_triggered()
+{
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.size() != 0)
+    {
+        if (m_filePropertyInspector == 0)
+            m_filePropertyInspector = new FilePropertyInspector(this);
+
+        m_filePropertyInspector->show();
+        QMap<QString, QString> propertyMap = m_currentFileServer->fileProperties(getURLOfItem(selectedItems.at(0)));
+        m_filePropertyInspector->setProperties(propertyMap);
     }
 }
