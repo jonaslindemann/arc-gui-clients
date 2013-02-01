@@ -1,11 +1,20 @@
 #include <QtGui/QApplication>
+#include <QSplashScreen>
+#include <QPixmap>
+
 #include <iostream>
+
 #include "arcstoragewindow.h"
 #include "arctools.h"
+#include <QImage>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
+    // Show splash screen
+
+    QPixmap pixmap(":/resources/images/splash_arc_storage.png");
 
     // Set application information
 
@@ -20,7 +29,12 @@ int main(int argc, char *argv[])
 
     // Start actual user interface
 
-    ArcStorageWindow w;
-    w.show();
-    return a.exec();
+    ArcStorageWindow window;
+    window.show();
+
+    QSplashScreen splash(pixmap);
+    splash.show();
+    splash.raise();
+
+    return app.exec();
 }

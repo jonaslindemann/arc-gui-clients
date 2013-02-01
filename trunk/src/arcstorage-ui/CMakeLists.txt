@@ -55,14 +55,14 @@ set(arcstorageui_MOC_HDRS
     ../common/helpwindow.h
 )
 
-#SET(arcexplorerui_RCS 
-#  arcexplorer-ui.qrc
-#)
+SET(arcstorageui_RCS
+  arcstorage-ui-resources.qrc
+)
 
 # After this call, foo_MOC_SRCS = moc_Class1.cxx moc_Class2.cxx moc_Class3.cxx.
 QT4_WRAP_CPP(arcstorageui_MOC_SRCS ${arcstorageui_MOC_HDRS} )
 QT4_WRAP_UI(arcstorageui_UIS_H ${arcstorageui_UIS} )
-#QT4_ADD_RESOURCES( arcstorageui_RC_SRCS ${arcstorageui_RCS} )
+QT4_ADD_RESOURCES(arcstorageui_RC_SRCS ${arcstorageui_RCS} )
 
 IF(APPLE)
 	add_executable(arcstorage-ui 
@@ -105,7 +105,7 @@ SET_SOURCE_FILES_PROPERTIES(
 	MACOSX_PACKAGE_LOCATION Resources
 )
 ELSE(APPLE)
-	add_executable(arcstorage-ui ${arcstorageui_SRCS} ${arcstorageui_MOC_SRCS} ${arcstorageui_UIS_H} )
+        add_executable(arcstorage-ui ${arcstorageui_SRCS} ${arcstorageui_MOC_SRCS} ${arcstorageui_RC_SRCS} ${arcstorageui_UIS_H} )
 ENDIF(APPLE)
 
 
