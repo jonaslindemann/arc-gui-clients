@@ -10,5 +10,6 @@
         <file>../../images/add.png</file>
         <file>../../images/remove.png</file>
         <file>../../images/edit-delete.png</file>
+        <file>../../images/splash_arcstat.png</file>
     </qresource>
 </RCC>

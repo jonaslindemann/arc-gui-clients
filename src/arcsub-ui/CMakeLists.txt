@@ -33,9 +33,9 @@ SET(arcsubui_MOC_HDRS
   jobdefinitionwindow.h
 )
 
-#SET(arccertui_RCS 
-#  arcproxy-ui.qrc
-#)
+SET(arcsubui_RCS
+  arcsubui.qrc
+)
 
 # After this call, foo_MOC_SRCS = moc_Class1.cxx moc_Class2.cxx moc_Class3.cxx.
 QT4_WRAP_CPP(arcsubui_MOC_SRCS ${arcsubui_MOC_HDRS} )

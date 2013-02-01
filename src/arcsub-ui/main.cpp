@@ -1,10 +1,15 @@
 #include <QtGui/QApplication>
+#include <QSplashScreen>
+#include <QPixmap>
+
 #include "jobdefinitionwindow.h"
 #include "arctools.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
+    QPixmap pixmap(":/arcsub-ui/images/splash_arcsub.png");
 
     // Set application information
 
@@ -17,9 +22,13 @@ int main(int argc, char *argv[])
     if (!ARCTools::instance()->initUserConfig())
         return -1;
 
-    JobDefinitionWindow w;
-    w.show();
+    JobDefinitionWindow window;
+    window.show();
+
+    QSplashScreen splash(pixmap);
+    splash.show();
+    splash.raise();
     
-    return a.exec();
+    return app.exec();
     return 0;
 }
