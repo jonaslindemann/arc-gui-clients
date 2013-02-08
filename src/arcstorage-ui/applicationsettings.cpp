@@ -49,10 +49,20 @@ void ApplicationSettings::on_okButton_clicked()
     GlobalStateInfo::instance()->setTransferRetries(ui->transferRetriesSpin->value());
     GlobalStateInfo::instance()->setTransferTimeout(ui->transferTimeoutSpin->value());
     GlobalStateInfo::instance()->setNewWindowUrl(ui->windowURLText->text());
-    this->close();
+
+    if (ui->logLevelCombo->currentIndex()==0)
+        GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_VERBOSE);
+    if (ui->logLevelCombo->currentIndex()==1)
+        GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_INFO);
+    if (ui->logLevelCombo->currentIndex()==2)
+        GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_WARNING);
+    if (ui->logLevelCombo->currentIndex()==3)
+        GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_ERROR);
+
+    this->accept();
 }
 
 void ApplicationSettings::on_cancelButton_clicked()
 {
-    this->close();
+    this->reject();
 }

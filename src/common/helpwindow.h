@@ -22,6 +22,16 @@ private Q_SLOTS:
 
     void on_actionHome_triggered();
 
+    void on_webView_loadStarted();
+
+    void on_webView_loadProgress(int progress);
+
+    void on_webView_loadFinished(bool arg1);
+
+    void on_webView_statusBarMessage(const QString &text);
+
+    void on_actionStop_triggered();
+
 private:
     Ui::HelpWindow *ui;
 };

@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QString>
 #include <QVariant>
+
 #include "arcfileelement.h"
 
 class MainWindow;
@@ -19,6 +20,8 @@ class MainWindow;
 class FileServer
 {
 private:
+
+
 
 protected:
     /** Pointer to main window needed for callbacks (get files done, delete file done, copy file done... */

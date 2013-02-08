@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QApplication>
+#include <QDesktopWidget>
 
 #include <arc/credential/Credential.h>
 
@@ -22,6 +23,7 @@ ARCTools::ARCTools()
 {
     m_userConfig = 0;
     m_proxyController = new ArcProxyController();
+    m_helpWindow = 0;
 }
 
 bool ARCTools::initUserConfig()
@@ -30,7 +32,6 @@ bool ARCTools::initUserConfig()
 
     bool prereqFound = true;
 
-    qDebug() << "Creating ARC configuration.";
     m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
 
     ArcProxyController::TCertStatus certStatus = m_proxyController->checkCert();
@@ -57,12 +58,8 @@ bool ARCTools::initUserConfig()
         QMessageBox::warning(0, "Proxy", "CA directory not found. Please check configuration.");
         prereqFound = false;
     }
-    else if (certStatus == ArcProxyController::CS_VALID)
-        qDebug() << "Certificate is valid.";
 
     ArcProxyController::TProxyStatus proxyStatus = m_proxyController->checkProxy();
-
-    // enum TProxyStatus { PS_PATH_EMPTY, PS_NOT_FOUND, PS_EXPIRED, PS_NOT_VALID, PS_VALID };
 
     if (proxyStatus == ArcProxyController::PS_NOT_FOUND)
         m_proxyController->showProxyUI();
@@ -75,20 +72,11 @@ bool ARCTools::initUserConfig()
         m_proxyController->showProxyUI();
     else if (proxyStatus == ArcProxyController::PS_NOT_VALID)
         m_proxyController->showProxyUI();
-    else if (proxyStatus == ArcProxyController::PS_VALID)
-        qDebug() << "Proxy is valid.";
-
 
     if (m_proxyController->getUiReturnStatus()==ArcProxyController::RS_FAILED)
-    {
-        qDebug() << "GUI returns RS_FAILED.";
         prereqFound = false;
-    }
     else
-    {
-        qDebug() << "GUI returns RS_OK";
         prereqFound = true;
-    }
 
     if (!prereqFound)
         return false;
@@ -170,4 +158,38 @@ void ARCTools::storageTool()
 #else
     process.startDetached("arcstorage-ui");
 #endif
+}
+
+void ARCTools::showHelpWindow(QMainWindow* window)
+{
+    if (m_helpWindow == 0)
+    {
+        m_helpWindow = new HelpWindow(window);
+
+        int x, y;
+        int screenWidth;
+        int screenHeight;
+
+        QDesktopWidget *desktop = QApplication::desktop();
+
+        screenWidth = desktop->width();
+        screenHeight = desktop->height();
+
+        x = (screenWidth - m_helpWindow->width()) / 2;
+        y = (screenHeight - m_helpWindow->height()) / 2;
+
+        m_helpWindow->setGeometry(x, y, m_helpWindow->width(), m_helpWindow->height());
+    }
+
+    m_helpWindow->show();
+    m_helpWindow->raise();
+}
+
+void ARCTools::closeHelpWindow()
+{
+    if (m_helpWindow!=0)
+    {
+        m_helpWindow->close();
+        delete m_helpWindow;
+    }
 }

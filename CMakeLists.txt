@@ -5,7 +5,7 @@ project(arc-gui-clients)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 find_package(OpenSSL REQUIRED)
-find_package(Qt4 COMPONENTS QtMain QtCore QtGui QtSql QtXml QtNetwork REQUIRED)
+find_package(Qt4 COMPONENTS QtMain QtCore QtGui QtSql QtXml QtNetwork QtWebKit REQUIRED)
 find_package(Glib REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Glibmm REQUIRED)

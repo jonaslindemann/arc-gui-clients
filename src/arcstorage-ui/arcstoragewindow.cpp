@@ -105,7 +105,6 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     // Get fileserver and wire it up
 
-    qDebug() << "start url = " << m_startUrl;
     m_currentFileServer = new SRMFileServer();
 
     // So basically we handle everything using a SRMFileServer (...)
@@ -144,6 +143,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
         m_logStream->setFormat(Arc::ShortFormat);
         Arc::Logger::getRootLogger().addDestination(*m_logStream);
         Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
+
+        logger.msg(Arc::INFO, "ARC Storage Explorer initialising...");
     }
 
     // Set splitter sizes
@@ -156,6 +157,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     if (m_childWindow)
         ui->textOutput->hide();
+
+    ui->actionBack->setDisabled(true);
 
 #ifdef __linux__
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
@@ -172,6 +175,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->actionCreateDir->setIcon(QIcon::fromTheme("folder-new"));
     ui->actionOpenNewLocation->setIcon(QIcon::fromTheme("computer"));
     ui->actionCreateProxyCert->setIcon(QIcon::fromTheme("security-high"));
+    ui->actionDownloadSelected->setIcon(QIcon::fromTheme("document-save"));
+    ui->actionUploadSelected->setIcon(QIcon(":/resources/icons/document-upload.png"));
 #endif
 
     // Center main window
@@ -180,6 +185,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     if (!m_childWindow)
     {
+        logger.msg(Arc::INFO, "File transfer thread starting...");
         m_fileProcessingThread = new FileTransferProcessingThread();
         m_fileProcessingThread->start();
     }
@@ -196,11 +202,13 @@ ArcStorageWindow::~ArcStorageWindow()
 
     if (!m_childWindow)
     {
+        ARCTools::instance()->closeHelpWindow();
         Arc::Logger::getRootLogger().removeDestinations();
         delete m_logStream;
         delete m_debugStream;
         delete m_debugStream2;
     }
+
     delete ui;
 }
 
@@ -216,6 +224,8 @@ int ArcStorageWindow::getWindowId()
 
 void ArcStorageWindow::writeSettings()
 {
+    logger.msg(Arc::VERBOSE, "Writing settings (writeSettings)");
+
     // Get Qt settings singleton
 
     QSettings settings;
@@ -255,6 +265,8 @@ void ArcStorageWindow::writeSettings()
 
 void ArcStorageWindow::readSettings()
 {
+    logger.msg(Arc::VERBOSE, "Reading settings (readSettings)");
+
     QSettings settings;
 
     int i;
@@ -298,7 +310,6 @@ void ArcStorageWindow::readSettings()
             QString windowName = "ChildWindow"+QString::number(i);
             if (settings.childGroups().contains(windowName))
             {
-                qDebug() << "Found child window " << windowName;
                 settings.beginGroup(windowName);
                 QString url = settings.value("url", "").toString();
                 ArcStorageWindow* window = new ArcStorageWindow(0, true, url);
@@ -314,12 +325,49 @@ void ArcStorageWindow::readSettings()
     {
         // Child window reads its start URL from settings
 
-        qDebug() << "Child window reading settings:";
         QString windowName = "ChildWindow"+QString::number(i);
         settings.beginGroup(windowName);
         m_startUrl = settings.value("url", m_startUrl).toString();
-        qDebug() << "  start URL = " << m_startUrl;
         settings.endGroup();
+    }
+}
+
+void ArcStorageWindow::pushUrl(QString url)
+{
+    if (url!="")
+    {
+        m_backStack.push_back(url);
+        ui->actionBack->setEnabled(true);
+
+        QVectorIterator<QString> i(m_backStack);
+
+        /*
+        qDebug() << "-->";
+        while (i.hasNext())
+            qDebug() << i.next();
+        qDebug() << "<--";
+        */
+    }
+}
+
+QString ArcStorageWindow::popUrl()
+{
+    if (m_backStack.size()>0)
+    {
+        QString url = m_backStack.back();
+        m_backStack.pop_back();
+
+        if (m_backStack.size()==0)
+            ui->actionBack->setDisabled(true);
+        else
+            ui->actionBack->setEnabled(true);
+
+        return url;
+    }
+    else
+    {
+        ui->actionBack->setDisabled(true);
+        return m_currentFileServer->getCurrentURL();
     }
 }
 
@@ -342,7 +390,7 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
         if (QApplication::argc()>1)
         {
             QString url = QApplication::arguments().at(1);
-            qDebug() << "URL to open: " << url;
+            logger.msg(Arc::INFO, "Opening url = ", url.toStdString());
             this->openUrl(url);
         }
     }
@@ -352,6 +400,7 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
 
 void ArcStorageWindow::closeEvent(QCloseEvent *e)
 {
+    logger.msg(Arc::VERBOSE, "Received close event. (closeEvent)");
     // This method is called before window is closed.
     // Saves settings. Closes child windows.
     /*
@@ -377,7 +426,7 @@ void ArcStorageWindow::closeEvent(QCloseEvent *e)
 
 void ArcStorageWindow::deleteSelectedFiles()
 {
-    logger.msg(Arc::INFO, "Delete selected files started.");
+    logger.msg(Arc::VERBOSE, "Delete selected files started. (deleteSelectedFiles)");
 
     // Delete selected file
 
@@ -409,6 +458,7 @@ void ArcStorageWindow::deleteSelectedFiles()
 
 void ArcStorageWindow::createDir()
 {
+    logger.msg(Arc::VERBOSE, "Creating directory. (createDir)");
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;   // Update the listview displaying the folder...
 
     bool ok;
@@ -438,8 +488,7 @@ void ArcStorageWindow::setBusyUI(bool busy)
 {
     if (busy == true)
     {
-        qDebug() << "UI Busy -->";
-        //setCursor(Qt::WaitCursor);
+        logger.msg(Arc::VERBOSE, "Disable UI");
         ui->statusBar->showMessage("Processing...");
         ui->menuBar->setEnabled(false);
         ui->mainToolBar->setEnabled(false);
@@ -449,8 +498,7 @@ void ArcStorageWindow::setBusyUI(bool busy)
     }
     else
     {
-        qDebug() << "<-- UI Active";
-        //setCursor(Qt::ArrowCursor);
+        logger.msg(Arc::VERBOSE, "Enable UI");
         ui->statusBar->clearMessage();
         ui->menuBar->setEnabled(true);
         ui->mainToolBar->setEnabled(true);
@@ -467,7 +515,6 @@ QString ArcStorageWindow::getCurrentURL()
 
 QMenu* ArcStorageWindow::getWindowListMenu()
 {
-    return ui->menuWindow;
 }
 
 
@@ -575,7 +622,7 @@ QString convertToSizeWithUnit(qint64 num_bytes)
 
 void ArcStorageWindow::updateFileTree()
 {
-    logger.msg(Arc::INFO, "Updating file list.");
+    logger.msg(Arc::VERBOSE, "Updating file list. (updateFileTree)");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
@@ -603,12 +650,6 @@ void ArcStorageWindow::updateFileTree()
         else
             item->setText(2, "file");
         item->setText(3, AFE->getLastModfied().toString());
-        //item->setText(4, AFE->getOwner());
-        //item->setText(5, AFE->getGroup());
-        //QString tmpStr;
-        //tmpStr.sprintf("%x", AFE->getPermissions());
-        //item->setText(6, tmpStr);
-        //item->setText(7, AFE->getLastRead().toString());
         setURLOfItem(item, AFE->getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }
@@ -622,13 +663,13 @@ void ArcStorageWindow::updateFileTree()
 
     this->setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
-    logger.msg(Arc::INFO, "File list update done.");
+    logger.msg(Arc::VERBOSE, "File list update done.");
 }
 
 
 void ArcStorageWindow::updateFoldersTree()
 {
-    logger.msg(Arc::INFO, "Updating folder tree.");
+    logger.msg(Arc::VERBOSE, "Updating folder tree. (updateFolderTree)");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
     m_folderListUrl = m_currentFileServer->getCurrentURL();
@@ -650,12 +691,12 @@ void ArcStorageWindow::updateFoldersTree()
             ui->foldersTreeWidget->addTopLevelItem(item);
         }
     }
-    logger.msg(Arc::INFO, "Folder tree update done.");
+    logger.msg(Arc::VERBOSE, "Folder tree update done.");
 }
 
 void ArcStorageWindow::updateFoldersTreeBelow()
 {
-    logger.msg(Arc::INFO, "Update folders tree below.");
+    logger.msg(Arc::VERBOSE, "Update folders tree below. (updateFoldersTreeBelow)");
 
     m_currentFileServer->setNotifyParent(false);
     QString currentURL = m_currentFileServer->getCurrentURL();
@@ -688,6 +729,8 @@ void ArcStorageWindow::updateFoldersTreeBelow()
 
 void ArcStorageWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
 {
+    logger.msg(Arc::VERBOSE, "Expanding folder in tree. (expandFolderTreeWidget)");
+
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
 
     for (int i = 0; i < fileList.size(); ++i)
@@ -734,8 +777,6 @@ void ArcStorageWindow::setCurrentComboBoxURL(QString url)
 
         if (urlParts.at(0).length()==0)
         {
-            qDebug() << "Local path: " << urlParts;
-
             buildPath = "";
 
             for (int i=1; i<urlParts.count(); i++)
@@ -751,8 +792,6 @@ void ArcStorageWindow::setCurrentComboBoxURL(QString url)
         }
         else
         {
-            qDebug() << "External URL: " << urlParts;
-
             buildPath = urlParts.at(0)+"/";
 
             for (int i=2; i<urlParts.count(); i++)
@@ -772,7 +811,7 @@ void ArcStorageWindow::setCurrentComboBoxURL(QString url)
 
 void ArcStorageWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 {
-    logger.msg(Arc::INFO, "Files dropped in window.");
+    logger.msg(Arc::VERBOSE, "Files dropped in window. (onFilesDropped in file list widget)");
 
     GlobalStateInfo::instance()->showTransferWindow();
 
@@ -781,7 +820,7 @@ void ArcStorageWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
     int i;
 
     for (i=0; i<urlList.length(); i++)
-        logger.msg(Arc::INFO, "file:" + urlList[i].toString().toStdString());
+        logger.msg(Arc::VERBOSE, "Dropped file :" + urlList[i].toString().toStdString());
 
     FileTransferList::instance()->pauseProcessing();
     m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
@@ -790,8 +829,7 @@ void ArcStorageWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
 
 void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
 {
-    qDebug() << "folder list URL = " << m_folderListUrl;
-    qDebug() << "file list URL   = " << m_currentFileServer->getCurrentURL();
+    logger.msg(Arc::VERBOSE, "File listing finished. (onFileListFinished)");
 
     setBusyUI(false);
 
@@ -846,58 +884,39 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
 
 void ArcStorageWindow::onCopyFromServerFinished(bool error)
 {
-    logger.msg(Arc::INFO, "Copy from file server finished.");
+    logger.msg(Arc::VERBOSE, "Copy from file server finished. (onCopyFromServerFinished)");
     updateFileTree();
     GlobalStateInfo::instance()->hideTransferWindow();
     setBusyUI(false);
     if (error == true)
-    {
         QMessageBox::information(this, tr("ArcFTP"), "An error occured while trying to copy the file");
-    }
-    else
-    {
-        //ui->statusLabel->setText("Copy complete!");
-    }
 }
 
 void ArcStorageWindow::onDeleteFinished(bool error)
 {
-    logger.msg(Arc::INFO, "File deletion finished.");
+    logger.msg(Arc::VERBOSE, "File deletion finished. (onDeleteFinished)");
     this->updateFileTree();
 
     setBusyUI(false);
     if (error == true)
-    {
         QMessageBox::information(this, tr("ArcFTP"), "Delete failed");
-    }
-    else
-    {
-        //ui->statusLabel->setText("File deleted!");
-    }
 }
 
 
 void ArcStorageWindow::onMakeDirFinished(bool error)
 {
-    logger.msg(Arc::INFO, "Make dir finished.");
-    //m_currentUpdateFileListsMode = CUFLM_clickedBrowse;   // Update the listview displaying the folder...
-    //onFileListFinished(false, "");                      // ... so that the deleted file is removed
+    logger.msg(Arc::VERBOSE, "Make dir finished. (onMakeDirFinished)");
 
     setBusyUI(false);
+
     if (error == true)
-    {
         QMessageBox::information(this, tr("ArcFTP"), "Makedir failed");
-    }
-    else
-    {
-        //ui->statusLabel->setText("Folder created!");
-    }
 }
 
 
 void ArcStorageWindow::onCopyToServerFinished(bool error, QList<QString> &failedFiles)
 {
-    logger.msg(Arc::INFO, "Copy to server finished.");
+    logger.msg(Arc::VERBOSE, "Copy to server finished. (onCopyToServerFinished)");
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
     onFileListFinished(false, "");                      // ... so that the deleted file is removed
 
@@ -914,10 +933,6 @@ void ArcStorageWindow::onCopyToServerFinished(bool error, QList<QString> &failed
         }
 
         QMessageBox::information(this, tr("ArcFTP"), message);
-    }
-    else
-    {
-        //ui->statusLabel->setText("Copy files to server OK!");
     }
 }
 
@@ -1054,13 +1069,13 @@ void ArcStorageWindow::onBreadCrumbTriggered()
 
 void ArcStorageWindow::on_foldersTreeWidget_expanded(QModelIndex index)
 {
-    logger.msg(Arc::INFO, "on_foldersTreeWidget_expanded() %d ", index.row());
+    logger.msg(Arc::VERBOSE, "on_foldersTreeWidget_expanded() %d ", index.row());
 }
 
 
 void ArcStorageWindow::on_foldersTreeWidget_itemExpanded(QTreeWidgetItem* item)
 {
-    logger.msg(Arc::INFO, "on_foldersTreeWidget_itemExpanded() %s", item->text(0).toStdString());
+    logger.msg(Arc::VERBOSE, "on_foldersTreeWidget_itemExpanded() %s", item->text(0).toStdString());
 
     m_currentUpdateFileListsMode = CUFLM_expandedFolder;
 
@@ -1076,11 +1091,12 @@ void ArcStorageWindow::on_foldersTreeWidget_itemExpanded(QTreeWidgetItem* item)
 void ArcStorageWindow::on_foldersTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
     QString clickedString = item->text(0);
-    logger.msg(Arc::INFO, "on_foldersTreeWidget_itemClicked() %s", clickedString.toStdString());
+    logger.msg(Arc::VERBOSE, "on_foldersTreeWidget_itemClicked() %s", clickedString.toStdString());
     setBusyUI(true);
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;
     QString newURL = getURLOfItem(item);
     m_folderWidgetBeingUpdated = item;
+    this->pushUrl(m_currentFileServer->getCurrentURL());
     m_currentFileServer->updateFileList(newURL); // --> startUpdateFileList
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 }
@@ -1101,6 +1117,7 @@ void ArcStorageWindow::on_actionUp_triggered()
 {
     setBusyUI(true);
     m_currentUpdateFileListsMode = CUFLM_clickedUp;
+    this->pushUrl(m_currentFileServer->getCurrentURL());
     if (m_currentFileServer->goUpOneFolder() == true)
         setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
     else
@@ -1126,7 +1143,6 @@ void ArcStorageWindow::on_actionNewWindow_triggered()
     r.setRight(this->geometry().right()+150);
     r.setBottom(this->geometry().bottom()+150);
 
-    qDebug() << r;
     window->setGeometry(r);
     window->show();
 
@@ -1138,11 +1154,12 @@ void ArcStorageWindow::on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *ite
     if (item->text(2)=="folder")
     {
         QString clickedString = item->text(0);
-        logger.msg(Arc::INFO, "on_filesTreeWidget_itemDoubleClicked() %s", clickedString.toStdString());
+        logger.msg(Arc::VERBOSE, "on_filesTreeWidget_itemDoubleClicked() %s", clickedString.toStdString());
         setBusyUI(true);
         m_currentUpdateFileListsMode = CUFLM_clickedBrowse  ;
         QString newURL = getURLOfItem(item);
         m_folderWidgetBeingUpdated = item;
+        this->pushUrl(m_currentFileServer->getCurrentURL());
         m_currentFileServer->startUpdateFileList(newURL);
         setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
     }
@@ -1185,7 +1202,6 @@ void ArcStorageWindow::on_actionOpenNewLocation_triggered()
         r.setRight(this->geometry().right()+150);
         r.setBottom(this->geometry().bottom()+150);
 
-        qDebug() << r;
         window->setGeometry(r);
         window->show();
 
@@ -1232,6 +1248,7 @@ void ArcStorageWindow::openUrl(QString url)
 
     while (url.endsWith('/')) { url = url.left(url.length() - 1); }  // Get rid of trailing /
 
+    this->pushUrl(m_currentFileServer->getCurrentURL());
     m_folderListUrl = url;
     m_currentFileServer->startUpdateFileList(url);
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
@@ -1272,10 +1289,7 @@ void ArcStorageWindow::on_actionSettings_triggered()
 {
     ApplicationSettings dialog(this);
     dialog.setModal(true);
-    int dialogReturnValue = dialog.exec();
-    if (dialogReturnValue != 0)
-    {
-    }
+    dialog.exec();
 }
 
 void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoint &pos)
@@ -1292,8 +1306,6 @@ void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoin
 
 void ArcStorageWindow::on_actionCopyURL_triggered()
 {
-    qDebug() << "copyURL selected.";
-
     QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
 
     if (selectedItems.size() != 0)
@@ -1354,5 +1366,92 @@ void ArcStorageWindow::on_actionShowFileProperties_triggered()
         m_filePropertyInspector->show();
         QMap<QString, QString> propertyMap = m_currentFileServer->fileProperties(getURLOfItem(selectedItems.at(0)));
         m_filePropertyInspector->setProperties(propertyMap);
+    }
+}
+
+void ArcStorageWindow::on_actionBack_triggered()
+{
+    QString url = this->popUrl();
+    if (url!="")
+        this->openUrl(url);
+}
+
+void ArcStorageWindow::on_actionHelpContents_triggered()
+{
+    if (!m_childWindow)
+        ARCTools::instance()->showHelpWindow(this);
+    else
+        ARCTools::instance()->showHelpWindow(GlobalStateInfo::instance()->mainWindow());
+}
+
+void ArcStorageWindow::on_actionDownloadSelected_triggered()
+{
+    logger.msg(Arc::VERBOSE, "Downloading files to selected directory. (on_actionDownloadSelected_triggered)");
+
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select destination directory"),
+                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    QString destDir = (QUrl::fromLocalFile(dir)).toString();
+
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    if (selectedItems.length()>0)
+    {
+        QList<QUrl> urlList;
+
+        for (int i=0; i<selectedItems.length(); i++)
+        {
+            QTreeWidgetItem* item = selectedItems.at(i);
+            if (item->text(2)=="file")
+            {
+                QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                QUrl url = QUrl::fromLocalFile(dataQV.toString());
+                urlList.append(url);
+            }
+            else
+            {
+                QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                QUrl url = QUrl::fromLocalFile(dataQV.toString()+"/");
+                urlList.append(url);
+            }
+        }
+
+        GlobalStateInfo::instance()->showTransferWindow();
+
+        this->setBusyUI(true);
+
+        int i;
+
+        FileTransferList::instance()->pauseProcessing();
+        m_currentFileServer->copyToServer(urlList, destDir);
+        FileTransferList::instance()->resumeProcessing();
+    }
+}
+
+void ArcStorageWindow::on_actionUploadSelected_triggered()
+{
+    logger.msg(Arc::VERBOSE, "Uploading files to selected directory. (on_actionUploadSelected_triggered)");
+
+    QStringList selectedFiles = QFileDialog::getOpenFileNames(this, "Select files to upload", "/home");
+
+    if (selectedFiles.length()>0)
+    {
+        QList<QUrl> urlList;
+
+        for (int i=0; i<selectedFiles.length(); i++)
+        {
+            QUrl url = QUrl::fromLocalFile(selectedFiles.at(i));
+            urlList.append(url);
+        }
+
+        GlobalStateInfo::instance()->showTransferWindow();
+
+        this->setBusyUI(true);
+
+        int i;
+
+        FileTransferList::instance()->pauseProcessing();
+        m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
+        FileTransferList::instance()->resumeProcessing();
     }
 }

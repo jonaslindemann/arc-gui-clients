@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     // Start actual user interface
 
-    ArcStorageWindow window;
+    ArcStorageWindow window(0, false);
     window.show();
 
     QSplashScreen splash(pixmap);

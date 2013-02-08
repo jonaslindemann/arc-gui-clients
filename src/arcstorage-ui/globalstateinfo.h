@@ -2,6 +2,7 @@
 #define GLOBALSTATEINFO_H
 
 #include <QList>
+#include <QMenu>
 
 #include "arcstoragewindow.h"
 #include "transferlistwindow.h"
@@ -13,6 +14,7 @@ private:
     TransferListWindow* m_transferListWindow;
     QList<ArcStorageWindow*> m_childWindows;
     ArcStorageWindow* m_mainWindow;
+    QMenu* m_windowMenu;
 public:
     enum TLogLevel {LL_VERBOSE, LL_INFO, LL_WARNING, LL_ERROR};
     static GlobalStateInfo* instance()
@@ -44,6 +46,7 @@ public:
     void readSettings();
 
     void setMainWindow(ArcStorageWindow* window);
+    ArcStorageWindow* mainWindow();
     void addChildWindow(ArcStorageWindow* window);
     void removeChildWindow(ArcStorageWindow* window);
     void closeChildWindows();
@@ -51,6 +54,8 @@ public:
     void hideTransferWindow();
     int childWindowCount();
     ArcStorageWindow* getChildWindow(int idx);
+
+    QMenu* windowMenu();
 
     void updateWindowList(QMenu* menu);
 

@@ -7,6 +7,8 @@
 #include <arc/UserConfig.h>
 
 #include "arcproxy-utils.h"
+#include "helpwindow.h"
+
 
 class ARCTools : public QObject
 {
@@ -15,6 +17,7 @@ private:
     Arc::UserConfig* m_userConfig;
     ArcProxyController* m_proxyController;
     QString m_jobListFile;
+    HelpWindow* m_helpWindow;
 public:
     static ARCTools* instance()
     {
@@ -53,6 +56,9 @@ public:
     void jobManagerTool();
     void submissionTool();
     void storageTool();
+
+    void showHelpWindow(QMainWindow* window);
+    void closeHelpWindow();
 
 private:
 

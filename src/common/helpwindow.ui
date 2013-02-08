@@ -15,8 +15,17 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
     <item>
-     <widget class="QTextBrowser" name="textBrowser"/>
+     <widget class="QWebView" name="webView">
+      <property name="url">
+       <url>
+        <string>about:blank</string>
+       </url>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -44,6 +53,7 @@
    <addaction name="actionBack"/>
    <addaction name="actionForward"/>
    <addaction name="actionHome"/>
+   <addaction name="actionStop"/>
   </widget>
   <action name="actionBack">
    <property name="text">
@@ -60,7 +70,19 @@
     <string>Home</string>
    </property>
   </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebView</class>
+   <extends>QWidget</extends>
+   <header>QtWebKit/QWebView</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
