@@ -12,6 +12,8 @@ namespace Ui {
 #include <QModelIndex>
 #include <arc/Logger.h>
 #include <QComboBox>
+#include <QStack>
+
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
 #include "filetransferlist.h"
@@ -85,6 +87,10 @@ private:
     QStringList fileTreeHeaderLabels;
 
     QStringList m_breadCrumbItems;
+    QStack<QString> m_backStack;
+
+    void pushUrl(QString url);
+    QString popUrl();
 
     Arc::LogStream* m_logStream;
     QDebugStream* m_debugStream;
@@ -147,6 +153,14 @@ private Q_SLOTS:
     void on_actionCopyURLFilename_triggered();
 
     void on_actionShowFileProperties_triggered();
+
+    void on_actionBack_triggered();
+
+    void on_actionHelpContents_triggered();
+
+    void on_actionDownloadSelected_triggered();
+
+    void on_actionUploadSelected_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);

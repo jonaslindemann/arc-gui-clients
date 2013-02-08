@@ -28,6 +28,8 @@ GlobalStateInfo::GlobalStateInfo()
     m_rememberWindowsPositions = true;
     m_rememberStartupDirs = true;
     m_newWindowUrl = "";
+
+    m_windowMenu = new QMenu();
 }
 
 void GlobalStateInfo::writeSettings()
@@ -60,6 +62,11 @@ void GlobalStateInfo::writeSettings()
     settings.setValue("remember_url", m_rememberStartupDirs);
     settings.setValue("startup_url", m_newWindowUrl);
     settings.endGroup();
+
+    settings.remove("Logging");
+    settings.beginGroup("Logging");
+    settings.setValue("log_level", m_logLevel);
+    settings.endGroup();
 }
 
 void GlobalStateInfo::readSettings()
@@ -84,6 +91,12 @@ void GlobalStateInfo::readSettings()
         m_newWindowUrl = settings.value("startup_url").toString();
         settings.endGroup();
     }
+    if (settings.childGroups().contains("Logging"))
+    {
+        settings.beginGroup("Logging");
+        m_rememberWindowsPositions = settings.value("log_level").toInt();
+        settings.endGroup();
+    }
 }
 
 
@@ -92,31 +105,27 @@ void GlobalStateInfo::setMainWindow(ArcStorageWindow* window)
     m_mainWindow = window;
 }
 
+ArcStorageWindow* GlobalStateInfo::mainWindow()
+{
+    return m_mainWindow;
+}
+
+QMenu* GlobalStateInfo::windowMenu()
+{
+    return m_windowMenu;
+}
+
 void GlobalStateInfo::addChildWindow(ArcStorageWindow* window)
 {
     m_childWindows.append(window);
-
-    /*
-    for (int i=0; i<m_childWindows.count(); i++)
-        this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
-    */
-
     this->enumerateWindows();
-    //this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::removeChildWindow(ArcStorageWindow* window)
 {
     m_childWindows.removeOne(window);
     delete window;
-
-    /*
-    for (int i=0; i<m_childWindows.count(); i++)
-        this->updateWindowList(m_childWindows.at(i)->getWindowListMenu());
-    */
-
     this->enumerateWindows();
-    //this->updateWindowList(m_mainWindow->getWindowListMenu());
 }
 
 void GlobalStateInfo::closeChildWindows()

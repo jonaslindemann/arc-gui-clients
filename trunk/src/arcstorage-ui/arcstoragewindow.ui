@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>814</width>
+    <width>889</width>
     <height>606</height>
    </rect>
   </property>
@@ -21,6 +21,9 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitterVertical">
       <property name="sizePolicy">
@@ -60,6 +63,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -81,6 +87,9 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
         </property>
         <column>
          <property name="text">
@@ -106,6 +115,12 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::ContiguousSelection</enum>
@@ -148,6 +163,9 @@
          <pointsize>9</pointsize>
         </font>
        </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
        <property name="lineWrapMode">
         <enum>QTextEdit::NoWrap</enum>
        </property>
@@ -167,7 +185,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>814</width>
+     <width>889</width>
      <height>26</height>
     </rect>
    </property>
@@ -197,7 +215,6 @@
     </property>
     <addaction name="actionReload"/>
     <addaction name="actionBack"/>
-    <addaction name="actionForward"/>
     <addaction name="actionUp"/>
     <addaction name="actionStop"/>
    </widget>
@@ -205,6 +222,8 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionHelpContents"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout_ARC_File_Navigator"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -213,26 +232,18 @@
     </property>
     <addaction name="actionShowTransferList"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menuTransfer">
     <property name="title">
-     <string>Tools</string>
+     <string>Transfer</string>
     </property>
-    <addaction name="actionConvertCertificates"/>
-    <addaction name="actionCreateProxyCert"/>
-    <addaction name="actionJobSubmissionTool"/>
-    <addaction name="actionJobManager"/>
-   </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
+    <addaction name="actionDownloadSelected"/>
+    <addaction name="actionUploadSelected"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuGo"/>
-   <addaction name="menuTools"/>
-   <addaction name="menuWindow"/>
+   <addaction name="menuTransfer"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -241,6 +252,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -251,12 +265,16 @@
    <addaction name="actionNewWindow"/>
    <addaction name="actionOpenNewLocation"/>
    <addaction name="separator"/>
+   <addaction name="actionBack"/>
    <addaction name="actionUp"/>
    <addaction name="actionReload"/>
    <addaction name="actionStop"/>
    <addaction name="separator"/>
    <addaction name="actionCreateDir"/>
    <addaction name="actionDelete"/>
+   <addaction name="separator"/>
+   <addaction name="actionDownloadSelected"/>
+   <addaction name="actionUploadSelected"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -301,6 +319,9 @@
    <property name="text">
     <string>Reload</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -317,6 +338,9 @@
    <property name="text">
     <string>Back</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+Left</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -332,6 +356,9 @@
   <action name="actionUp">
    <property name="text">
     <string>Up</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Up</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -475,6 +502,33 @@
   <action name="actionShowFileProperties">
    <property name="text">
     <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionHelpContents">
+   <property name="text">
+    <string>Contents...</string>
+   </property>
+  </action>
+  <action name="actionDownloadSelected">
+   <property name="text">
+    <string>Download</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionUploadSelected">
+   <property name="text">
+    <string>Upload</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

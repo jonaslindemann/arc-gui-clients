@@ -119,7 +119,7 @@ SRMFileServer::SRMFileServer()
     m_usercfg = NULL;
     m_notifyParent = true;
 
-    connect(&m_updateFileListWatcher, SIGNAL(finished()), this, SLOT(onUpdateFileListFinished()));
+    //connect(&m_updateFileListWatcher, SIGNAL(finished()), this, SLOT(onUpdateFileListFinished()));
 
 }
 

@@ -13,8 +13,6 @@ Contents:
 
    introduction.rst
    arcstorage-ui.rst
-   arcsub-ui.rst
-   arcstat-ui.rst
 
 
 

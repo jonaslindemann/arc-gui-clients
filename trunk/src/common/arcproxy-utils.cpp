@@ -170,8 +170,6 @@ bool VomsList::read()
                     strippedFields.append(fields[j].replace("\"", ""));
                 }
 
-                qDebug() << strippedFields;
-
                 VomsListEntry* entry = new VomsListEntry();
                 entry->setAlias(strippedFields[0]);
                 entry->setMachine(strippedFields[1]);
@@ -202,7 +200,6 @@ int VomsList::count()
 bool VomsList::write()
 {
     QString vomsFilename = QDir::homePath() + "/.arc/vomses";
-    qDebug() << "writing file :" << vomsFilename;
     QFile vomsFile(vomsFilename);
     vomsFile.open(QFile::WriteOnly|QFile::Truncate);
 
@@ -372,13 +369,9 @@ ArcProxyController::TCertStatus ArcProxyController::checkCert()
 
 ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
 {
-    std::cout << "Creating proxy window." << std::endl;
-
     m_proxyWindow = new ProxyWindow(0, this);
     m_proxyWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, m_proxyWindow->size(), qApp->desktop()->availableGeometry()));
-    std::cout << "Executing main loop." << std::endl;
     m_proxyWindow->exec();
-    std::cout << "Returning from main loop." << std::endl;
 
     if (this->checkProxy() != PS_VALID)
         m_uiReturnStatus = RS_FAILED;
@@ -390,7 +383,6 @@ ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
 
 void ArcProxyController::showProxyUIAppLoop()
 {
-    std::cout << "Creating application instance" << std::endl;
     m_application = new QApplication(0,0,0);
     this->showProxyUI();
 }
@@ -398,11 +390,6 @@ void ArcProxyController::showProxyUIAppLoop()
 
 int ArcProxyController::initialize()
 {
-    /*
-    Arc::Logger::getRootLogger().removeDestinations();
-    Arc::Logger::getRootLogger().addDestination(logCerr);
-    Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
-    */
     logCerr.setFormat(Arc::ShortFormat);
 
     Arc::ArcLocation::Init("");
