@@ -88,11 +88,13 @@ void print_details(const std::list<Arc::FileInfo>& files, bool show_urls, bool s
     } else {
       std::cout << " " << std::setw(sizewidth) << std::right << "  (n/a)";
     }
+#if ARC_VERSION_MAJOR >= 3
     if (i->CheckModified()) {
       std::cout << " " << i->GetModified();
     } else {
       std::cout << "       (n/a)        ";
     }
+#endif
     if (i->CheckValid()) {
       std::cout << " " << i->GetValid();
     } else {
