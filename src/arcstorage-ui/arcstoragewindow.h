@@ -162,6 +162,10 @@ private Q_SLOTS:
 
     void on_actionUploadSelected_triggered();
 
+    void on_actionUploadDirectory_triggered();
+
+    void on_actionUploadDirAndArchive_triggered();
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);

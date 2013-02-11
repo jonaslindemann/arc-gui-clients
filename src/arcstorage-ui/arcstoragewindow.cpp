@@ -8,6 +8,7 @@
 #include <QInputDialog>
 #include <QSpacerItem>
 #include <QApplication>
+#include <QProcess>
 #include <iostream>
 #include "arcstoragewindow.h"
 #include "ui_arcstoragewindow.h"
@@ -1454,4 +1455,60 @@ void ArcStorageWindow::on_actionUploadSelected_triggered()
         m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
         FileTransferList::instance()->resumeProcessing();
     }
+}
+
+void ArcStorageWindow::on_actionUploadDirectory_triggered()
+{
+    logger.msg(Arc::VERBOSE, "Uploading directory to selected directory. (on_actionUploadSelected_triggered)");
+
+    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", "/home");
+
+    if (selectedDir.length()>0)
+    {
+        QList<QUrl> urlList;
+
+        QUrl url = QUrl::fromLocalFile(selectedDir+"/");
+        urlList.append(url);
+
+        GlobalStateInfo::instance()->showTransferWindow();
+
+        this->setBusyUI(true);
+
+        int i;
+
+        FileTransferList::instance()->pauseProcessing();
+        m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
+        FileTransferList::instance()->resumeProcessing();
+    }
+}
+
+void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
+{
+    logger.msg(Arc::VERBOSE, "Uploading directory to selected directory. (on_actionUploadSelected_triggered)");
+
+    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", "/home");
+
+    QProcess process;
+    process.start("ls -la");
+    process.waitForFinished();
+
+    /*
+    if (selectedDir.length()>0)
+    {
+        QList<QUrl> urlList;
+
+        QUrl url = QUrl::fromLocalFile(selectedDir+"/");
+        urlList.append(url);
+
+        GlobalStateInfo::instance()->showTransferWindow();
+
+        this->setBusyUI(true);
+
+        int i;
+
+        FileTransferList::instance()->pauseProcessing();
+        m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
+        FileTransferList::instance()->resumeProcessing();
+    }
+    */
 }

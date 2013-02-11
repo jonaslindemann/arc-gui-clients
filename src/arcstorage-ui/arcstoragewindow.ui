@@ -238,6 +238,8 @@
     </property>
     <addaction name="actionDownloadSelected"/>
     <addaction name="actionUploadSelected"/>
+    <addaction name="actionUploadDirectory"/>
+    <addaction name="actionUploadDirAndArchive"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -522,13 +524,23 @@
   </action>
   <action name="actionUploadSelected">
    <property name="text">
-    <string>Upload</string>
+    <string>Upload files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionUploadDirectory">
+   <property name="text">
+    <string>Upload directory</string>
+   </property>
+  </action>
+  <action name="actionUploadDirAndArchive">
+   <property name="text">
+    <string>Upload directory as archive </string>
    </property>
   </action>
  </widget>
