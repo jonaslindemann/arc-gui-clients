@@ -9,6 +9,9 @@
 #include <QSpacerItem>
 #include <QApplication>
 #include <QProcess>
+#include <QFileInfo>
+#include <QDateTime>
+
 #include <iostream>
 #include "arcstoragewindow.h"
 #include "ui_arcstoragewindow.h"
@@ -72,6 +75,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     m_transferWindow = 0;
     m_filePropertyInspector = 0;
     m_startUrl = Url;
+    m_tarProcess = 0;
 
     // Initialise Qt user interface
 
@@ -1482,33 +1486,68 @@ void ArcStorageWindow::on_actionUploadDirectory_triggered()
     }
 }
 
+void ArcStorageWindow::onTarErrorOutput()
+{
+    QByteArray data = m_tarProcess->readAllStandardError();
+    QString text = QString(data);
+    std::cout << text.toStdString() << endl;
+}
+
+void ArcStorageWindow::onTarStandardOutput()
+{
+    QByteArray data = m_tarProcess->readAllStandardOutput();
+    QString text = QString(data);
+    std::cout << text.toStdString() << endl;
+}
+
+void ArcStorageWindow::onTarFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitStatus == QProcess::NormalExit) {
+        std::cout << "Tar process completed succesfully." << std::endl;
+    }
+    else {
+        std::cout << "Tar process failed." << std::endl;
+    }
+
+    QList<QUrl> urlList;
+
+    QUrl url = QUrl::fromLocalFile(m_tarFilename);
+    urlList.append(url);
+
+    GlobalStateInfo::instance()->showTransferWindow();
+
+    FileTransferList::instance()->pauseProcessing();
+    m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
+    FileTransferList::instance()->resumeProcessing();
+}
+
 void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
 {
     logger.msg(Arc::VERBOSE, "Uploading directory to selected directory. (on_actionUploadSelected_triggered)");
 
     QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", "/home");
 
-    QProcess process;
-    process.start("ls -la");
-    process.waitForFinished();
-
-    /*
-    if (selectedDir.length()>0)
+    if (selectedDir!="")
     {
-        QList<QUrl> urlList;
+        QFileInfo fileInfo(selectedDir);
 
-        QUrl url = QUrl::fromLocalFile(selectedDir+"/");
-        urlList.append(url);
+        m_tarDestDir = fileInfo.absolutePath();
+        QString dirName = fileInfo.fileName();
+        QDateTime currentTime = QDateTime::currentDateTime();
+        QString currentTimeStamp = currentTime.toString("yyyyMMdd-hhmmss");
+        m_tarFilename = m_tarDestDir+"/"+dirName+"-"+currentTimeStamp+".tar.gz";
 
-        GlobalStateInfo::instance()->showTransferWindow();
+        if (m_tarProcess != 0)
+            delete m_tarProcess;
+
+        m_tarProcess = new QProcess(this);
+
+        connect(m_tarProcess, SIGNAL(readyReadStandardError()), this, SLOT(onTarErrorOutput()));
+        connect(m_tarProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(onTarStandardOutput()));
+        connect(m_tarProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onTarFinished(int,QProcess::ExitStatus)));
+        m_tarProcess->start("tar cvzf "+m_tarFilename+" "+selectedDir);
+        m_tarProcess->waitForStarted();
 
         this->setBusyUI(true);
-
-        int i;
-
-        FileTransferList::instance()->pauseProcessing();
-        m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
-        FileTransferList::instance()->resumeProcessing();
     }
-    */
 }

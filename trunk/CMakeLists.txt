@@ -46,6 +46,7 @@ set(CPACK_SOURCE_IGNORE_FILES
         ./builddir/
         ./bin/
 )
+SET(CPACK_RPM_PACKAGE_DEBUG 1)
 include(CPack)
 
 include(CheckFileOffsetBits)

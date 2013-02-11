@@ -13,6 +13,7 @@ namespace Ui {
 #include <arc/Logger.h>
 #include <QComboBox>
 #include <QStack>
+#include <QProcess>
 
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
@@ -104,6 +105,10 @@ private:
 
     FileTransferProcessingThread* m_fileProcessingThread;
 
+    QProcess* m_tarProcess;
+    QString m_tarFilename;
+    QString m_tarDestDir;
+
 protected:
     void showEvent(QShowEvent *e);
     void closeEvent( QCloseEvent *e );
@@ -165,6 +170,10 @@ private Q_SLOTS:
     void on_actionUploadDirectory_triggered();
 
     void on_actionUploadDirAndArchive_triggered();
+
+    void onTarErrorOutput();
+    void onTarStandardOutput();
+    void onTarFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
