@@ -82,6 +82,9 @@ public:
     void setLogLevel(TLogLevel level);
     TLogLevel logLevel();
 
+    void setRedirectLog(bool flag);
+    bool redirectLog();
+
     void setRememberWindowPositions(bool flag);
     bool rememberWindowPositions();
 
@@ -102,6 +105,7 @@ private:
     bool m_rememberStartupDirs;
     QString m_newWindowUrl;
     TLogLevel m_logLevel;
+    bool m_redirectLog;
 
     // File transfer options
 

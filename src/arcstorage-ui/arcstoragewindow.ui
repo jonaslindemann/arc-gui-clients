@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>889</width>
+    <width>985</width>
     <height>606</height>
    </rect>
   </property>
@@ -185,7 +185,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>889</width>
+     <width>985</width>
      <height>26</height>
     </rect>
    </property>
@@ -277,6 +277,8 @@
    <addaction name="separator"/>
    <addaction name="actionDownloadSelected"/>
    <addaction name="actionUploadSelected"/>
+   <addaction name="actionUploadDirectory"/>
+   <addaction name="actionUploadDirAndArchive"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -435,6 +437,9 @@
    <property name="text">
     <string>Create directory</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionShowTransferList">
    <property name="text">
@@ -537,10 +542,16 @@
    <property name="text">
     <string>Upload directory</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionUploadDirAndArchive">
    <property name="text">
     <string>Upload directory as archive </string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

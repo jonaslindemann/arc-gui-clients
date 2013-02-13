@@ -79,20 +79,27 @@ void FileTransferList::resumeProcessing()
 
 void FileTransferList::processTransfers()
 {
+    qDebug() << "processTransfers";
     m_accessMutex.lock();
+    int idleCount = 0;
     for (int i=0; i<m_transferList.length(); i++)
     {
         FileTransfer* xfr = m_transferList.at(i);
+        qDebug() << "checking: " << xfr->id();
         if (xfr->transferState()==TS_IDLE)
         {
+            qDebug() << xfr->id() << " is idle.";
+            idleCount++;
             if (m_activeTransferList.length()<m_maxTransfers)
             {
+                qDebug() << "processTransfers: Executing " << xfr->id();
                 m_activeTransferList.append(xfr);
                 m_activeTransferDict[xfr->id()] = xfr;
                 xfr->execute();
             }
         }
     }
+    qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length() << " total = " << m_transferList.length();
     m_accessMutex.unlock();
 }
 

@@ -2,5 +2,7 @@
     <qresource prefix="/resources">
         <file>images/splash_arc_storage.png</file>
         <file>icons/document-upload.png</file>
+        <file>icons/folder-upload.png</file>
+        <file>icons/folder-upload-tar.png</file>
     </qresource>
 </RCC>

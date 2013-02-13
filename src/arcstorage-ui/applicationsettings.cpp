@@ -31,6 +31,7 @@ void ApplicationSettings::showEvent(QShowEvent *e)
     ui->transferRetriesSpin->setValue(GlobalStateInfo::instance()->transferRetries());
     ui->transferTimeoutSpin->setValue(GlobalStateInfo::instance()->transferTimeout());
     ui->windowURLText->setText(GlobalStateInfo::instance()->newWindowUrl());
+    ui->redirectLogCheck->setChecked(GlobalStateInfo::instance()->redirectLog());
 }
 
 
@@ -49,6 +50,7 @@ void ApplicationSettings::on_okButton_clicked()
     GlobalStateInfo::instance()->setTransferRetries(ui->transferRetriesSpin->value());
     GlobalStateInfo::instance()->setTransferTimeout(ui->transferTimeoutSpin->value());
     GlobalStateInfo::instance()->setNewWindowUrl(ui->windowURLText->text());
+    GlobalStateInfo::instance()->setRedirectLog(ui->redirectLogCheck->isChecked());
 
     if (ui->logLevelCombo->currentIndex()==0)
         GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_VERBOSE);
