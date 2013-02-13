@@ -420,7 +420,7 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
             QString sourceFilename = sourcePath.right(sourcePath.length() - sourcePath.lastIndexOf('/') - 1);
             QString destinationPath = destinationFolder + "/" + sourceFilename;
 
-            logger.msg(Arc::INFO, "Adding filertransfer : "+sourcePath.toStdString()+" -> " + destinationPath.toStdString());
+            logger.msg(Arc::INFO, "Adding dir filertransfer : "+sourcePath.toStdString()+" -> " + destinationPath.toStdString());
             FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
             FileTransferList::instance()->addTransfer(xfr);
             connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
@@ -445,7 +445,7 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
                 locationPath.remove(sourceLocation);
                 QString destinationPath = destinationFolder + locationPath;
 
-                logger.msg(Arc::INFO, "Adding filertransfer : "+fileSourcePath.toStdString()+" -> " + destinationPath.toStdString());
+                logger.msg(Arc::INFO, "Adding file transfer : "+fileSourcePath.toStdString()+" -> " + destinationPath.toStdString());
                 FileTransfer* xfr = new FileTransfer(fileSourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
                 FileTransferList::instance()->addTransfer(xfr);
                 connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));

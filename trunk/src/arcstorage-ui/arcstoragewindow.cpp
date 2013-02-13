@@ -136,10 +136,21 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->filesTreeWidget->setMainWindow(this);
 
     if (!m_childWindow) {
-        m_debugStream = new QDebugStream(std::cout, ui->textOutput);
-        m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+        if (GlobalStateInfo::instance()->redirectLog())
+        {
+            m_debugStream = new QDebugStream(std::cout, ui->textOutput);
+            m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+        }
+        else
+        {
+            m_debugStream = 0;
+            m_debugStream2 = 0;
+        }
         ui->textOutput->clear();
+        this->setWindowTitle("ARC Storage Explorer - [Main Window]");
     }
+    else
+        this->setWindowTitle("ARC Storage Explorer - [Child]");
 
     // Redirect ARC logging to std::cout (in main window)
 
@@ -158,10 +169,14 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->splitterVertical->setStretchFactor(0,1);
     ui->splitterVertical->setStretchFactor(1,0);
 
-    // Only show log output in main window
+    // Hide log window and settings dialog in child windows
 
     if (m_childWindow)
+    {
         ui->textOutput->hide();
+        ui->actionSettings->setDisabled(true);
+        ui->actionSettings->setVisible(false);
+    }
 
     ui->actionBack->setDisabled(true);
 
@@ -182,6 +197,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->actionCreateProxyCert->setIcon(QIcon::fromTheme("security-high"));
     ui->actionDownloadSelected->setIcon(QIcon::fromTheme("document-save"));
     ui->actionUploadSelected->setIcon(QIcon(":/resources/icons/document-upload.png"));
+    ui->actionUploadDirectory->setIcon(QIcon(":/resources/icons/folder-upload.png"));
+    ui->actionUploadDirAndArchive->setIcon(QIcon(":/resources/icons/folder-upload-tar.png"));
 #endif
 
     // Center main window
@@ -500,6 +517,7 @@ void ArcStorageWindow::setBusyUI(bool busy)
         ui->filesTreeWidget->setEnabled(false);
         m_urlComboBox.setEnabled(false);
         ui->foldersTreeWidget->setEnabled(false);
+        ui->urlBreadCrumbToolbar->setEnabled(false);
     }
     else
     {
@@ -510,6 +528,7 @@ void ArcStorageWindow::setBusyUI(bool busy)
         ui->filesTreeWidget->setEnabled(true);
         m_urlComboBox.setEnabled(true);
         ui->foldersTreeWidget->setEnabled(true);
+        ui->urlBreadCrumbToolbar->setEnabled(true);
     }
 }
 
@@ -1197,7 +1216,7 @@ void ArcStorageWindow::on_actionOpenNewLocation_triggered()
     bool ok;
     QString url = QInputDialog::getText(this, tr("Open location"),
                                         tr("Url"), QLineEdit::Normal,
-                                        "", &ok);
+                                        QDir::homePath(), &ok);
     if (ok && !url.isEmpty())
     {
         ArcStorageWindow* window = new ArcStorageWindow(0, true, url);
@@ -1294,15 +1313,52 @@ void ArcStorageWindow::on_actionSettings_triggered()
 {
     ApplicationSettings dialog(this);
     dialog.setModal(true);
-    dialog.exec();
+    int retval = dialog.exec();
+
+    if (retval == QDialog::Accepted)
+    {
+        if (!m_childWindow)
+        {
+            if (GlobalStateInfo::instance()->redirectLog())
+            {
+                if (m_debugStream == 0)
+                {
+                    m_debugStream = new QDebugStream(std::cout, ui->textOutput);
+                    m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+                }
+            }
+            else
+            {
+                delete m_debugStream;
+                delete m_debugStream2;
+                m_debugStream = 0;
+                m_debugStream2 = 0;
+            }
+        }
+    }
 }
 
 void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoint &pos)
 {
     QMenu menu(this);
     QList<QAction*> actions;
+    actions.append(ui->actionCreateDir);
+    actions.append(ui->actionDelete);
+    menu.addActions(actions);
+    menu.addSeparator();
+    actions.clear();
+    actions.append(ui->actionDownloadSelected);
+    actions.append(ui->actionUploadSelected);
+    actions.append(ui->actionUploadDirectory);
+    actions.append(ui->actionUploadDirAndArchive);
+    menu.addActions(actions);
+    menu.addSeparator();
+    actions.clear();
     actions.append(ui->actionCopyURL);
     actions.append(ui->actionCopyURLFilename);
+    menu.addActions(actions);
+    menu.addSeparator();
+    actions.clear();
     actions.append(ui->actionShowFileProperties);
     menu.addActions(actions);
     QPoint globalPos = ui->filesTreeWidget->mapToGlobal(pos);
@@ -1437,7 +1493,7 @@ void ArcStorageWindow::on_actionUploadSelected_triggered()
 {
     logger.msg(Arc::VERBOSE, "Uploading files to selected directory. (on_actionUploadSelected_triggered)");
 
-    QStringList selectedFiles = QFileDialog::getOpenFileNames(this, "Select files to upload", "/home");
+    QStringList selectedFiles = QFileDialog::getOpenFileNames(this, "Select files to upload", QDir::homePath());
 
     if (selectedFiles.length()>0)
     {
@@ -1465,7 +1521,7 @@ void ArcStorageWindow::on_actionUploadDirectory_triggered()
 {
     logger.msg(Arc::VERBOSE, "Uploading directory to selected directory. (on_actionUploadSelected_triggered)");
 
-    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", "/home");
+    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", QDir::homePath());
 
     if (selectedDir.length()>0)
     {
@@ -1525,7 +1581,7 @@ void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
 {
     logger.msg(Arc::VERBOSE, "Uploading directory to selected directory. (on_actionUploadSelected_triggered)");
 
-    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", "/home");
+    QString selectedDir = QFileDialog::getExistingDirectory(this, "Select directory to upload", QDir::homePath());
 
     if (selectedDir!="")
     {

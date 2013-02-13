@@ -142,7 +142,7 @@ bool FileTransfer::execute()
 
     m_transferState = TS_EXECUTED;
 
-    logger.msg(Arc::INFO, "File transfer initiating.");
+    logger.msg(Arc::INFO, "---- File transfer initiating ----");
 
     m_completed = false;
 
@@ -226,7 +226,7 @@ bool FileTransfer::execute()
 
     // Do the actual transfer. Attach callback onDataMoveCompleted for notification of completion.
 
-    logger.msg(Arc::INFO, "Transfer process started.");
+    logger.msg(Arc::INFO, "---- Transfer process started ----");
 
     Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this, m_id.c_str());
     return true;
@@ -248,7 +248,7 @@ void FileTransfer::cancel()
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
     m_transferState = TS_COMPLETED;
-    logger.msg(Arc::INFO, "FileTransfer completed.");
+    logger.msg(Arc::INFO, "---- FileTransfer completed ----");
 
     // Release waiting signal
 

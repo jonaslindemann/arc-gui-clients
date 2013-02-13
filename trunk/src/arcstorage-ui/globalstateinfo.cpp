@@ -14,12 +14,15 @@ GlobalStateInfo::GlobalStateInfo()
     m_retries = 3;
     m_timeout = 300;
 
-    m_passive = false;
+    m_passive = true;
     m_notpassive = false;
     m_force = false;
     m_verbose = true;
     m_nocopy = false;
     m_secure = false;
+
+    m_logLevel = LL_WARNING;
+    m_redirectLog = true;
 
     m_maxTransfers = 5;
 
@@ -66,6 +69,7 @@ void GlobalStateInfo::writeSettings()
     settings.remove("Logging");
     settings.beginGroup("Logging");
     settings.setValue("log_level", m_logLevel);
+    settings.setValue("redirect_log", m_redirectLog);
     settings.endGroup();
 }
 
@@ -95,6 +99,7 @@ void GlobalStateInfo::readSettings()
     {
         settings.beginGroup("Logging");
         m_rememberWindowsPositions = settings.value("log_level").toInt();
+        m_redirectLog = settings.value("redirect_log", true).toBool();
         settings.endGroup();
     }
 }
@@ -275,6 +280,16 @@ GlobalStateInfo::TLogLevel GlobalStateInfo::logLevel()
     if (Arc::Logger::getRootLogger().getThreshold()==Arc::ERROR)
         m_logLevel = LL_ERROR;
     return m_logLevel;
+}
+
+void GlobalStateInfo::setRedirectLog(bool flag)
+{
+    m_redirectLog = flag;
+}
+
+bool GlobalStateInfo::redirectLog()
+{
+    return m_redirectLog;
 }
 
 void GlobalStateInfo::setRememberWindowPositions(bool flag)
