@@ -101,17 +101,98 @@ Detailed information on the file can be queried by selecting the file or directo
 .. figure:: images/arcstorage-metadata-1.png
 
    Metadata property window.
+   
+Uploading files
+---------------
+
+Uploading files to the current directory is accomplished using the **Transfer/Upload files** menu or using the **Ctrl-U** shortcut. This opens a file selection dialog in which files that should be uploaded can be selected, as shown in the following figure:
+
+.. figure:: images/arcstorage-upload-files-1.png
+
+   Upload files selection dialog.
+   
+The file transfer is started when the **Open** button in chosen in the file selection dialog. The file transfer dialog is shown during the active file transfer. From this dialog all transfers can be monitored and controlled.
+
+Uploading directories
+---------------------
+
+Uploading directories to the current directory is accomplished using the **Transfer/Upload directory** menu. This opens a directory selection dialog in which directories to be uploaded can be selected.
+
+.. figure:: images/arcstorage-upload-directory-1.png
+
+   Upload directory selection dialog.
+
+.. note::
+
+   It is not efficient to store thousands of small files in a directory structure. To archive and upload a larger directory structure please see the next section on how this can be accomplished.
+
+Upload directory as archive
+---------------------------
+
+To be able to upload large directory structures, ARC Storage Explorer, provides a special function for automatically uploading an archived version of a directory. To upload a directory as an archive, select **Transfer/Upload directory as archive**. This will display a directory selection dialog.
+
+.. figure:: images/arcstorage-upload-directory-1.png
+
+   Upload directory as archive selection dialog.
+   
+When the directory has been selected using the **Open** button, ARC Storage Explorer, will create a compressed tar-archive with the same filename as the selected directory followed by a time stamp.
+
+Download files and directories
+------------------------------
+
+Files can be downloaded to the local file system using the **Transfer/Download** menu or **Ctrl-D** shortcut. Selecting **Open**, will start the download. 
+
+.. figure:: images/arcstorage-download-files-1.png
+
+   Upload directory as archive selection dialog.
+
+The file transfer dialog is shown during the active file transfer. From this dialog all transfers can be monitored and controlled.
 
 Copying URL links
 -----------------
 
-Copying files
--------------
+Sometimes you need to communicate a URL of a specific file. This can be done using the context menu of the file list view. Select a file in the file list and use the right mouse button to show the context menu for the selected file. Select the **Copy URL** item in the menu.
+
+.. figure:: images/arcstorage-copy-url-1.png
+
+   Copy full URL of selected file.
+   
+The URL is now available from the clipboard and can be pasted into other applications.
+
 
 Creating directories
 --------------------
 
+Directories are created in the current directory either by using the toolbar button or the menu option in the file list context menu as shown in the following figures.
+
+.. figure:: images/arcstorage-create-dir-1.png
+
+   Creating a directory using the toolbar.
+
+.. figure:: images/arcstorage-create-dir-2.png
+
+   Creating a directory using the file view context menu.
+   
+Next, a dialog is shown asking for the directory name. Enter a name of the new directory and click **Ok** to create it.
+
+.. figure:: images/arcstorage-create-dir-3.png
+
+   Dialog for chosing a name for the new directory.
+
 Deleting files
 --------------
+
+Files can be delected by selecting them in the file view and selecting **Edit/Delete** in the menu or using the shortcut **Del**. There is also a option of deleting files from the file view context menu. 
+
+.. note:: 
+
+   Currently, ARC Storage Explorer does not support recursive delete operations. Also, directories must be empty before they can be deleted. The next version of the application will support recursive delete operations.
+   
+A confirmation dialog is shown before any file or directory will be deleted.
+
+
+
+Copying files
+-------------
 
 

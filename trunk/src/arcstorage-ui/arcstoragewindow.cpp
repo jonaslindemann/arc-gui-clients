@@ -110,17 +110,17 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     // Get fileserver and wire it up
 
-    m_currentFileServer = new SRMFileServer();
+    m_currentFileServer = new ArcFileServer();
 
     // So basically we handle everything using a SRMFileServer (...)
 
-    SRMFileServer* srmFileServer = m_currentFileServer;
-    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
-    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
-    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
-    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
-    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
-    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+    ArcFileServer* arcFileServer = m_currentFileServer;
+    connect(arcFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(arcFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(arcFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(arcFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(arcFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(arcFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget
 
@@ -1255,14 +1255,14 @@ void ArcStorageWindow::openUrl(QString url)
 
     // Create and wire up new file server.
 
-    m_currentFileServer = new SRMFileServer();
-    SRMFileServer* srmFileServer = m_currentFileServer;
-    connect(srmFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
-    connect(srmFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
-    connect(srmFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
-    connect(srmFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
-    connect(srmFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
-    connect(srmFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+    m_currentFileServer = new ArcFileServer();
+    ArcFileServer* arcFileServer = m_currentFileServer;
+    connect(arcFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(arcFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(arcFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(arcFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(arcFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(arcFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget (in case it's a new file server)
 

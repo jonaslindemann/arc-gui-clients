@@ -1,6 +1,6 @@
 #include "fileserverfactory.h"
 #include "fileserver.h"
-#include "srmfileserver.h"
+#include "arcfileserver.h"
 
 /*
 FTPFileServer*   FileServerFactory::ftpFileServer   = NULL;
@@ -26,27 +26,27 @@ FileServer* FileServerFactory::createFileServer(QString type)
 
     if (type == FTP_PREFIX || type.left(FTP_PREFIX.length()) == FTP_PREFIX)
     {
-        fileServer = new SRMFileServer();
+        fileServer = new ArcFileServer();
     }
     else if (type == LOCALFILE_PREFIX || type.left(LOCALFILE_PREFIX.length()) == LOCALFILE_PREFIX)
     {
-        fileServer = new SRMFileServer();
+        fileServer = new ArcFileServer();
     }
     else if (type == SRM_PREFIX || type.left(SRM_PREFIX.length()) == SRM_PREFIX)
     {
-        fileServer = new SRMFileServer();
+        fileServer = new ArcFileServer();
     }
     else if (type == GSIFTP_PREFIX || type.left(GSIFTP_PREFIX.length()) == GSIFTP_PREFIX)
     {
-        fileServer = new SRMFileServer();
+        fileServer = new ArcFileServer();
     }
     else if (type == HTTP_PREFIX || type.left(HTTP_PREFIX.length()) == HTTP_PREFIX)
     {
-        fileServer =  new SRMFileServer();
+        fileServer =  new ArcFileServer();
     }
     else
     {
-        fileServer = new SRMFileServer();
+        fileServer = new ArcFileServer();
     }
 
     return fileServer;

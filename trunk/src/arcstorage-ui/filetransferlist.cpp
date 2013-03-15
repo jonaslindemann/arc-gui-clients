@@ -13,6 +13,8 @@ FileTransferProcessingThread::FileTransferProcessingThread()
 {
     m_terminate = false;
     m_pause = false;
+
+    FileTransferList::instance()->setProcessingThread(this);
 }
 
 void FileTransferProcessingThread::shutdown()
@@ -34,11 +36,10 @@ void FileTransferProcessingThread::run()
 {
     while(!m_terminate)
     {
-        while(!m_pause)
-        {
+        if (!m_pause)
             FileTransferList::instance()->processTransfers();
-            sleep(GlobalStateInfo::instance()->transferThreadWakeUpInterval());
-        }
+
+        sleep(GlobalStateInfo::instance()->transferThreadWakeUpInterval());
     }
 }
 
@@ -99,7 +100,7 @@ void FileTransferList::processTransfers()
             }
         }
     }
-    qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length() << " total = " << m_transferList.length();
+    qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length()<< " total = " << m_transferList.length();
     m_accessMutex.unlock();
 }
 
@@ -120,6 +121,7 @@ void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
     m_activeTransferList.removeOne(fileTransfer);
     m_activeTransferDict.remove(fileTransfer->id());
     Q_EMIT onRemoveTransfer(fileTransfer->id());
+    delete fileTransfer;
     m_accessMutex.unlock();
 }
 

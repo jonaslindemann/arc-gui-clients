@@ -23,7 +23,6 @@ static void _onProgress(FILE *o, const char* prefix, unsigned int,
                      unsigned long long int all, unsigned long long int max,
                      double, double)
 {
-    //logger.msg(Arc::DEBUG, "ID%s: Transferred: %llu kB of %llu", prefix, all / 1024, max / 1024);
     QString id = prefix;
     FileTransferList::instance()->updateStatus(id, all / 1024, max / 1024);
 }

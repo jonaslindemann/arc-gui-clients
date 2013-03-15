@@ -18,7 +18,7 @@ namespace Ui {
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
 #include "filetransferlist.h"
-#include "srmfileserver.h"
+#include "arcfileserver.h"
 
 #include "filepropertyinspector.h"
 
@@ -61,7 +61,7 @@ private:
     DragDropableTreeWidget m_filesTreeWidget;
     QComboBox m_urlComboBox;
 
-    SRMFileServer *m_currentFileServer;
+    ArcFileServer *m_currentFileServer;
     QString m_folderListUrl;
     QString m_startUrl;
 
