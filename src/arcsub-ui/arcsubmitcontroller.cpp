@@ -13,6 +13,7 @@
 #include <arc/compute/JobDescription.h>
 #include <arc/compute/SubmissionStatus.h>
 #include <arc/compute/Submitter.h>
+#include <arc/compute/JobInformationStorage.h>
 #else
 #include <arc/client/ComputingServiceRetriever.h>
 #include <arc/client/Broker.h>

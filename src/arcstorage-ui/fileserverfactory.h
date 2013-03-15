@@ -4,9 +4,9 @@
 //#include "ftpfileserver.h"
 //#include "localfileserver.h"
 
-#include "srmfileserver.h"
+#include "arcfileserver.h"
 
-class SRMFileServer;
+class ArcFileServer;
 
 /** This class describes a File Server Factory. You ask for you server by
   * protocol name and recieve a File Server object in return.

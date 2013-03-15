@@ -1,4 +1,4 @@
-#include "srmfileserver.h"
+#include "arcfileserver.h"
 #include "arcstoragewindow.h"
 #include "settings.h"
 #include "filetransfer.h"
@@ -6,7 +6,7 @@
 #include "filetransferlist.h"
 #include "arctools.h"
 
-#include <qurl.h>
+#include <QUrl>
 #include <QDebug>
 
 #include "arc-gui-config.h"
@@ -116,33 +116,28 @@ void print_details(const std::list<Arc::FileInfo>& files, bool show_urls, bool s
   }
 }
 
-SRMFileServer::SRMFileServer()
+ArcFileServer::ArcFileServer()
 {
     m_usercfg = NULL;
     m_notifyParent = true;
-
-    //connect(&m_updateFileListWatcher, SIGNAL(finished()), this, SLOT(onUpdateFileListFinished()));
-
 }
 
-QStringList SRMFileServer::getFileInfoLabels()
+QStringList ArcFileServer::getFileInfoLabels()
 {
     QStringList labels;
-    //labels << "File" << "Size" << "Type" << "Last modified" << "Owner" << "Group" << "Permissions" <<
-    //          "Last read";
     labels << "File" << "Size" << "Type" << "Last modified";
     return labels;
 }
 
 
-bool SRMFileServer::initUserConfig()
+bool ArcFileServer::initUserConfig()
 {
     bool success = true;
     m_usercfg = ARCTools::instance()->currentUserConfig();
     return success;
 }
 
-void SRMFileServer::updateFileListSilent(QString URL)
+void ArcFileServer::updateFileListSilent(QString URL)
 {
     bool saveState = m_notifyParent;
     m_notifyParent = false;
@@ -150,12 +145,12 @@ void SRMFileServer::updateFileListSilent(QString URL)
     m_notifyParent = saveState;
 }
 
-void SRMFileServer::startUpdateFileList(QString URL)
+void ArcFileServer::startUpdateFileList(QString URL)
 {
-    m_updateFileListWatcher.setFuture(QtConcurrent::run(this, &SRMFileServer::updateFileList, URL));
+    m_updateFileListWatcher.setFuture(QtConcurrent::run(this, &ArcFileServer::updateFileList, URL));
 }
 
-void SRMFileServer::updateFileList(QString URL)
+void ArcFileServer::updateFileList(QString URL)
 {
     logger.msg(Arc::DEBUG, "Updating file list URL = %s (updateFileList)", URL.toStdString());
 
@@ -262,7 +257,7 @@ void SRMFileServer::updateFileList(QString URL)
         Q_EMIT onFileListFinished(false, "");
 }
 
-bool SRMFileServer::goUpOneFolder()
+bool ArcFileServer::goUpOneFolder()
 {
     QString url = m_currentUrlString.left(m_currentUrlString.lastIndexOf('/'));
     if (url.length() > (int)strlen("SRM://"))
@@ -276,17 +271,17 @@ bool SRMFileServer::goUpOneFolder()
     }
 }
 
-QString SRMFileServer::getCurrentURL()
+QString ArcFileServer::getCurrentURL()
 {
     return currentPath;
 }
 
-QString SRMFileServer::getCurrentPath()
+QString ArcFileServer::getCurrentPath()
 {
     return currentPath;
 }
 
-bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
+bool ArcFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 {
     logger.msg(Arc::DEBUG, "SRMServer::copyFromServer()");
     bool success = false;
@@ -299,16 +294,16 @@ bool SRMFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 
     if (!xfr->execute()) // Startar filöverföringen asynkront.
     {
-        logger.msg(Arc::ERROR, "SRM file transfer failed.");
+        logger.msg(Arc::ERROR, "File transfer failed.");
         m_transferList.removeOne(xfr);
         delete xfr;
-        Q_EMIT onError("SRM file transfer failed.");
+        Q_EMIT onError("File transfer failed.");
     }
 
     return success;
 }
 
-bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
+bool ArcFileServer::copyToServer(QString sourcePath, QString destinationPath)
 {
     logger.msg(Arc::DEBUG, "SRMServer::copyToServer()");
 
@@ -322,16 +317,16 @@ bool SRMFileServer::copyToServer(QString sourcePath, QString destinationPath)
 
     if (!xfr->execute()) // Startar filöverföringen asynkront.
     {
-        logger.msg(Arc::INFO, "SRM file copy failed.");
+        logger.msg(Arc::INFO, "File copy failed.");
         m_transferList.removeOne(xfr);
         delete xfr;
-        Q_EMIT onError("SRM file transfer failed.");
+        Q_EMIT onError("File transfer failed.");
     }
 
     return success;
 }
 
-void SRMFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
+void ArcFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
 {
     Arc::URL arcUrl = currentDir.toStdString();
 
@@ -395,7 +390,7 @@ void SRMFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
     }
 }
 
-bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder)
+bool ArcFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder)
 {
     logger.msg(Arc::INFO, "Initiating multiple file copy to server (copyToServer).");
 
@@ -456,7 +451,7 @@ bool SRMFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
     return success;
 }
 
-bool SRMFileServer::deleteItems(QStringList& URLs)
+bool ArcFileServer::deleteItems(QStringList& URLs)
 {
     logger.msg(Arc::INFO, "Removing multiple files (deleteItems).");
     bool success = false;
@@ -493,7 +488,7 @@ bool SRMFileServer::deleteItems(QStringList& URLs)
     return success;
 }
 
-bool SRMFileServer::deleteItem(QString URL)
+bool ArcFileServer::deleteItem(QString URL)
 {
     bool success = false;
 
@@ -526,7 +521,7 @@ bool SRMFileServer::deleteItem(QString URL)
     return success;
 }
 
-bool SRMFileServer::makeDir(QString path)
+bool ArcFileServer::makeDir(QString path)
 {
     bool success = false;
     path = currentPath + "/" + path + "/";
@@ -559,19 +554,19 @@ bool SRMFileServer::makeDir(QString path)
     return true;
 }
 
-unsigned int SRMFileServer::getFilePermissions(QString path)
+unsigned int ArcFileServer::getFilePermissions(QString path)
 {
     int filePermissions = 0;
 
     return filePermissions;
 }
 
-void SRMFileServer::setFilePermissions(QString path, unsigned int permissions)
+void ArcFileServer::setFilePermissions(QString path, unsigned int permissions)
 {
 
 }
 
-QMap<QString, QString> SRMFileServer::fileProperties(QString URL)
+QMap<QString, QString> ArcFileServer::fileProperties(QString URL)
 {
     QMap<QString, QString> propertyMap;
 
@@ -615,9 +610,43 @@ QMap<QString, QString> SRMFileServer::fileProperties(QString URL)
     return propertyMap;
 }
 
-void SRMFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
+bool ArcFileServer::rename(QString fromURL, QString toURL)
 {
-    logger.msg(Arc::DEBUG, "SRMFileServer::onCompleted.");
+    bool success = false;
+
+    m_usercfg = ARCTools::instance()->currentUserConfig();
+
+    Arc::URL arcUrl = fromURL.toStdString();
+    Arc::URL newUrl = toURL.toStdString();
+
+    Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
+    if (!dataHandle)
+    {
+        logger.msg(Arc::ERROR, "Unsupported URL given");
+        Q_EMIT onError("Unsupported URL given. URL = " + arcUrl);
+    }
+    else
+    {
+        Arc::DataStatus status = dataHandle->Rename(newUrl);
+        if (status.Passed())
+        {
+            this->updateFileListSilent(this->getCurrentURL());
+            Q_EMIT onDeleteFinished(false);
+            success = true;
+        }
+        else
+        {
+            Q_EMIT onDeleteFinished(true);
+            success = false;
+        }
+    }
+
+    return success;}
+
+
+void ArcFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
+{
+    logger.msg(Arc::DEBUG, "ArcFileServer::onCompleted.");
 
     FileTransferList::instance()->removeTransfer(fileTransfer);
     delete fileTransfer;

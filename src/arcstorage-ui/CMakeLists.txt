@@ -21,7 +21,7 @@ set(arcstorageui_SRCS
     dragdropabletreewidget.cpp
     fileserverfactory.cpp
     filepropertiesdialog.cpp
-    srmfileserver.cpp
+    arcfileserver.cpp
     srmsettingsdialog.cpp
     settings.cpp
     filetransfer.cpp
@@ -40,7 +40,7 @@ set(arcstorageui_SRCS
 set(arcstorageui_MOC_HDRS
     arcstoragewindow.h
     filepropertiesdialog.h
-    srmfileserver.h
+    arcfileserver.h
     srmsettingsdialog.h
     filetransfer.h
     filetransferlist.h
