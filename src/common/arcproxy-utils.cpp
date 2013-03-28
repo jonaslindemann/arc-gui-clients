@@ -381,9 +381,9 @@ ArcProxyController::TReturnStatus ArcProxyController::showProxyUI()
     return m_uiReturnStatus;
 }
 
-void ArcProxyController::showProxyUIAppLoop()
+void ArcProxyController::showProxyUIAppLoop(int& argc, char** argv)
 {
-    m_application = new QApplication(0,0,0);
+    m_application = new QApplication(argc, argv);
     this->showProxyUI();
 }
 
@@ -1020,10 +1020,10 @@ int ArcProxyController::generateProxy()
 
             std::string proxy_cred_str_pem;
 
-            Arc::UserConfig usercfg_tmp(Arc::initializeCredentialsType(Arc::initializeCredentialsType::SkipCredentials));
+            Arc::UserConfig usercfg_tmp( (Arc::initializeCredentialsType(Arc::initializeCredentialsType::SkipCredentials)) );
             usercfg_tmp.CACertificatesDirectory(usercfg.CACertificatesDirectory());
 
-            Arc::CredentialStore cstore(usercfg_tmp,Arc::URL("myproxy://"+myproxy_server));
+            Arc::CredentialStore cstore( (usercfg_tmp,Arc::URL("myproxy://"+myproxy_server)) );
             std::map<std::string,std::string> myproxyopt;
             myproxyopt["username"] = user_name;
             myproxyopt["password"] = passphrase;
