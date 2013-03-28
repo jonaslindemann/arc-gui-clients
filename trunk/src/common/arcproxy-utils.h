@@ -102,6 +102,10 @@ private:
     QApplication* m_application;
 
     TReturnStatus m_uiReturnStatus;
+    
+    int m_argc;
+    
+    
 public:
     ArcProxyController();
     virtual ~ArcProxyController();
@@ -116,7 +120,7 @@ public:
 
     TReturnStatus showProxyUI();
 
-    void showProxyUIAppLoop();
+    void showProxyUIAppLoop(int & argc, char ** argv);
 
     TCertStatus checkCert();
     TProxyStatus checkProxy();
