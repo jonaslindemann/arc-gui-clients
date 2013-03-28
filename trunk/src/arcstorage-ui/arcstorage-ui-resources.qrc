@@ -4,5 +4,26 @@
         <file>icons/document-upload.png</file>
         <file>icons/folder-upload.png</file>
         <file>icons/folder-upload-tar.png</file>
+        <file>icons/24px/ArrowHead-Left.png</file>
+        <file>icons/24px/ArrowHead-Up.png</file>
+        <file>icons/24px/Cancel.png</file>
+        <file>icons/24px/Document Download.png</file>
+        <file>icons/24px/Document-Download.png</file>
+        <file>icons/24px/Document Upload.png</file>
+        <file>icons/24px/Download.png</file>
+        <file>icons/24px/Download(1).png</file>
+        <file>icons/24px/Folder-New.png</file>
+        <file>icons/24px/Left Arrow.png</file>
+        <file>icons/24px/Network Sharing.png</file>
+        <file>icons/24px/Open.png</file>
+        <file>icons/24px/Recycle Bin.png</file>
+        <file>icons/24px/Reload.png</file>
+        <file>icons/24px/Rename.png</file>
+        <file>icons/24px/Swap Left.png</file>
+        <file>icons/24px/Swap Right.png</file>
+        <file>icons/24px/Upload.png</file>
+        <file>icons/24px/Window-New.png</file>
+        <file>icons/24px/Upload_folder.png</file>
+        <file>icons/24px/Upload_archive.png</file>
     </qresource>
 </RCC>

@@ -649,7 +649,7 @@ void ArcFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QStrin
     logger.msg(Arc::DEBUG, "ArcFileServer::onCompleted.");
 
     FileTransferList::instance()->removeTransfer(fileTransfer);
-    delete fileTransfer;
+    //delete fileTransfer;
 
     if (FileTransferList::instance()->getTransferCount()==0)
     {

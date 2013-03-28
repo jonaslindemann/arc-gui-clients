@@ -180,7 +180,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     ui->actionBack->setDisabled(true);
 
-#ifdef __linux__
+#ifdef THEMABLE
     ui->actionQuit->setIcon(QIcon::fromTheme("application-exit"));
     ui->actionDelete->setIcon(QIcon::fromTheme("edit-delete"));
     ui->actionForward->setIcon(QIcon::fromTheme("forward"));
@@ -197,7 +197,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->actionCreateProxyCert->setIcon(QIcon::fromTheme("security-high"));
     ui->actionDownloadSelected->setIcon(QIcon::fromTheme("document-save"));
     ui->actionUploadSelected->setIcon(QIcon(":/resources/icons/document-upload.png"));
-    ui->actionUploadDirectory->setIcon(QIcon(":/resources/icons/folder-upload.png"));
+    ui->actionUploadDirectory->setIcon(QrIcon(":/resources/icons/folder-upload.png"));
     ui->actionUploadDirAndArchive->setIcon(QIcon(":/resources/icons/folder-upload-tar.png"));
 #endif
 
@@ -1343,6 +1343,7 @@ void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoin
     QMenu menu(this);
     QList<QAction*> actions;
     actions.append(ui->actionCreateDir);
+    actions.append(ui->actionRename);
     actions.append(ui->actionDelete);
     menu.addActions(actions);
     menu.addSeparator();

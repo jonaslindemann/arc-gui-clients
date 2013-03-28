@@ -227,7 +227,29 @@ bool FileTransfer::execute()
 
     logger.msg(Arc::INFO, "---- Transfer process started ----");
 
-    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle, *m_cache, *m_urlMap, &_onDataMoveCompleted, this, m_id.c_str());
+    //Arc::DataStatus res = mover.Transfer(*source, *destination, cache, Arc::URLMap(),
+    //                                   0, 0, 0, timeout, &mover_callback, &callback_res);
+
+    //DataStatus Transfer(DataPoint& source, DataPoint& destination,
+    //                    FileCache& cache, const URLMap& map,
+    //                    callback cb = NULL, void *arg = NULL,
+    //                    const char *prefix = NULL);
+
+    //DataStatus Transfer(DataPoint& source, DataPoint& destination,
+    //                    FileCache& cache, const URLMap& map,
+    //                    unsigned long long int min_speed,
+    //                    time_t min_speed_time,
+    //                    unsigned long long int min_average_speed,
+    //                    time_t max_inactivity_time,
+    //                    callback cb = NULL, void *arg = NULL,
+    //                    const char *prefix = NULL);
+
+
+    Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle,
+                                            *m_cache, *m_urlMap,
+                                            0, 0, 0, 20,
+                                            &_onDataMoveCompleted, this,
+                                            m_id.c_str());
     return true;
 }
 
