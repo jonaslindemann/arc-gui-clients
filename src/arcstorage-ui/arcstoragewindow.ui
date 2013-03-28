@@ -205,6 +205,7 @@
     <addaction name="actionSelectAllFiles"/>
     <addaction name="actionClearSelection"/>
     <addaction name="separator"/>
+    <addaction name="actionRename"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
@@ -273,6 +274,7 @@
    <addaction name="actionStop"/>
    <addaction name="separator"/>
    <addaction name="actionCreateDir"/>
+   <addaction name="actionRename"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionDownloadSelected"/>
@@ -320,6 +322,10 @@
    </property>
   </action>
   <action name="actionReload">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Reload.png</normaloff>:/resources/icons/24px/Reload.png</iconset>
+   </property>
    <property name="text">
     <string>Reload</string>
    </property>
@@ -339,6 +345,10 @@
    </property>
   </action>
   <action name="actionBack">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/ArrowHead-Left.png</normaloff>:/resources/icons/24px/ArrowHead-Left.png</iconset>
+   </property>
    <property name="text">
     <string>Back</string>
    </property>
@@ -358,6 +368,10 @@
    </property>
   </action>
   <action name="actionUp">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/ArrowHead-Up.png</normaloff>:/resources/icons/24px/ArrowHead-Up.png</iconset>
+   </property>
    <property name="text">
     <string>Up</string>
    </property>
@@ -369,6 +383,10 @@
    </property>
   </action>
   <action name="actionStop">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Cancel.png</normaloff>:/resources/icons/24px/Cancel.png</iconset>
+   </property>
    <property name="text">
     <string>Stop</string>
    </property>
@@ -377,6 +395,10 @@
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Recycle Bin.png</normaloff>:/resources/icons/24px/Recycle Bin.png</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -388,6 +410,10 @@
    </property>
   </action>
   <action name="actionNewWindow">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Window-New.png</normaloff>:/resources/icons/24px/Window-New.png</iconset>
+   </property>
    <property name="text">
     <string>New Window</string>
    </property>
@@ -410,6 +436,10 @@
    </property>
   </action>
   <action name="actionUploadFiles">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Document Upload.png</normaloff>:/resources/icons/24px/Document Upload.png</iconset>
+   </property>
    <property name="text">
     <string>Upload files...</string>
    </property>
@@ -434,6 +464,10 @@
    </property>
   </action>
   <action name="actionCreateDir">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Folder-New.png</normaloff>:/resources/icons/24px/Folder-New.png</iconset>
+   </property>
    <property name="text">
     <string>Create directory</string>
    </property>
@@ -447,6 +481,10 @@
    </property>
   </action>
   <action name="actionOpenNewLocation">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Network Sharing.png</normaloff>:/resources/icons/24px/Network Sharing.png</iconset>
+   </property>
    <property name="text">
     <string>Open new location....</string>
    </property>
@@ -517,6 +555,10 @@
    </property>
   </action>
   <action name="actionDownloadSelected">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Download.png</normaloff>:/resources/icons/24px/Download.png</iconset>
+   </property>
    <property name="text">
     <string>Download</string>
    </property>
@@ -528,6 +570,10 @@
    </property>
   </action>
   <action name="actionUploadSelected">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Upload.png</normaloff>:/resources/icons/24px/Upload.png</iconset>
+   </property>
    <property name="text">
     <string>Upload files</string>
    </property>
@@ -539,6 +585,10 @@
    </property>
   </action>
   <action name="actionUploadDirectory">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Upload_folder.png</normaloff>:/resources/icons/24px/Upload_folder.png</iconset>
+   </property>
    <property name="text">
     <string>Upload directory</string>
    </property>
@@ -547,8 +597,27 @@
    </property>
   </action>
   <action name="actionUploadDirAndArchive">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Upload_archive.png</normaloff>:/resources/icons/24px/Upload_archive.png</iconset>
+   </property>
    <property name="text">
     <string>Upload directory as archive </string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Rename.png</normaloff>:/resources/icons/24px/Rename.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rename</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -563,6 +632,8 @@
    <header location="global">dragdropabletreewidget.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="arcstorage-ui-resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

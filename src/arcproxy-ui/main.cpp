@@ -8,6 +8,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("arc-proxy-ui");
 
     ArcProxyController proxyController;
-    proxyController.showProxyUIAppLoop();
+    proxyController.showProxyUIAppLoop(argc, argv);
     return 0;
 }
