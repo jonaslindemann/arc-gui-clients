@@ -182,6 +182,8 @@ bool VomsList::read()
             vomsFile.close();
         }
     }
+
+    return true;
 }
 
 VomsListEntry* VomsList::at(int idx)
@@ -219,6 +221,8 @@ bool VomsList::write()
     vomsFile.close();
 
     m_vomsList.clear();
+
+    return true;
 }
 
 
@@ -520,6 +524,7 @@ int ArcProxyController::initialize()
 
     if (timeout > 0) usercfg.Timeout(timeout);
 
+    return EXIT_SUCCESS;
 }
 
 QString ArcProxyController::getIdentity()
@@ -1065,16 +1070,25 @@ int ArcProxyController::generateProxy()
     //Create proxy or voms proxy
     try {
         Arc::Credential signer(cert_path, key_path, "", "", m_passphrase.toStdString());
+
+        std::cout << signer.GetIdentityName() << std::endl;
+
         if (signer.GetIdentityName().empty()) {
             std::cerr << Arc::IString("Proxy generation failed: No valid certificate found.") << std::endl;
             return EXIT_FAILURE;
         }
+#ifndef WIN32
+#ifndef __APPLE__
+        /*
         EVP_PKEY* pkey = signer.GetPrivKey();
         if(!pkey) {
             std::cerr << Arc::IString("Proxy generation failed: No valid private key found.") << std::endl;
             return EXIT_FAILURE;
         }
         if(pkey) EVP_PKEY_free(pkey);
+        */
+#endif
+#endif
         std::cout << Arc::IString("Your identity: %s", signer.GetIdentityName()) << std::endl;
         if (now > signer.GetEndTime()) {
             std::cerr << Arc::IString("Proxy generation failed: Certificate has expired.") << std::endl;

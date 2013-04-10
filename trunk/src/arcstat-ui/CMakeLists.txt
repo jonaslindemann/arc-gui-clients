@@ -28,7 +28,7 @@ QT4_WRAP_CPP(arcstatui_MOC_SRCS ${arcstatui_MOC_HDRS} )
 QT4_WRAP_UI(arcstatui_UIS_H ${arcstatui_UIS} )
 QT4_ADD_RESOURCES( arcstatui_RC_SRCS ${arcstatui_RCS} )
 
-IF(APPLE)
+IF(APPLES)
 	add_executable(arcstat-ui 
 	MACOSX_BUNDLE 
 	${arcstatui_SRCS} ${arcstatui_MOC_SRCS} ${arcstatui_RC_SRCS} ${arcstatui_UIS_H} 
@@ -69,9 +69,9 @@ SET_SOURCE_FILES_PROPERTIES(
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLE)
+ELSE(APPLES)
 	add_executable(arcstat-ui ${arcstatui_SRCS} ${arcstatui_MOC_SRCS} ${arcstatui_RC_SRCS} ${arcstatui_UIS_H} )
-ENDIF(APPLE)
+ENDIF(APPLES)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 

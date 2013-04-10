@@ -34,7 +34,7 @@ QT4_WRAP_CPP(arcproxyui_MOC_SRCS ${arcproxyui_MOC_HDRS} )
 QT4_WRAP_UI(arcproxyui_UIS_H ${arcproxyui_UIS} )
 QT4_ADD_RESOURCES( arcproxyui_RC_SRCS ${arcproxyui_RCS} )
 
-IF(APPLE)
+IF(APPLES)
 ADD_EXECUTABLE(
 	arcproxy-ui 
 	MACOSX_BUNDLE
@@ -77,9 +77,9 @@ SET_SOURCE_FILES_PROPERTIES(
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLE)
+ELSE(APPLES)
 	add_executable(arcproxy-ui ${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H} )
-ENDIF(APPLE)
+ENDIF(APPLES)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 

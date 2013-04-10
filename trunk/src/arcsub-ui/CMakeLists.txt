@@ -42,7 +42,7 @@ QT4_WRAP_CPP(arcsubui_MOC_SRCS ${arcsubui_MOC_HDRS} )
 QT4_WRAP_UI(arcsubui_UIS_H ${arcsubui_UIS} )
 QT4_ADD_RESOURCES( arcsubui_RC_SRCS ${arcsubui_RCS} )
 
-IF(APPLE)
+IF(APPLES)
 ADD_EXECUTABLE(
 	arcsub-ui 
 	MACOSX_BUNDLE
@@ -85,9 +85,9 @@ SET_SOURCE_FILES_PROPERTIES(
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLE)
+ELSE(APPLES)
 	add_executable(arcsub-ui ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H} )
-ENDIF(APPLE)
+ENDIF(APPLES)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Arc_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/src/common ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 
