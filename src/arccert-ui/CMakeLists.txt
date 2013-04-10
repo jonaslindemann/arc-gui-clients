@@ -24,7 +24,7 @@ QT4_WRAP_CPP(arccertui_MOC_SRCS ${arccertui_MOC_HDRS} )
 QT4_WRAP_UI(arccertui_UIS_H ${arccertui_UIS} )
 QT4_ADD_RESOURCES( arccertui_RC_SRCS ${arccertui_RCS} )
 
-IF(APPLE)
+IF(APPLES)
 ADD_EXECUTABLE(
 	arccert-ui 
 	MACOSX_BUNDLE
@@ -67,9 +67,9 @@ SET_SOURCE_FILES_PROPERTIES(
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLE)
+ELSE(APPLES)
 	add_executable(arccert-ui ${arccertui_SRCS} ${arccertui_MOC_SRCS} ${arccertui_RC_SRCS} ${arccertui_UIS_H} )
-ENDIF(APPLE)
+ENDIF(APPLES)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
 

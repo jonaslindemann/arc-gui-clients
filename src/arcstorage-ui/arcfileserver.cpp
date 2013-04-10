@@ -613,7 +613,7 @@ QMap<QString, QString> ArcFileServer::fileProperties(QString URL)
 bool ArcFileServer::rename(QString fromURL, QString toURL)
 {
     bool success = false;
-
+#if ARC_VERSION_MAJOR >= 3
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
     Arc::URL arcUrl = fromURL.toStdString();
@@ -641,7 +641,11 @@ bool ArcFileServer::rename(QString fromURL, QString toURL)
         }
     }
 
-    return success;}
+    return success;
+#else
+    return false;
+#endif
+}
 
 
 void ArcFileServer::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
