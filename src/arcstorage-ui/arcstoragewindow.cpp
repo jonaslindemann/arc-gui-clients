@@ -657,6 +657,7 @@ void ArcStorageWindow::updateFileTree()
     {
         ARCFileElement* AFE = fileList.at(i);
         QTreeWidgetItem *item = new QTreeWidgetItem;
+        item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         item->setText(0, AFE->getFileName());
         if (AFE->getFileType()==ARCDir)
         {
@@ -1607,4 +1608,28 @@ void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
 
         this->setBusyUI(true);
     }
+}
+
+void ArcStorageWindow::on_actionRename_triggered()
+{
+    ui->filesTreeWidget->editItem(ui->filesTreeWidget->currentItem());
+}
+
+void ArcStorageWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column)
+{
+    QString originalURL = this->getURLOfItem(item);
+    QString newFilename = item->text(0);
+    QStringList urlSplit = originalURL.split("/");
+    QStringList newURLParts;
+
+    for (int i=0; i<urlSplit.length()-1; i++)
+        newURLParts.append(urlSplit.at(i));
+
+    newURLParts.append(newFilename);
+
+    QString newURL = newURLParts.join("/");
+
+    qDebug() << "URL " << this->getURLOfItem(item) << " rename to -> " << newURL;
+
+    m_currentFileServer->rename(originalURL, newURL);
 }

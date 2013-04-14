@@ -175,6 +175,10 @@ private Q_SLOTS:
     void onTarStandardOutput();
     void onTarFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
+    void on_actionRename_triggered();
+
+    void on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column);
+
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
     void onFileListFinished(bool error, QString errorMsg);
