@@ -9,6 +9,7 @@ set(arcstorageui_UIS
     transferlistwindow.ui
     applicationsettings.ui
     filepropertyinspector.ui
+    renamedialog.ui
     ../common/proxywindow.ui
     ../common/helpwindow.ui
 )
@@ -30,6 +31,7 @@ set(arcstorageui_SRCS
     globalstateinfo.cpp
     applicationsettings.cpp
     filepropertyinspector.cpp
+    renamedialog.cpp
     ../common/arctools.cpp
     ../common/arcproxy-utils.cpp
     ../common/arcproxy-utils-functions.cpp
@@ -48,6 +50,7 @@ set(arcstorageui_MOC_HDRS
     globalstateinfo.h
     applicationsettings.h
     filepropertyinspector.h
+    renamedialog.h
     ../common/arctools.h
     ../common/arcproxy-utils.h
     ../common/proxywindow.h

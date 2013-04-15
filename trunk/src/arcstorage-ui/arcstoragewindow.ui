@@ -273,6 +273,7 @@
    <addaction name="actionReload"/>
    <addaction name="actionStop"/>
    <addaction name="separator"/>
+   <addaction name="actionOpenURLExt"/>
    <addaction name="actionCreateDir"/>
    <addaction name="actionRename"/>
    <addaction name="actionDelete"/>
@@ -489,7 +490,7 @@
     <string>Open new location....</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+O</string>
+    <string>Ctrl+L</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -618,6 +619,21 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionOpenURLExt">
+   <property name="icon">
+    <iconset resource="arcstorage-ui-resources.qrc">
+     <normaloff>:/resources/icons/24px/Open.png</normaloff>:/resources/icons/24px/Open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>

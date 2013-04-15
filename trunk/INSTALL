@@ -12,10 +12,11 @@ Requirements
 
 cmake
 QT4
+Qt4-Webkit
 glib
 glibmm
 sigc++
-ARC client libraries (2.x)
+ARC client libraries (2.x/3.x)
 
 ------------
 Installation

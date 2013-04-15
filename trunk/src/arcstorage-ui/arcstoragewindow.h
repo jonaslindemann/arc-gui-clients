@@ -109,6 +109,8 @@ private:
     QString m_tarFilename;
     QString m_tarDestDir;
 
+    QList<QUrl> m_filesToOpen;
+
 protected:
     void showEvent(QShowEvent *e);
     void closeEvent( QCloseEvent *e );
@@ -178,6 +180,8 @@ private Q_SLOTS:
     void on_actionRename_triggered();
 
     void on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column);
+
+    void on_actionOpenURLExt_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);
