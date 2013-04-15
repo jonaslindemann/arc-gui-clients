@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QDesktopServices>
 
 #include <iostream>
 #include "arcstoragewindow.h"
@@ -26,8 +27,8 @@
 #include "arcstorage.h"
 #include "arctools.h"
 #include "applicationsettings.h"
-
 #include "filetransferlist.h"
+#include "renamedialog.h"
 
 #include <arc/Logger.h>
 
@@ -128,6 +129,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
     ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
     ui->filesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    ui->filesTreeWidget->setEditTriggers(QTreeWidget::SelectedClicked | QTreeWidget::EditKeyPressed);
 
     setBusyUI(true);
 
@@ -657,18 +660,21 @@ void ArcStorageWindow::updateFileTree()
     {
         ARCFileElement* AFE = fileList.at(i);
         QTreeWidgetItem *item = new QTreeWidgetItem;
-        item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         item->setText(0, AFE->getFileName());
         if (AFE->getFileType()==ARCDir)
         {
-            item->setIcon(0,QIcon::fromTheme("folder"));
+            //item->setIcon(0,QIcon::fromTheme("folder"));
+            item->setIcon(0,QIcon(":/resources/icons/16px/Folder Open.png"));
             item->setText(1, "---");
+            item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         else
         {
-            item->setIcon(0,QIcon::fromTheme("document"));
+            //item->setIcon(0,QIcon::fromTheme("document"));
+            item->setIcon(0,QIcon(":/resources/icons/16px/Untitled.png"));
             //item->setText(1, QString::number(AFE->getSize()));
             item->setText(1, convertToSizeWithUnit(AFE->getSize()));
+            item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         if (AFE->getFileType()==ARCDir)
             item->setText(2, "folder");
@@ -708,7 +714,8 @@ void ArcStorageWindow::updateFoldersTree()
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE->getFileName());
-            item->setIcon(0, QIcon::fromTheme("folder"));
+            //item->setIcon(0, QIcon::fromTheme("folder"));
+            item->setIcon(0, QIcon(":/resources/icons/16px/Folder Open.png"));
             setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
@@ -738,7 +745,8 @@ void ArcStorageWindow::updateFoldersTreeBelow()
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE->getFileName());
-            item->setIcon(0, QIcon::fromTheme("folder"));
+            //item->setIcon(0, QIcon::fromTheme("folder"));
+            item->setIcon(0, QIcon(":/resources/icons/16px/Folder Open.png"));
             setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
@@ -765,7 +773,8 @@ void ArcStorageWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE->getFileName());
-            item->setIcon(0, QIcon::fromTheme("folder"));
+            //item->setIcon(0, QIcon::fromTheme("folder"));
+            item->setIcon(0, QIcon(":/resources/icons/16px/Folder Open.png"));
             setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
             QTreeWidgetItem *dummyItem = new QTreeWidgetItem;
@@ -915,6 +924,19 @@ void ArcStorageWindow::onCopyFromServerFinished(bool error)
     setBusyUI(false);
     if (error == true)
         QMessageBox::information(this, tr("ArcFTP"), "An error occured while trying to copy the file");
+
+    if (m_filesToOpen.length()>0)
+    {
+        for (int i=0; i<m_filesToOpen.length(); i++)
+        {
+            QDateTime currentTime = QDateTime::currentDateTime();
+            QString currentTimeStamp = currentTime.toString("yyyyMMdd-hhmmss");
+            QFile downloadedFile(m_filesToOpen.at(i).toLocalFile());
+            downloadedFile.rename(downloadedFile.fileName()+"."+currentTimeStamp);
+            QDesktopServices::openUrl(QUrl::fromLocalFile(downloadedFile.fileName()));
+        }
+    }
+    m_filesToOpen.clear();
 }
 
 void ArcStorageWindow::onDeleteFinished(bool error)
@@ -958,6 +980,19 @@ void ArcStorageWindow::onCopyToServerFinished(bool error, QList<QString> &failed
         }
 
         QMessageBox::information(this, tr("ArcFTP"), message);
+
+        m_filesToOpen.clear();
+    }
+    else
+    {
+        if (m_filesToOpen.length()>0)
+        {
+            for (int i=0; i<m_filesToOpen.length(); i++)
+            {
+                QDesktopServices::openUrl(m_filesToOpen.at(i));
+            }
+        }
+        m_filesToOpen.clear();
     }
 }
 
@@ -1188,6 +1223,10 @@ void ArcStorageWindow::on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *ite
         m_currentFileServer->startUpdateFileList(newURL);
         setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
     }
+    else
+    {
+        ui->actionOpenURLExt->trigger();
+    }
 }
 
 void ArcStorageWindow::on_actionClearSelection_triggered()
@@ -1343,6 +1382,7 @@ void ArcStorageWindow::on_filesTreeWidget_customContextMenuRequested(const QPoin
 {
     QMenu menu(this);
     QList<QAction*> actions;
+    actions.append(ui->actionOpenURLExt);
     actions.append(ui->actionCreateDir);
     actions.append(ui->actionRename);
     actions.append(ui->actionDelete);
@@ -1452,7 +1492,7 @@ void ArcStorageWindow::on_actionDownloadSelected_triggered()
     logger.msg(Arc::VERBOSE, "Downloading files to selected directory. (on_actionDownloadSelected_triggered)");
 
     QString dir = QFileDialog::getExistingDirectory(this, tr("Select destination directory"),
-                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+                                                    QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     QString destDir = (QUrl::fromLocalFile(dir)).toString();
 
@@ -1612,7 +1652,11 @@ void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
 
 void ArcStorageWindow::on_actionRename_triggered()
 {
-    ui->filesTreeWidget->editItem(ui->filesTreeWidget->currentItem());
+    if (ui->filesTreeWidget->currentItem()!=0)
+    {
+        QTreeWidgetItem* item = ui->filesTreeWidget->currentItem();
+        ui->filesTreeWidget->editItem(ui->filesTreeWidget->currentItem());
+    }
 }
 
 void ArcStorageWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column)
@@ -1632,4 +1676,61 @@ void ArcStorageWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int
     qDebug() << "URL " << this->getURLOfItem(item) << " rename to -> " << newURL;
 
     m_currentFileServer->rename(originalURL, newURL);
+}
+
+void ArcStorageWindow::on_actionOpenURLExt_triggered()
+{
+    //QDesktopServices::openUrl()
+    logger.msg(Arc::VERBOSE, "Downloading files to selected directory. (on_actionDownloadSelected_triggered)");
+
+    QString destDir;
+
+    if (false)
+    {
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select destination directory"),
+                                                        QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+        destDir = (QUrl::fromLocalFile(dir)).toString();
+    }
+    else
+    {
+        destDir = QDir::tempPath();
+    }
+
+    QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
+
+    this->m_filesToOpen.clear();
+
+    if (selectedItems.length()>0)
+    {
+        QList<QUrl> urlList;
+
+        for (int i=0; i<selectedItems.length(); i++)
+        {
+            QTreeWidgetItem* item = selectedItems.at(i);
+            if (item->text(2)=="file")
+            {
+                QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                QUrl url = QUrl::fromLocalFile(dataQV.toString());
+                urlList.append(url);
+                m_filesToOpen.append(QUrl(destDir+"/"+item->text(0)));
+            }
+            else
+            {
+                QVariant dataQV = item->data(0, Qt::ToolTipRole);
+                QUrl url = QUrl::fromLocalFile(dataQV.toString()+"/");
+                urlList.append(url);
+            }
+        }
+
+        GlobalStateInfo::instance()->showTransferWindow();
+
+        this->setBusyUI(true);
+
+        int i;
+
+        FileTransferList::instance()->pauseProcessing();
+        m_currentFileServer->copyToServer(urlList, destDir);
+        FileTransferList::instance()->resumeProcessing();
+    }
 }

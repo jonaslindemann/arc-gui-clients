@@ -25,5 +25,13 @@
         <file>icons/24px/Window-New.png</file>
         <file>icons/24px/Upload_folder.png</file>
         <file>icons/24px/Upload_archive.png</file>
+        <file>icons/16px/Current Folder.png</file>
+        <file>icons/16px/Folder-Information.png</file>
+        <file>icons/16px/Folder Open.png</file>
+        <file>icons/16px/Untitled.png</file>
+        <file>icons/24px/Folder Open.png</file>
+        <file>icons/24px/Folder-Information.png</file>
+        <file>icons/24px/Untitled.png</file>
+        <file>icons/24px/Current Folder.png</file>
     </qresource>
 </RCC>
