@@ -5,6 +5,7 @@
 #include <QList>
 #include <QHash>
 #include <QThread>
+#include <QElapsedTimer>
 
 #include "filetransfer.h"
 
@@ -44,6 +45,9 @@ private:
     FileTransferProcessingThread* m_fileProcessingThread;
     QMutex m_accessMutex;
     int m_maxTransfers;
+    QElapsedTimer m_transferTimer;
+    qint64 m_transferTime;
+    unsigned long m_totalTransferred;
 public:
     /// Returns the global FileTransferList instance.
     static FileTransferList* instance()
@@ -136,6 +140,12 @@ public:
      */
     void resumeProcessing();
 
+    void startMeasuring();
+    void stopMeasuring();
+
+    unsigned long totalTransferred();
+    double transferTime();
+
 private:
     /// Create a file transfer list
     FileTransferList();
@@ -156,6 +166,10 @@ Q_SIGNALS:
 
     /// This signal is sent when a file transfer is removed from the list.
     void onRemoveTransfer(QString id);
+
+private Q_SLOTS:
+    void onCompleted(FileTransfer* fileTransfer, bool success, QString error);
+
 };
 
 #endif // FILETRANSFERLIST_H

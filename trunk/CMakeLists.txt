@@ -1,6 +1,19 @@
 cmake_minimum_required (VERSION 2.6)
 project(arc-gui-clients)
 
+if (APPLE)
+SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -headerpad_max_install_names" )
+SET( CMAKE_SKIP_INSTALL_RPATH ON )
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+   # No rpath on Darwin. Setting it will only cause trouble.
+else(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+   option(USE_RPATH "Use -rpath when linking libraries, executables" ON)
+endif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+endif (APPLE)
+
+include_directories(/opt/arc3/include /opt/ldg/include)
+link_directories(/opt/arc3/lib /opt/ldg/lib)
+
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 

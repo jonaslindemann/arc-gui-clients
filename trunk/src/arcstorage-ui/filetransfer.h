@@ -23,6 +23,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QTime>
 
 /// File transfer states
 enum TTransferState { TS_IDLE,     ///<Waiting to be transferred.
@@ -61,6 +62,9 @@ private:
     Arc::UserConfig* m_config;
     Arc::DataStatus m_status;
     Arc::SimpleCondition m_cond;
+
+    QTime m_transferTimer;
+    qint64 m_transferTime;
 public:
     /// Create a file transfer object.
     /**
@@ -121,6 +125,10 @@ public:
 
     /// Return current transfer statistics.
     void getTransferStatus(unsigned long& transferred, unsigned long& totalSize);
+
+    double transferTime();
+    unsigned long totalTransferred();
+    unsigned long totalSize();
 
 Q_SIGNALS:
 

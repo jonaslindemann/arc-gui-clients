@@ -47,7 +47,7 @@ ADD_EXECUTABLE(
 	arcsub-ui 
 	MACOSX_BUNDLE
 	${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H}
-    ../../images/arccert_icon.icns
+    	../../images/arcstat_icon.icns
 )
 
 install(TARGETS arcsub-ui
@@ -59,27 +59,6 @@ SET( MACOSX_BUNDLE_ICON_FILE arcsub_icon.icns )
 SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
 SET( MACOSX_BUNDLE_VERSION 0.1 )
 SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
-
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/brushes/rbrush16.rgb
-#        ../../bin/release/brushes/rbrush32.rgb
-#        ../../bin/release/brushes/rbrush4.rgb
-#        ../../bin/release/brushes/rbrush64.rgb
-#        ../../bin/release/brushes/rbrush8.rgb
-#        ../../bin/release/brushes/sbrush16.rgb
-#        ../../bin/release/brushes/sbrush32.rgb
-#        ../../bin/release/brushes/sbrush4.rgb
-#        ../../bin/release/brushes/sbrush64.rgb
-#        ../../bin/release/brushes/sbrush8.rgb
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/brushes
-#)
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/colormaps/colormap1.map
-#        ../../bin/release/colormaps/colormap2.map
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/colormaps
-#)
 SET_SOURCE_FILES_PROPERTIES(
         ../../images/arcsub_icon.icns
 	PROPERTIES

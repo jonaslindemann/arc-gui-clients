@@ -82,32 +82,19 @@ SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
 SET( MACOSX_BUNDLE_VERSION 0.1 )
 SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
 
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/brushes/rbrush16.rgb
-#        ../../bin/release/brushes/rbrush32.rgb
-#        ../../bin/release/brushes/rbrush4.rgb
-#        ../../bin/release/brushes/rbrush64.rgb
-#        ../../bin/release/brushes/rbrush8.rgb
-#        ../../bin/release/brushes/sbrush16.rgb
-#        ../../bin/release/brushes/sbrush32.rgb
-#        ../../bin/release/brushes/sbrush4.rgb
-#        ../../bin/release/brushes/sbrush64.rgb
-#        ../../bin/release/brushes/sbrush8.rgb
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/brushes
-#)
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/colormaps/colormap1.map
-#        ../../bin/release/colormaps/colormap2.map
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/colormaps
-#)
 SET_SOURCE_FILES_PROPERTIES(
         ../../images/arcstorage_icon.icns
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLES)
+
+   set_target_properties(
+   arcstorage-ui
+ 	PROPERTIES BUILD_WITH_INSTALL_RPATH OFF
+ 	INSTALL_NAME_DIR "@executable_path"
+   )
+
+ELSE(APPLE)
         add_executable(arcstorage-ui ${arcstorageui_SRCS} ${arcstorageui_MOC_SRCS} ${arcstorageui_RC_SRCS} ${arcstorageui_UIS_H} )
 ENDIF(APPLES)
 

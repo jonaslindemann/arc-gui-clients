@@ -857,6 +857,7 @@ void ArcStorageWindow::onFilesDroppedInFileListWidget(QList<QUrl>& urlList)
         logger.msg(Arc::VERBOSE, "Dropped file :" + urlList[i].toString().toStdString());
 
     FileTransferList::instance()->pauseProcessing();
+    FileTransferList::instance()->startMeasuring();
     m_currentFileServer->copyToServer(urlList, m_currentFileServer->getCurrentPath());
     FileTransferList::instance()->resumeProcessing();
 }
@@ -918,6 +919,8 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
 
 void ArcStorageWindow::onCopyFromServerFinished(bool error)
 {
+    FileTransferList::instance()->stopMeasuring();
+
     logger.msg(Arc::VERBOSE, "Copy from file server finished. (onCopyFromServerFinished)");
     updateFileTree();
     GlobalStateInfo::instance()->hideTransferWindow();
@@ -963,6 +966,8 @@ void ArcStorageWindow::onMakeDirFinished(bool error)
 
 void ArcStorageWindow::onCopyToServerFinished(bool error, QList<QString> &failedFiles)
 {
+    FileTransferList::instance()->stopMeasuring();
+
     logger.msg(Arc::VERBOSE, "Copy to server finished. (onCopyToServerFinished)");
     m_currentUpdateFileListsMode = CUFLM_clickedFolder;   // Update the listview displaying the folder...
     onFileListFinished(false, "");                      // ... so that the deleted file is removed
