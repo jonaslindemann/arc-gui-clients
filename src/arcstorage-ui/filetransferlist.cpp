@@ -80,16 +80,15 @@ void FileTransferList::resumeProcessing()
 
 void FileTransferList::processTransfers()
 {
-    qDebug() << "processTransfers";
     m_accessMutex.lock();
     int idleCount = 0;
     for (int i=0; i<m_transferList.length(); i++)
     {
         FileTransfer* xfr = m_transferList.at(i);
-        qDebug() << "checking: " << xfr->id();
+        //qDebug() << "checking: " << xfr->id();
         if (xfr->transferState()==TS_IDLE)
         {
-            qDebug() << xfr->id() << " is idle.";
+            //qDebug() << xfr->id() << " is idle.";
             idleCount++;
             if (m_activeTransferList.length()<m_maxTransfers)
             {
@@ -100,7 +99,7 @@ void FileTransferList::processTransfers()
             }
         }
     }
-    qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length()<< " total = " << m_transferList.length();
+    //qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length()<< " total = " << m_transferList.length();
     m_accessMutex.unlock();
 }
 
@@ -110,6 +109,7 @@ void FileTransferList::addTransfer(FileTransfer* fileTransfer)
     m_transferList.append(fileTransfer);
     m_transferDict[fileTransfer->id()] = fileTransfer;
     Q_EMIT onAddTransfer(fileTransfer->id());
+    connect(fileTransfer, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
     m_accessMutex.unlock();
 }
 
@@ -181,5 +181,37 @@ void FileTransferList::updateStatus(QString id, unsigned long transferred, unsig
     FileTransfer* xfr = this->getTransfer(id);
     xfr->updateTransferStatus(transferred, totalSize);
     Q_EMIT onUpdateStatus(id);
+}
+
+void FileTransferList::startMeasuring()
+{
+    m_transferTime = 0;
+    m_totalTransferred = 0;
+    m_transferTimer.start();
+}
+
+void FileTransferList::stopMeasuring()
+{
+    m_transferTime = m_transferTimer.elapsed();
+    double transferBandwidth = ((double)m_totalTransferred/1024.0)/((double)m_transferTime/1000.0);
+    qDebug() << "Average transfer bandwidth = " << transferBandwidth << "MB/s";
+}
+
+unsigned long FileTransferList::totalTransferred()
+{
+    return m_totalTransferred;
+}
+
+double FileTransferList::transferTime()
+{
+    return (double)m_transferTime/1000.0;
+}
+
+void FileTransferList::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
+{
+    qDebug() << "(FileTransferList) File transfer " << fileTransfer->id() << " completed.";
+
+    if (success)
+        m_totalTransferred += fileTransfer->totalSize();
 }
 

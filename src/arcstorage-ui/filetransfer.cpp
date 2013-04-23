@@ -85,6 +85,8 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
     m_transferred = 0;
     m_totalSize = 0;
     m_transferState = TS_IDLE;
+
+    m_transferTime = -1;
 }
 
 FileTransfer::~FileTransfer()
@@ -245,6 +247,7 @@ bool FileTransfer::execute()
     //                    const char *prefix = NULL);
 
 
+    m_transferTimer.start();
     Arc::DataStatus res = m_mover->Transfer(*m_sourceHandle, *m_destHandle,
                                             *m_cache, *m_urlMap,
                                             0, 0, 0, 20,
@@ -268,6 +271,11 @@ void FileTransfer::cancel()
 
 void FileTransfer::completed(Arc::DataStatus res, std::string error)
 {
+    m_transferTime = m_transferTimer.elapsed();
+
+    double transferBandwidth = ((double)m_totalSize/1024.0)/this->transferTime();
+    qDebug() << "Transfer bandwidth = " << transferBandwidth << "MB/s";
+
     m_transferState = TS_COMPLETED;
     logger.msg(Arc::INFO, "---- FileTransfer completed ----");
 
@@ -292,3 +300,19 @@ bool FileTransfer::isCompleted()
 {
     return m_completed;
 }
+
+double FileTransfer::transferTime()
+{
+    return (double)m_transferTime/1000.0;
+}
+
+unsigned long FileTransfer::totalTransferred()
+{
+    return m_transferred;
+}
+
+unsigned long FileTransfer::totalSize()
+{
+    return m_totalSize;
+}
+

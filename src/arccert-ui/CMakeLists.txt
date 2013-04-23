@@ -29,7 +29,7 @@ ADD_EXECUTABLE(
 	arccert-ui 
 	MACOSX_BUNDLE
 	${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H}
-    ../../images/arccert_icon.icns
+	../../images/arcstat_icon.icns
 )
 
 install(TARGETS arccert-ui
