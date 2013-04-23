@@ -146,6 +146,9 @@ public:
     unsigned long totalTransferred();
     double transferTime();
 
+    int maxTransfers();
+    void setMaxTransfers(int maxTransfers);
+
 private:
     /// Create a file transfer list
     FileTransferList();

@@ -2,6 +2,7 @@
 #include "ui_applicationsettings.h"
 
 #include "globalstateinfo.h"
+#include "filetransferlist.h"
 
 ApplicationSettings::ApplicationSettings(QWidget *parent) :
     QDialog(parent),
@@ -60,6 +61,8 @@ void ApplicationSettings::on_okButton_clicked()
         GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_WARNING);
     if (ui->logLevelCombo->currentIndex()==3)
         GlobalStateInfo::instance()->setLogLevel(GlobalStateInfo::LL_ERROR);
+
+    FileTransferList::instance()->setMaxTransfers(GlobalStateInfo::instance()->maxTransfers());
 
     this->accept();
 }

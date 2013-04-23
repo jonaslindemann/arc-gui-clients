@@ -207,6 +207,16 @@ double FileTransferList::transferTime()
     return (double)m_transferTime/1000.0;
 }
 
+int FileTransferList::maxTransfers()
+{
+    return m_maxTransfers;
+}
+
+void FileTransferList::setMaxTransfers(int maxTransfers)
+{
+    m_maxTransfers = maxTransfers;
+}
+
 void FileTransferList::onCompleted(FileTransfer* fileTransfer, bool success, QString error)
 {
     qDebug() << "(FileTransferList) File transfer " << fileTransfer->id() << " completed.";
