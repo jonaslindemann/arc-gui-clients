@@ -51,7 +51,7 @@
 
 #include "proxywindow.h"
 
-#undef HAVE_NSS
+#define HAVE_NSS
 
 #ifdef HAVE_NSS
 #include <arc/credential/NSSUtil.h>
@@ -140,9 +140,9 @@ bool VomsList::read()
     QStringList vomsPaths;
 
     vomsPaths << QDir::homePath() + "/.arc/vomses";
-//    vomsPaths << QDir::homePath() + "/.voms/vomses";
-//    vomsPaths << "/etc/vomses";
-//    vomsPaths << "/etc/grid-security/vomses";
+    //    vomsPaths << QDir::homePath() + "/.voms/vomses";
+    //    vomsPaths << "/etc/vomses";
+    //    vomsPaths << "/etc/grid-security/vomses";
 
     this->clear();
 
@@ -253,8 +253,48 @@ ArcProxyController::ArcProxyController()
     m_proxyWindow = 0;
     m_application = 0;
 
+    m_selectedNssPath = "";
+
     m_uiReturnStatus = RS_OK;
 
+}
+
+void ArcProxyController::readNSSCerts()
+{
+
+}
+
+void ArcProxyController::readNSSProfiles()
+{
+
+}
+
+void ArcProxyController::setUseNssDb(bool flag)
+{
+    use_nssdb = flag;
+}
+
+bool ArcProxyController::useNssDb()
+{
+    return use_nssdb;
+}
+
+QString ArcProxyController::getNssPath(int idx)
+{
+    if ((idx>=0)&&(idx<m_nssPaths.size()))
+        return m_nssPaths[idx].c_str();
+    else
+        return "";
+}
+
+int ArcProxyController::nssPathCount()
+{
+    return m_nssPaths.size();
+}
+
+void ArcProxyController::setNssPath(QString path)
+{
+    m_selectedNssPath = path;
 }
 
 void ArcProxyController::setUiReturnStatus(TReturnStatus status)
@@ -326,7 +366,7 @@ void ArcProxyController::removeVomsServer(const QString& server, const QString& 
     else
         serverLine = server.toStdString();
 
-    std::vector<std::string>::iterator it;
+    std::list<std::string>::iterator it;
 
     it = find(vomslist.begin(), vomslist.end(), serverLine);
 
@@ -336,7 +376,23 @@ void ArcProxyController::removeVomsServer(const QString& server, const QString& 
 
 QString ArcProxyController::getVomsServer(int idx)
 {
-    QString returnString = vomslist[idx].c_str();
+    std::list<std::string>::iterator it = vomslist.begin();
+    QString returnString = "";
+
+    for(int i=0; i<idx; i++)
+    {
+        if (it != vomslist.end())
+        {
+            if (i == idx)
+            {
+                returnString = (*it).c_str();
+                return returnString;
+            }
+            it++;
+        }
+        else
+            return returnString;
+    }
     return returnString;
 }
 
@@ -398,72 +454,6 @@ int ArcProxyController::initialize()
 
     Arc::ArcLocation::Init("");
 
-#ifdef HAVE_NSS
-    //Using nss db dominate other option
-    if(use_nssdb) {
-        std::string nssdb_path = get_nssdb_path();
-        if(nssdb_path.empty()) {
-            std::cout << Arc::IString("The nss db can not be detected under firefox profile") << std::endl;
-            return EXIT_FAILURE;
-        }
-        bool res;
-        std::string configdir = nssdb_path;
-        res = AuthN::nssInit(configdir);
-        std::cout<< Arc::IString("nss db to be accesses: %s\n", configdir.c_str());
-
-        char* slotpw = NULL; //"secretpw";
-        //The nss db under firefox profile seems to not be protected by any passphrase by default
-        bool ascii = true;
-        const char* trusts = "p,p,p";
-
-        std::string proxy_csrfile = "proxy.csr";
-        std::string proxy_keyname = "proxykey";
-        std::string proxy_privk_str;
-        res = AuthN::nssGenerateCSR(proxy_keyname, "CN=Test,OU=ARC,O=EMI", slotpw, proxy_csrfile, proxy_privk_str, ascii);
-        if(!res) return EXIT_FAILURE;
-
-        std::string proxy_certfile = "myproxy.pem";
-        std::string issuername = "Imported Certificate";
-        //The name of the certificate imported in firefox is
-        //normally "Imported Certificate" by default, if name is not specified
-        int duration = 12;
-        res = AuthN::nssCreateCert(proxy_csrfile, issuername, "", duration, proxy_certfile, ascii);
-        if(!res) return EXIT_FAILURE;
-
-        const char* proxy_certname = "proxycert";
-        res = AuthN::nssImportCert(slotpw, proxy_certfile, proxy_certname, trusts, ascii);
-        if(!res) return EXIT_FAILURE;
-
-        //Compose the proxy certificate
-        if(!proxy_path.empty())Arc::SetEnv("X509_USER_PROXY", proxy_path);
-        Arc::UserConfig usercfg(conffile,
-                                Arc::initializeCredentialsType(Arc::initializeCredentialsType::NotTryCredentials));
-        if (!usercfg) {
-            logger.msg(Arc::ERROR, "Failed configuration initialization.");
-            return EXIT_FAILURE;
-        }
-        if(proxy_path.empty()) proxy_path = usercfg.ProxyPath();
-        usercfg.ProxyPath(proxy_path);
-        std::string cert_file = "cert.pem";
-        res = AuthN::nssExportCertificate(issuername, cert_file);
-        if(!res) return EXIT_FAILURE;
-
-        std::string proxy_cred_str;
-        std::ifstream proxy_s(proxy_certfile.c_str());
-        std::getline(proxy_s, proxy_cred_str,'\0');
-        proxy_s.close();
-
-        std::string eec_cert_str;
-        std::ifstream eec_s(cert_file.c_str());
-        std::getline(eec_s, eec_cert_str,'\0');
-        eec_s.close();
-
-        proxy_cred_str.append(proxy_privk_str).append(eec_cert_str);
-        write_proxy_file(proxy_path, proxy_cred_str);
-
-        return EXIT_SUCCESS;
-    }
-#endif
 
     // If debug is specified as argument, it should be set before loading the configuration.
     if (!debug.empty())
@@ -476,8 +466,19 @@ int ArcProxyController::initialize()
     if(!ca_dir.empty())Arc::SetEnv("X509_CERT_DIR", ca_dir);
 
     // Set default, predefined or guessed credentials. Also check if they exist.
+
+#ifdef HAVE_NSS
+    Arc::UserConfig usercfg(conffile,
+                            Arc::initializeCredentialsType(use_nssdb ? Arc::initializeCredentialsType::NotTryCredentials
+                                                                     : Arc::initializeCredentialsType::TryCredentials));
+#else
     Arc::UserConfig usercfg(conffile,
                             Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+#endif
+
+
+    //    Arc::UserConfig usercfg(conffile,
+    //                            Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
     if (!usercfg) {
         logger.msg(Arc::ERROR, "Failed configuration initialization.");
         return EXIT_FAILURE;
@@ -523,6 +524,8 @@ int ArcProxyController::initialize()
         Arc::Logger::getRootLogger().setThreshold(Arc::string_to_level(usercfg.Verbosity()));
 
     if (timeout > 0) usercfg.Timeout(timeout);
+
+    get_default_nssdb_path(m_nssPaths);
 
     return EXIT_SUCCESS;
 }
@@ -728,10 +731,10 @@ int ArcProxyController::generateProxy()
     }
 
     Arc::UserConfig usercfg(conffile,
-          Arc::initializeCredentialsType(Arc::initializeCredentialsType::SkipCredentials));
+                            Arc::initializeCredentialsType(Arc::initializeCredentialsType::SkipCredentials));
     if (!usercfg) {
-      logger.msg(Arc::ERROR, "Failed configuration initialization.");
-      return EXIT_FAILURE;
+        logger.msg(Arc::ERROR, "Failed configuration initialization.");
+        return EXIT_FAILURE;
     }
 
     std::map<std::string, std::string> constraints;
@@ -840,6 +843,153 @@ int ArcProxyController::generateProxy()
     }
     std::string myproxy_period = Arc::tostring(myproxyvalidityPeriod.GetPeriod());
 
+#ifdef HAVE_NSS
+    //Using nss db dominate other option
+    if(use_nssdb) {
+
+        if(m_nssPaths.empty()) {
+            std::cout << Arc::IString("The NSS database can not be detected in the Firefox profile") << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        if (m_selectedNssPath.length()==0)
+            return EXIT_FAILURE;
+
+        // Let user to choose which profile to use
+        // if multiple profiles exist
+        bool res;
+        std::string configdir = m_selectedNssPath.toStdString();
+        /*
+        if(m_nssPaths.size()) {
+            std::cout<<Arc::IString("There are %d NSS base directories where the certificate, key, and module datbases live",
+                                    m_nssPaths.size())<<std::endl;
+        }
+        for(int i=0; i < nssdb_paths.size(); i++) {
+            std::cout<<Arc::IString("Number %d is: %s", i+1, nssdb_paths[i])<<std::endl;
+        }
+        std::cout << Arc::IString("Please choose the NSS database you would use (1-%d): ", nssdb_paths.size());
+        if(nssdb_paths.size() == 1) { configdir = nssdb_paths[0]; }
+        char c;
+        while(true && (nssdb_paths.size()>1)) {
+            c = getchar();
+            int num = c - '0';
+            if((num<=nssdb_paths.size()) && (num>=1)) {
+                configdir = nssdb_paths[num-1];
+                break;
+            }
+        }
+        */
+        res = AuthN::nssInit(configdir);
+        std::cout<< Arc::IString("NSS database to be accessed: %s\n", configdir.c_str());
+
+        char* slotpw = NULL; //"secretpw";
+        //The nss db under firefox profile seems to not be protected by any passphrase by default
+        bool ascii = true;
+        const char* trusts = "u,u,u";
+
+        // Generate CSR
+        std::string proxy_csrfile = "proxy.csr";
+        std::string proxy_keyname = "proxykey";
+        std::string proxy_privk_str;
+        res = AuthN::nssGenerateCSR(proxy_keyname, "CN=Test,OU=ARC,O=EMI", slotpw, proxy_csrfile, proxy_privk_str, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        // Create a temporary proxy and contact voms server
+        std::string issuername;
+        std::string vomsacseq;
+
+        if (!vomslist.empty()) {
+            std::string tmp_proxy_path;
+            tmp_proxy_path = Glib::build_filename(Glib::get_tmp_dir(), std::string("tmp_proxy.pem"));
+            get_nss_certname(issuername, logger);
+
+            // Create tmp proxy cert
+            int duration = 12;
+            res = AuthN::nssCreateCert(proxy_csrfile, issuername, NULL, duration, "", tmp_proxy_path, ascii);
+            if(!res) return EXIT_FAILURE;
+            std::string tmp_proxy_cred_str;
+            std::ifstream tmp_proxy_cert_s(tmp_proxy_path.c_str());
+            std::getline(tmp_proxy_cert_s, tmp_proxy_cred_str,'\0');
+            tmp_proxy_cert_s.close();
+
+            // Export EEC
+            std::string cert_file = "cert.pem";
+            res = AuthN::nssExportCertificate(issuername, cert_file);
+            if(!res) return EXIT_FAILURE;
+            std::string eec_cert_str;
+            std::ifstream eec_s(cert_file.c_str());
+            std::getline(eec_s, eec_cert_str,'\0');
+            eec_s.close();
+            remove_cert_file(cert_file);
+
+            // Compose tmp proxy file
+            tmp_proxy_cred_str.append(proxy_privk_str).append(eec_cert_str);
+            write_proxy_file(tmp_proxy_path, tmp_proxy_cred_str);
+
+            contact_voms_servers(vomslist, orderlist, vomses_path, use_gsi_comm,
+                                 use_http_comm, voms_period, usercfg, logger, tmp_proxy_path, vomsacseq);
+            remove_proxy_file(tmp_proxy_path);
+        }
+
+        // Create proxy with VOMS AC
+        std::string proxy_certfile = "myproxy.pem";
+
+        // Let user to choose which credential to use
+        if(issuername.empty()) get_nss_certname(issuername, logger);
+        std::cout<<Arc::IString("Certificate to use is: %s", issuername)<<std::endl;
+
+        int duration;
+        duration = validityPeriod.GetPeriod() / 3600;
+
+        std::string vomsacseq_asn1;
+        if(!vomsacseq.empty()) Arc::VOMSACSeqEncode(vomsacseq, vomsacseq_asn1);
+        res = AuthN::nssCreateCert(proxy_csrfile, issuername, "", duration, vomsacseq_asn1, proxy_certfile, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        const char* proxy_certname = "proxycert";
+        res = AuthN::nssImportCert(slotpw, proxy_certfile, proxy_certname, trusts, ascii);
+        if(!res) return EXIT_FAILURE;
+
+        //Compose the proxy certificate
+        if(!proxy_path.empty())Arc::SetEnv("X509_USER_PROXY", proxy_path);
+        Arc::UserConfig usercfg(conffile,
+                                Arc::initializeCredentialsType(Arc::initializeCredentialsType::NotTryCredentials));
+        if (!usercfg) {
+            logger.msg(Arc::ERROR, "Failed configuration initialization.");
+            return EXIT_FAILURE;
+        }
+        if(proxy_path.empty()) proxy_path = usercfg.ProxyPath();
+        usercfg.ProxyPath(proxy_path);
+        std::string cert_file = "cert.pem";
+        res = AuthN::nssExportCertificate(issuername, cert_file);
+        if(!res) return EXIT_FAILURE;
+
+        std::string proxy_cred_str;
+        std::ifstream proxy_s(proxy_certfile.c_str());
+        std::getline(proxy_s, proxy_cred_str,'\0');
+        proxy_s.close();
+        // Remove the proxy file, because the content
+        // is recorded and then writen into proxy path,
+        // together with private key, and the issuer of proxy.
+        remove_proxy_file(proxy_certfile);
+
+        std::string eec_cert_str;
+        std::ifstream eec_s(cert_file.c_str());
+        std::getline(eec_s, eec_cert_str,'\0');
+        eec_s.close();
+        remove_cert_file(cert_file);
+
+        proxy_cred_str.append(proxy_privk_str).append(eec_cert_str);
+        write_proxy_file(proxy_path, proxy_cred_str);
+
+        Arc::Credential proxy_cred(proxy_path, proxy_path, "", "");
+        Arc::Time left = proxy_cred.GetEndTime();
+        std::cout << Arc::IString("Proxy generation succeeded") << std::endl;
+        std::cout << Arc::IString("Your proxy is valid until: %s", left.str(Arc::UserTime)) << std::endl;
+
+        return EXIT_SUCCESS;
+    }
+#endif
 
     Arc::OpenSSLInit();
 
@@ -1123,7 +1273,7 @@ int ArcProxyController::generateProxy()
 
             //Parse the voms server and command from command line
             std::multimap<std::string, std::string> server_command_map;
-            for (std::vector<std::string>::iterator it = vomslist.begin();
+            for (std::list<std::string>::iterator it = vomslist.begin();
                  it != vomslist.end(); it++) {
                 size_t p;
                 std::string voms_server;

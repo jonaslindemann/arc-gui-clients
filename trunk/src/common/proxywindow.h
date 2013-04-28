@@ -54,6 +54,8 @@ private Q_SLOTS:
 
     void on_helpButton_clicked();
 
+    void on_NSSProfileList_itemClicked(QListWidgetItem *item);
+
 private:
     Ui::ProxyWindow *ui;
 };

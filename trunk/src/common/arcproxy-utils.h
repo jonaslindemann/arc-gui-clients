@@ -70,7 +70,7 @@ private:
     std::string ca_dir;
     std::string vomses_path;
     std::string voms_dir;
-    std::vector<std::string> vomslist;
+    std::list<std::string> vomslist;
     std::list<std::string> orderlist;
     std::string user_name; //user name to MyProxy server
     std::string retrievable_by_cert; //if use empty passphrase to myproxy server
@@ -102,8 +102,14 @@ private:
     QApplication* m_application;
 
     TReturnStatus m_uiReturnStatus;
+
+    std::vector<std::string> m_nssPaths;
+    QString m_selectedNssPath;
     
     int m_argc;
+
+    void readNSSProfiles();
+    void readNSSCerts();
     
     
 public:
@@ -129,6 +135,13 @@ public:
     void setValidityPeriod(int seconds);
     void setUseGSIProxy(bool flag);
     bool getUseGSIProxy();
+
+    void setUseNssDb(bool flag);
+    bool useNssDb();
+
+    QString getNssPath(int idx);
+    int nssPathCount();
+    void setNssPath(QString path);
 
     void addVomsServer(const QString& server, const QString& role);
     void addVomsServerAndRole(const QString& serverAndRole);
