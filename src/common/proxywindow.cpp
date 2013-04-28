@@ -67,6 +67,13 @@ ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
 
     m_configTableDirty = false;
 
+    ui->NSSProfileList->clear();
+    for (i=0; i<m_proxyController->nssPathCount(); i++)
+    {
+        ui->NSSProfileList->addItem(m_proxyController->getNssPath(i));
+    }
+
+
     this->readSettings();
 }
 
@@ -136,18 +143,25 @@ void ProxyWindow::on_generateButton_clicked()
 {   
     // Ask for private key passphrase
 
-    bool ok;
-    QString passphrase = QInputDialog::getText(this, tr("Proxy generation"),
-                                               tr("Private key passphrase:"), QLineEdit::Password,
-                                               "", &ok);
+    QString passphrase;
 
-    if (!ok)
-        return;
+    m_proxyController->setUseNssDb(true);
 
-    if (passphrase.length()==0)
+    if (!m_proxyController->useNssDb())
     {
-        QMessageBox::warning(this, "Proxy generation", "Passphrase can't be empy.");
-        return;
+        bool ok;
+        passphrase = QInputDialog::getText(this, tr("Proxy generation"),
+                                                   tr("Private key passphrase:"), QLineEdit::Password,
+                                                   "", &ok);
+
+        if (!ok)
+            return;
+
+        if (passphrase.length()==0)
+        {
+            QMessageBox::warning(this, "Proxy generation", "Passphrase can't be empy.");
+            return;
+        }
     }
 
     // Generate proxy using ArcProxyController
@@ -253,4 +267,12 @@ void ProxyWindow::on_helpButton_clicked()
     m_helpWindow = new HelpWindow(this);
     m_helpWindow->setWindowFlags(m_helpWindow->windowFlags() | Qt::WindowStaysOnTopHint);
     m_helpWindow->show();
+}
+
+void ProxyWindow::on_NSSProfileList_itemClicked(QListWidgetItem *item)
+{
+    QString selectedPath = item->text();
+    m_proxyController->setNssPath(selectedPath);
+
+
 }
