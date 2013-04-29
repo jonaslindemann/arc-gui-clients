@@ -1,23 +1,23 @@
 # - Try to find GLib2
 # Once done this will define
 #
-#  GLIB2_FOUND - system has GLib2
-#  GLIB2_INCLUDE_DIRS - the GLib2 include directory
-#  GLIB2_LIBRARIES - Link these to use GLib2
+# GLIB2_FOUND - system has GLib2
+# GLIB2_INCLUDE_DIRS - the GLib2 include directory
+# GLIB2_LIBRARIES - Link these to use GLib2
 #
-#  HAVE_GLIB_GREGEX_H  glib has gregex.h header and 
-#                      supports g_regex_match_simple
+# HAVE_GLIB_GREGEX_H glib has gregex.h header and
+# supports g_regex_match_simple
 #
-#  Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
-#  Copyright (c) 2006 Philippe Bernery <philippe.bernery@gmail.com>
-#  Copyright (c) 2007 Daniel Gollub <dgollub@suse.de>
-#  Copyright (c) 2007 Alban Browaeys <prahal@yahoo.com>
-#  Copyright (c) 2008 Michael Bell <michael.bell@web.de>
-#  Copyright (c) 2008 Bjoern Ricks <bjoern.ricks@googlemail.com>
+# Copyright (c) 2006 Andreas Schneider <mail@cynapses.org>
+# Copyright (c) 2006 Philippe Bernery <philippe.bernery@gmail.com>
+# Copyright (c) 2007 Daniel Gollub <dgollub@suse.de>
+# Copyright (c) 2007 Alban Browaeys <prahal@yahoo.com>
+# Copyright (c) 2008 Michael Bell <michael.bell@web.de>
+# Copyright (c) 2008 Bjoern Ricks <bjoern.ricks@googlemail.com>
 #
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Redistribution and use is allowed according to the terms of the New
+# BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
 
@@ -207,12 +207,11 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 ENDIF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS)
 
 IF ( GLIB2_FOUND )
-	# Check if system has a newer version of glib
-	# which supports g_regex_match_simple
-	INCLUDE( CheckIncludeFiles )
-	SET( CMAKE_REQUIRED_INCLUDES ${GLIB2_INCLUDE_DIRS} )
-	CHECK_INCLUDE_FILES ( glib/gregex.h HAVE_GLIB_GREGEX_H )
-	# Reset CMAKE_REQUIRED_INCLUDES
-	SET( CMAKE_REQUIRED_INCLUDES "" )
+# Check if system has a newer version of glib
+# which supports g_regex_match_simple
+INCLUDE( CheckIncludeFiles )
+SET( CMAKE_REQUIRED_INCLUDES ${GLIB2_INCLUDE_DIRS} )
+CHECK_INCLUDE_FILES ( glib/gregex.h HAVE_GLIB_GREGEX_H )
+# Reset CMAKE_REQUIRED_INCLUDES
+SET( CMAKE_REQUIRED_INCLUDES "" )
 ENDIF( GLIB2_FOUND )
-

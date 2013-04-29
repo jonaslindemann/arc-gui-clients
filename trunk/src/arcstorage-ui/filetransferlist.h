@@ -5,7 +5,13 @@
 #include <QList>
 #include <QHash>
 #include <QThread>
+
+#if QT_MAJOR_VERSION<=4 && QT_MINOR_VERSION<=7
+#include <QTime>
+typedef QTime QElapsedTimer;
+#else
 #include <QElapsedTimer>
+#endif
 
 #include "filetransfer.h"
 
