@@ -23,7 +23,13 @@
 
 #include <QObject>
 #include <QString>
+
+#if QT_MAJOR_VERSION<=4 && QT_MINOR_VERSION<=7
 #include <QTime>
+typedef QTime QElapsedTimer;
+#else
+#include <QElapsedTimer>
+#endif
 
 /// File transfer states
 enum TTransferState { TS_IDLE,     ///<Waiting to be transferred.
