@@ -1,0 +1,36 @@
+# - Try to find Glib-2.0 (with gobject)
+# Once done, this will define
+#
+#  Glib_FOUND - system has Glib
+#  Glib_INCLUDE_DIRS - the Glib include directories
+#  Glib_LIBRARIES - link these to use Glib
+
+include(LibFindMacros)
+
+# Use pkg-config to get hints about paths
+libfind_pkg_check_modules(NSS_PKGCONF nspr)
+message("RESULT: ${NSS_PKGCONF_VERSION}")
+
+# Main include dir
+#find_path(NSS_INCLUDE_DIR
+#  NAMES nss.h
+#  PATHS ${NSS_PKGCONF_INCLUDE_DIRS}
+#)
+
+find_path(NSPR_INCLUDE_DIR
+  NAMES nspr.h
+  PATHS ${NSPR_PKGCONF_INCLUDE_DIRS}
+)
+
+# Finally the library itself
+find_library(NSPR_LIBRARY
+  NAMES nspr4
+  PATHS ${NSPR_PKGCONF_LIBRARY_DIRS}
+)
+
+# Set the include dir variables and the libraries and let libfind_process do the rest.
+# NOTE: Singular variables for this library, plural for libraries this this lib depends on.
+set(NSPR_PROCESS_INCLUDES NSPR_INCLUDE_DIR)
+set(NSPR_PROCESS_LIBS NSPR_LIBRARY)
+libfind_process(NSPR)
+
