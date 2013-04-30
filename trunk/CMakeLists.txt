@@ -11,11 +11,12 @@ else(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif (APPLE)
 
-include_directories(/opt/arc3/include /opt/ldg/include)
-link_directories(/opt/arc3/lib /opt/ldg/lib)
 
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+include_directories(/opt/arc3/include /opt/ldg/include)
+link_directories(/opt/arc3/lib /opt/ldg/lib)
 
 find_package(OpenSSL REQUIRED)
 
@@ -25,6 +26,16 @@ find_package(Glib REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Glibmm REQUIRED)
 find_package(Arc REQUIRED)
+find_package(NSS REQUIRED)
+find_package(NSPR REQUIRED)
+
+message("-----------")
+message("${NSS_INCLUDE_DIR}")
+message("${NSS_LIBRARY}")
+message("${NSPR_INCLUDE_DIR}")
+message("${NSPR_LIBRARY}")
+message("-----------")
+
 
 configure_file(${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h.in ${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h)
 

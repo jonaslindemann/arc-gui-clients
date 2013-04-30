@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>529</width>
-    <height>307</height>
+    <height>341</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -68,16 +68,6 @@
               <widget class="QListWidget" name="NSSProfileList"/>
              </item>
             </layout>
-           </item>
-           <item>
-            <widget class="QLabel" name="NSSCertListLabel">
-             <property name="text">
-              <string>Select certificate</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QListWidget" name="NSSCertList"/>
            </item>
           </layout>
          </item>
