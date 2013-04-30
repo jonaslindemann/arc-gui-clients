@@ -44,7 +44,7 @@ public:
         mutex.unlock();
     }
 
-    bool initUserConfig();
+    bool initUserConfig(bool showUi = false);
     Arc::UserConfig* currentUserConfig();
     bool hasValidProxy();
 

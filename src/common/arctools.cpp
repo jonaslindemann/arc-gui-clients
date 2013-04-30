@@ -26,7 +26,7 @@ ARCTools::ARCTools()
     m_helpWindow = 0;
 }
 
-bool ARCTools::initUserConfig()
+bool ARCTools::initUserConfig(bool showUi)
 {
     m_proxyController->initialize();
 
@@ -71,6 +71,8 @@ bool ARCTools::initUserConfig()
     else if (proxyStatus == ArcProxyController::PS_EXPIRED)
         m_proxyController->showProxyUI();
     else if (proxyStatus == ArcProxyController::PS_NOT_VALID)
+        m_proxyController->showProxyUI();
+    else if (showUi)
         m_proxyController->showProxyUI();
 
     if (m_proxyController->getUiReturnStatus()==ArcProxyController::RS_FAILED)

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QCloseEvent>
 #include <QModelIndex>
+#include <QListWidgetItem>
 
 class HelpWindow;
 
@@ -55,6 +56,8 @@ private Q_SLOTS:
     void on_helpButton_clicked();
 
     void on_NSSProfileList_itemClicked(QListWidgetItem *item);
+
+    void on_tabWidget_currentChanged(int index);
 
 private:
     Ui::ProxyWindow *ui;

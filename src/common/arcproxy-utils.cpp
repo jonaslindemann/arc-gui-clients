@@ -48,13 +48,95 @@
 #include <QtGui/QApplication>
 #include <QStyle>
 #include <QDesktopWidget>
+#include <QInputDialog>
 
 #include "proxywindow.h"
 
 #define HAVE_NSS
 
 #ifdef HAVE_NSS
+#include <nss3/pk11pub.h>
 #include <arc/credential/NSSUtil.h>
+
+char* nss_get_password_from_msgbox(PK11SlotInfo* slot, PRBool retry, void *arg) {
+    char prompt[255];
+    char* pw = NULL;
+
+    if(arg != NULL) pw = (char *)PORT_Strdup((char *)arg);
+    if(pw != NULL) return pw;
+
+    sprintf(prompt, "Password or Pin for \"%s\":",
+            PK11_GetTokenName(slot));
+
+    bool ok;
+    QString text = QInputDialog::getText(0, "Unlock security device",
+                                         prompt, QLineEdit::Password,
+                                         "", &ok);
+    if (ok && !text.isEmpty())
+    {
+        pw = (char *)PORT_Strdup((char *)text.toStdString().c_str());
+        return pw;
+    }
+    else
+        return NULL;
+
+    return NULL;
+}
+
+void get_nss_certname_dialog(std::string& certname, Arc::Logger& logger) {
+    std::list<AuthN::certInfo> certInfolist;
+    AuthN::nssListUserCertificatesInfo(certInfolist);
+    if(certInfolist.size()) {
+        std::cout<<Arc::IString("There are %d user certificates existing in the NSS database",
+                                certInfolist.size())<<std::endl;
+    }
+
+    QStringList certNames;
+    QStringList descrNames;
+
+    int n = 1;
+    std::list<AuthN::certInfo>::iterator it;
+    for(it = certInfolist.begin(); it != certInfolist.end(); it++) {
+        AuthN::certInfo cert_info = (*it);
+        std::string sub_dn = cert_info.subject_dn;
+        std::string cn_name;
+        std::string::size_type pos1, pos2;
+        pos1 = sub_dn.find("CN=");
+        if(pos1 != std::string::npos) {
+            pos2 = sub_dn.find(",", pos1);
+            if(pos2 != std::string::npos)
+                cn_name = " ("+sub_dn.substr(pos1+3, pos2-pos1-3) + ")";
+        }
+        std::cout<<Arc::IString("Number %d is with nickname: %s%s", n, cert_info.certname, cn_name)<<std::endl;
+        Arc::Time now;
+        std::string msg;
+        if(now > cert_info.end) msg = "(expired)";
+        else if((now + 300) > cert_info.end) msg = "(will be expired in 5 min)";
+        else if((now + 3600*24) > cert_info.end) {
+            Arc::Period left(cert_info.end - now);
+            msg = std::string("(will be expired in ") + std::string(left) + ")";
+        }
+        std::cout<<Arc::IString("    expiration time: %s ", cert_info.end.str())<<msg<<std::endl;
+        //std::cout<<Arc::IString("    certificate dn:  %s", cert_info.subject_dn)<<std::endl;
+        //std::cout<<Arc::IString("    issuer dn:       %s", cert_info.issuer_dn)<<std::endl;
+        //std::cout<<Arc::IString("    serial number:   %d", cert_info.serial)<<std::endl;
+        logger.msg(Arc::INFO, "    certificate dn:  %s", cert_info.subject_dn);
+        logger.msg(Arc::INFO, "    issuer dn:       %s", cert_info.issuer_dn);
+        logger.msg(Arc::INFO, "    serial number:   %d", cert_info.serial);
+        n++;
+
+        descrNames << Arc::IString("%s%s", cert_info.certname, cn_name).str().c_str();
+        certNames << cert_info.certname.c_str();
+
+    }
+
+    bool ok;
+    QString item = QInputDialog::getItem(0, "Select certificate",
+                                         "Cert:", certNames, 0, false, &ok);
+    if (ok && !item.isEmpty())
+        certname = item.toStdString();
+
+}
 #endif
 
 #include "arcproxy-utils-functions.h"
@@ -525,6 +607,7 @@ int ArcProxyController::initialize()
 
     if (timeout > 0) usercfg.Timeout(timeout);
 
+    m_nssPaths.clear();
     get_default_nssdb_path(m_nssPaths);
 
     return EXIT_SUCCESS;
@@ -537,6 +620,7 @@ QString ArcProxyController::getIdentity()
     Arc::Credential cred(cert_path, "", "", "");
 
     identity = cred.GetDN().c_str();
+    qDebug() << identity;
     return identity;
 }
 
@@ -859,31 +943,12 @@ int ArcProxyController::generateProxy()
         // if multiple profiles exist
         bool res;
         std::string configdir = m_selectedNssPath.toStdString();
-        /*
-        if(m_nssPaths.size()) {
-            std::cout<<Arc::IString("There are %d NSS base directories where the certificate, key, and module datbases live",
-                                    m_nssPaths.size())<<std::endl;
-        }
-        for(int i=0; i < nssdb_paths.size(); i++) {
-            std::cout<<Arc::IString("Number %d is: %s", i+1, nssdb_paths[i])<<std::endl;
-        }
-        std::cout << Arc::IString("Please choose the NSS database you would use (1-%d): ", nssdb_paths.size());
-        if(nssdb_paths.size() == 1) { configdir = nssdb_paths[0]; }
-        char c;
-        while(true && (nssdb_paths.size()>1)) {
-            c = getchar();
-            int num = c - '0';
-            if((num<=nssdb_paths.size()) && (num>=1)) {
-                configdir = nssdb_paths[num-1];
-                break;
-            }
-        }
-        */
         res = AuthN::nssInit(configdir);
+        PK11_SetPasswordFunc(nss_get_password_from_msgbox);
+
         std::cout<< Arc::IString("NSS database to be accessed: %s\n", configdir.c_str());
 
-        char* slotpw = NULL; //"secretpw";
-        //The nss db under firefox profile seems to not be protected by any passphrase by default
+        char* slotpw = NULL;
         bool ascii = true;
         const char* trusts = "u,u,u";
 
@@ -901,7 +966,7 @@ int ArcProxyController::generateProxy()
         if (!vomslist.empty()) {
             std::string tmp_proxy_path;
             tmp_proxy_path = Glib::build_filename(Glib::get_tmp_dir(), std::string("tmp_proxy.pem"));
-            get_nss_certname(issuername, logger);
+            get_nss_certname_dialog(issuername, logger);
 
             // Create tmp proxy cert
             int duration = 12;
@@ -935,7 +1000,7 @@ int ArcProxyController::generateProxy()
         std::string proxy_certfile = "myproxy.pem";
 
         // Let user to choose which credential to use
-        if(issuername.empty()) get_nss_certname(issuername, logger);
+        if(issuername.empty()) get_nss_certname_dialog(issuername, logger);
         std::cout<<Arc::IString("Certificate to use is: %s", issuername)<<std::endl;
 
         int duration;

@@ -73,6 +73,7 @@ ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
         ui->NSSProfileList->addItem(m_proxyController->getNssPath(i));
     }
 
+    ui->NSSProfileList->setCurrentRow(0);
 
     this->readSettings();
 }
@@ -145,7 +146,16 @@ void ProxyWindow::on_generateButton_clicked()
 
     QString passphrase;
 
-    m_proxyController->setUseNssDb(true);
+    if (ui->tabWidget->currentIndex()==0)
+        m_proxyController->setUseNssDb(true);
+    else
+        m_proxyController->setUseNssDb(false);
+
+    if (m_proxyController->useNssDb())
+    {
+        if (ui->NSSProfileList->currentRow()>=0)
+            m_proxyController->setNssPath(ui->NSSProfileList->currentItem()->text());
+    }
 
     if (!m_proxyController->useNssDb())
     {
@@ -273,6 +283,28 @@ void ProxyWindow::on_NSSProfileList_itemClicked(QListWidgetItem *item)
 {
     QString selectedPath = item->text();
     m_proxyController->setNssPath(selectedPath);
+}
 
+void ProxyWindow::on_tabWidget_currentChanged(int index)
+{
+    if (ui->tabWidget->currentIndex()==0)
+        m_proxyController->setUseNssDb(true);
+    else
+        m_proxyController->setUseNssDb(false);
+
+    m_proxyController->initialize();
+
+    ui->identityText->setText(m_proxyController->getIdentity());
+
+    QDateTime currentTime = QDateTime::currentDateTime();
+    QDateTime notValidAfter = currentTime.addSecs(12*60*60);
+
+    ui->proxyLifeTimeEdit->setDateTime(notValidAfter);
+    ui->generateButton->setFocus();
+
+    if (m_proxyController->getUseGSIProxy())
+        ui->proxyTypeCombo->setCurrentIndex(1);
+    else
+        ui->proxyTypeCombo->setCurrentIndex(0);
 
 }
