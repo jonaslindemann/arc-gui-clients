@@ -6,7 +6,7 @@
 #include <QHash>
 #include <QThread>
 
-#if QT_MAJOR_VERSION<=4 && QT_MINOR_VERSION<=7
+#if QT_VERSION < QT_VERSION_CHECK(4, 8, 0)
 #include <QTime>
 typedef QTime QElapsedTimer;
 #else

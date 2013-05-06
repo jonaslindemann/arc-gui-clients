@@ -55,7 +55,7 @@
 #define HAVE_NSS
 
 #ifdef HAVE_NSS
-#include <nss3/pk11pub.h>
+#include <pk11pub.h>
 #include <arc/credential/NSSUtil.h>
 
 char* nss_get_password_from_msgbox(PK11SlotInfo* slot, PRBool retry, void *arg) {
