@@ -1,0 +1,15 @@
+--- src/hed/shc/legacy/arc_lcmaps.cpp	2012-11-28 09:48:42.000000000 +0100
++++ src/hed/shc/legacy/arc_lcmaps.cpp	2013-05-09 00:10:12.000000000 +0200
+@@ -14,7 +14,12 @@
+ #include <openssl/x509.h>
+ #include <openssl/evp.h>
+ 
++#ifdef __APPLE__
++#include <globus/gssapi.h>
++#else
+ #include <gssapi.h>
++#endif
++
+ #include <globus_gsi_credential.h>
+ #include <globus_gsi_cert_utils.h>
+ 
