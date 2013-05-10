@@ -1,0 +1,107 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    globus-gssapi-gsi
+set _name               [ string map {"-" "_"} $name ]
+version                 10.7
+revision                1
+platforms               darwin
+categories              net
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - GSSAPI library
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        GSSAPI library
+
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
+
+distfiles               ${_name}-${version}.tar.gz
+
+checksums               ${_name}-${version}.tar.gz \
+                            sha256 2d7074d09e39aaa7ff256c1de91bdb78cea384e3be2dc1147f39c8761d917622 \
+                            rmp160 bf976e0e4db23d9952447d9ec4707a9c0573b395
+
+depends_run             port:globus-common \
+                        port:globus-gsi-callback \
+                        port:globus-gsi-cert-utils \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-proxy-core \
+                        port:globus-gsi-sysconfig \
+                        port:globus-openssl-module
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-callback \
+                        port:globus-openssl-module \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gsi-proxy-core \
+                        port:globus-core \
+                        port:globus-gsi-cert-utils \
+                        port:globus-common \
+                        bin:doxygen:doxygen \
+                        bin:dot:graphviz \
+                        bin:gs:ghostscript \
+                        bin:pdflatex:texlive-latex
+
+worksrcdir              ${_name}-${version}
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    # Remove files that should be replaced during bootstrap
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/doxygen/Doxyfile* ] dummy
+    file delete -force ${worksrcpath}/doxygen/Makefile.am
+    file delete -force ${worksrcpath}/pkgdata/Makefile.am
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
+    file delete -force ${worksrcpath}/autom4te.cache
+
+    system "cd $worksrcpath && \
+        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
+        ${prefix}/share/globus/globus-bootstrap.sh"
+}
+
+post-destroot {
+    # Remove libtool archives (.la files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
+        delete $file
+    }
+
+    # Remove static libraries (.a files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
+        delete $file
+    }
+
+    # Remove deprecated.3 man page (too common name)
+    delete ${destroot}${prefix}/share/man/man3/deprecated.3
+    reinplace "/deprecated\\.3/d" \
+        ${destroot}${prefix}/share/globus/packages/${_name}/noflavor_doc.filelist
+}

@@ -1,0 +1,97 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    globus-gsi-credential
+set _name               [ string map {"-" "_"} $name ]
+version                 5.3
+revision                1
+platforms               darwin
+categories              net
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - Globus GSI Credential Library
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        Globus GSI Credential Library
+
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
+
+distfiles               ${_name}-${version}.tar.gz
+
+checksums               ${_name}-${version}.tar.gz \
+                            sha256 3f48638475a3c6cc766a8f7c8722889f887cb141bfa69ceaed6b8f5eb8f4235c \
+                            rmp160 35965c34de14279530bdf061887dce40c84b363e
+
+depends_run             port:globus-common \
+                        port:globus-gsi-proxy-ssl \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-cert-utils \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gsi-callback
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-core \
+                        port:globus-common \
+                        port:globus-gsi-proxy-ssl \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-cert-utils \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gsi-callback \
+                        bin:doxygen:doxygen \
+                        bin:dot:graphviz \
+                        bin:gs:ghostscript \
+                        bin:pdflatex:texlive-latex
+
+worksrcdir              ${_name}-${version}
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    # Remove files that should be replaced during bootstrap
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/doxygen/Doxyfile* ] dummy
+    file delete -force ${worksrcpath}/doxygen/Makefile.am
+    file delete -force ${worksrcpath}/pkgdata/Makefile.am
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
+    file delete -force ${worksrcpath}/autom4te.cache
+    system "cd $worksrcpath && \
+        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
+        ${prefix}/share/globus/globus-bootstrap.sh"
+}
+
+post-destroot {
+    # Remove libtool archives (.la files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
+        delete $file
+    }
+
+    # Remove static libraries (.a files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
+        delete $file
+    }
+}
