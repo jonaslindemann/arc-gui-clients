@@ -42,31 +42,36 @@ QT4_WRAP_CPP(arcsubui_MOC_SRCS ${arcsubui_MOC_HDRS} )
 QT4_WRAP_UI(arcsubui_UIS_H ${arcsubui_UIS} )
 QT4_ADD_RESOURCES( arcsubui_RC_SRCS ${arcsubui_RCS} )
 
-IF(APPLES)
-ADD_EXECUTABLE(
-	arcsub-ui 
-	MACOSX_BUNDLE
-	${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H}
-    	../../images/arcstat_icon.icns
-)
+IF(APPLE)
+        add_executable(arcsub-ui
+        MACOSX_BUNDLE ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H}
+        ../../images/arcstat_icon.icns )
 
 install(TARGETS arcsub-ui
    BUNDLE
    DESTINATION .
 )
 
-SET( MACOSX_BUNDLE_ICON_FILE arcsub_icon.icns )
+SET( MACOSX_BUNDLE_ICON_FILE arcstat_icon.icns )
 SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
 SET( MACOSX_BUNDLE_VERSION 0.1 )
 SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
+
 SET_SOURCE_FILES_PROPERTIES(
-        ../../images/arcsub_icon.icns
-	PROPERTIES
-	MACOSX_PACKAGE_LOCATION Resources
+        ../../images/arcstat_icon.icns
+        PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLES)
-	add_executable(arcsub-ui ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H} )
-ENDIF(APPLES)
+
+   set_target_properties(
+   arcsub-ui
+        PROPERTIES BUILD_WITH_INSTALL_RPATH OFF
+        INSTALL_NAME_DIR "@executable_path"
+   )
+
+ELSE(APPLE)
+        add_executable(arcsub-ui ${arcstorageui_SRCS} ${arcstorageui_MOC_SRCS} ${arcstorageui_RC_SRCS} ${arcstorageui_UIS_H} )
+ENDIF(APPLE)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR} ${NSS_INCLUDE_DIR} ${NSPR_INCLUDE_DIR})
 

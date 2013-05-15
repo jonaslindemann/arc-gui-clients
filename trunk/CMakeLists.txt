@@ -11,15 +11,9 @@ else(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif (APPLE)
 
-
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-include_directories(/opt/arc3/include /opt/ldg/include)
-link_directories(/opt/arc3/lib /opt/ldg/lib)
-
 find_package(OpenSSL REQUIRED)
-
 set(QT_MAKE_EXECUTABLE "/opt/local/bin/qmake")
 find_package(Qt4 COMPONENTS QtMain QtCore QtGui QtSql QtXml QtNetwork QtWebKit REQUIRED)
 find_package(Glib REQUIRED)
@@ -28,14 +22,6 @@ find_package(Glibmm REQUIRED)
 find_package(Arc REQUIRED)
 find_package(NSS REQUIRED)
 find_package(NSPR REQUIRED)
-
-message("-----------")
-message("${NSS_INCLUDE_DIR}")
-message("${NSS_LIBRARY}")
-message("${NSPR_INCLUDE_DIR}")
-message("${NSPR_LIBRARY}")
-message("-----------")
-
 
 configure_file(${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h.in ${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h)
 
@@ -47,10 +33,10 @@ set(CPACK_GENERATOR "TGZ;RPM")
 set(CPACK_PACKAGE_NAME "arc-gui-clients")
 set(CPACK_PACKAGE_VENDOR "lunarc.lu.se")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Graphical clients for the ARC middleware")
-set(CPACK_PACKAGE_VERSION "0.4.3")
+set(CPACK_PACKAGE_VERSION "0.4.4")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "4")
-set(CPACK_PACKAGE_VERSION_PATCH "3")
+set(CPACK_PACKAGE_VERSION_PATCH "4")
 SET(CPACK_BINARY_RPM "ON")
 set(CPACK_RPM_PACKAGE_VENDOR "Lunarc, Lund University")
 set(CPACK_RPM_PACKAGE_LICENSE "Apache License V2.0")

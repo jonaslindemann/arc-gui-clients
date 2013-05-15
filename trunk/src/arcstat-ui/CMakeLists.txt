@@ -28,7 +28,7 @@ QT4_WRAP_CPP(arcstatui_MOC_SRCS ${arcstatui_MOC_HDRS} )
 QT4_WRAP_UI(arcstatui_UIS_H ${arcstatui_UIS} )
 QT4_ADD_RESOURCES( arcstatui_RC_SRCS ${arcstatui_RCS} )
 
-IF(APPLES)
+IF(APPLE)
 	add_executable(arcstat-ui 
 	MACOSX_BUNDLE 
 	${arcstatui_SRCS} ${arcstatui_MOC_SRCS} ${arcstatui_RC_SRCS} ${arcstatui_UIS_H} 
@@ -44,34 +44,14 @@ SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
 SET( MACOSX_BUNDLE_VERSION 0.1 )
 SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
 
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/brushes/rbrush16.rgb
-#        ../../bin/release/brushes/rbrush32.rgb
-#        ../../bin/release/brushes/rbrush4.rgb
-#        ../../bin/release/brushes/rbrush64.rgb
-#        ../../bin/release/brushes/rbrush8.rgb
-#        ../../bin/release/brushes/sbrush16.rgb
-#        ../../bin/release/brushes/sbrush32.rgb
-#        ../../bin/release/brushes/sbrush4.rgb
-#        ../../bin/release/brushes/sbrush64.rgb
-#        ../../bin/release/brushes/sbrush8.rgb
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/brushes
-#)
-#SET_SOURCE_FILES_PROPERTIES(
-#        ../../bin/release/colormaps/colormap1.map
-#        ../../bin/release/colormaps/colormap2.map
-#	PROPERTIES
-#	MACOSX_PACKAGE_LOCATION MacOS/colormaps
-#)
 SET_SOURCE_FILES_PROPERTIES(
         ../../images/arcstat_icon.icns
 	PROPERTIES
 	MACOSX_PACKAGE_LOCATION Resources
 )
-ELSE(APPLES)
+ELSE(APPLE)
 	add_executable(arcstat-ui ${arcstatui_SRCS} ${arcstatui_MOC_SRCS} ${arcstatui_RC_SRCS} ${arcstatui_UIS_H} )
-ENDIF(APPLES)
+ENDIF(APPLE)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR} ${NSS_INCLUDE_DIR} ${NSPR_INCLUDE_DIR})
 
