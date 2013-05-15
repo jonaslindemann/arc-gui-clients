@@ -955,7 +955,7 @@ int ArcProxyController::generateProxy()
         // Generate CSR
         std::string proxy_csrfile = "proxy.csr";
         std::string proxy_keyname = "proxykey";
-        std::string proxy_privk_str;
+        std::string proxy_privk_str = "";
         res = AuthN::nssGenerateCSR(proxy_keyname, "CN=Test,OU=ARC,O=EMI", slotpw, proxy_csrfile, proxy_privk_str, ascii);
         if(!res) return EXIT_FAILURE;
 

@@ -142,6 +142,8 @@ QString JobDefinitionBase::runtimeAt(int idx)
 {
     if ((idx>=0)&&(idx<m_runtimeEnvironments.count()))
         return m_runtimeEnvironments[idx];
+    else
+        return "";
 }
 
 void JobDefinitionBase::removeRuntime(int idx)
@@ -205,12 +207,16 @@ QString JobDefinitionBase::inputFileAt(int idx)
 {
     if ((idx>=0)&&(idx<m_inputFiles.count()))
         return m_inputFiles.at(idx);
+    else
+        return "";
 }
 
 QString JobDefinitionBase::inputFileSourceAt(int idx)
 {
     if ((idx>=0)&&(idx<m_inputFileUrls.count()))
         return m_inputFileUrls.at(idx);
+    else
+        return "";
 }
 
 void JobDefinitionBase::removeInputFile(int idx)
@@ -269,12 +275,16 @@ QString JobDefinitionBase::perJobFileAt(int idx)
 {
     if ((idx>=0)&&(idx<m_perJobFiles.count()))
         return m_perJobFiles.at(idx);
+    else
+        return "";
 }
 
 QString JobDefinitionBase::perJobFileSourceAt(int idx)
 {
     if ((idx>=0)&&(idx<m_perJobFileUrls.count()))
         return m_perJobFileUrls.at(idx);
+    else
+        return "";
 }
 
 void JobDefinitionBase::removePerJobFile(int idx)
@@ -326,12 +336,16 @@ QString JobDefinitionBase::outputFileAt(int idx)
 {
     if ((idx>=0)&&(idx<m_outputFiles.count()))
         return m_outputFiles.at(idx);
+    else
+        return "";
 }
 
 QString JobDefinitionBase::outputFileTargetAt(int idx)
 {
     if ((idx>=0)&&(idx<m_outputFileUrls.count()))
         return m_outputFileUrls.at(idx);
+    else
+        return "";
 }
 
 void JobDefinitionBase::removeOutputFile(int idx)
@@ -663,6 +677,8 @@ bool JobDefinitionBase::load(QString jobDefDir)
     }
     else
         return false;
+
+    return false;
 }
 
 bool JobDefinitionBase::save(QString saveDir)
