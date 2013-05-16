@@ -1,0 +1,78 @@
+# $Id$
+
+PortSystem          1.0
+
+set sourcename nordugrid-arc
+set type experimental
+
+name                ${sourcename}-client
+version             3.0.1
+categories          net
+maintainers         nbi.ku.dk:skou
+description         ${version} release of the Advanced Resource Connector (ARC) client
+long_description    \
+        The Advanced Resource Connector (ARC) middleware, introduced by \
+        NorduGrid (www.nordugrid.org), is an open source software solution \
+        enabling production quality computational and data Grids since May \
+        2002.
+homepage            http://www.nordugrid.org
+platforms           darwin
+master_sites        http://download.nordugrid.org/packages/${sourcename}/releases/${version}/src/
+distfiles           ${sourcename}-${version}.tar.gz
+checksums           md5     ac37d4991168980d8d2f4b1da0d28c14
+
+patchfiles          patch-fix-gsscredential.diff \
+		    patch-fix-arc_lcas.diff \
+		    patch-fix-arc_lcmaps.diff
+
+depends_run         port:glibmm \
+                    port:libxml2 \
+                    port:openldap \
+                    port:globus-common \
+                    port:globus-gssapi-gsi \
+                    port:globus-ftp-client \
+                    port:globus-ftp-control \
+                    port:globus-io \
+                    port:openssl
+
+depends_build       port:gettext \
+                    port:libtool \
+                    port:pkgconfig \
+                    port:doxygen \
+                    port:automake \
+                    port:autoconf \
+                    port:cvs \
+                    port:glibmm \
+                    port:libxml2 \
+                    port:grid-packaging-tools \
+                    port:openldap \
+                    port:globus-common \
+                    port:globus-gssapi-gsi \
+                    port:globus-ftp-client \
+                    port:globus-ftp-control \
+                    port:globus-io \
+                    port:openssl \
+		    port:nss \
+		    port:nspr
+                        
+worksrcdir          ${sourcename}-${version}
+#pre-configure       {
+#    reinplace "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" ${worksrcpath}/po/Makefile.in.in
+#}
+compiler.blacklist clang
+
+configure.cflags-append -I/opt/local/include/globus
+configure.env PKG_CONFIG_LIBDIR=/opt/local/lib/pkgconfig
+configure.args-append --disable-all-services --disable-doc --disable-java --disable-python --disable-acix
+
+post-destroot {
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/config"
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/echo"
+  system "rm -rf ${destroot}/${prefix}/share/arc/profiles"
+  system "rm -rf ${destroot}/${prefix}/share/arc/schema"
+  system "rm -rf ${destroot}/${prefix}/share/doc"
+  system "rm -rf ${destroot}/${prefix}/share/man/man8"
+  system "rm -rf ${destroot}/${prefix}/sbin"
+  system "rm -rf ${destroot}/${prefix}/libexec"
+  system "rm -rf ${destroot}/Library"
+}
