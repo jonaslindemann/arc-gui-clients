@@ -6,7 +6,7 @@ set sourcename arc-gui-clients
 set type experimental
 
 name                ${sourcename}
-version             0.4.4
+version             0.4.5
 categories          net
 maintainers         lunarc.lu.se:lindemann
 description         ${version} release of ARC Graphical clients
@@ -17,9 +17,10 @@ long_description    \
         2002.
 homepage            http://www.lunarc.lu.se
 platforms           darwin
-master_sites        http://downloads.sourceforge.net/project/arc-gui-clients/${sourcename}-${version}-Source.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Farc-gui-clients%2Ffiles%2F&ts=1368053365&use_mirror=switch
+master_sites        https://dl.dropboxusercontent.com/u/2888586/arc-gui-clients-0.4.5-Source.tar.gz
+#master_sites        http://downloads.sourceforge.net/project/arc-gui-clients/${sourcename}-${version}-Source.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Farc-gui-clients%2Ffiles%2F&ts=1368053365&use_mirror=switch
 distfiles           ${sourcename}-${version}-Source.tar.gz
-checksums           md5 ad91f01208eafa78be299d952a2d63d0
+checksums           md5 1a03de464dd71fe0536fa9d83a484721
 
 depends_build       port:nordugrid-arc-client port:openssl port:libiconv port:xmlsec port:glib2 port:nspr port:glibmm port:libxml2 port:zlib port:gettext port:xz port:qt4-mac port:libtool port:libsigcxx2 port:libffi port:libxslt port:nss port:cmake
                         
@@ -45,9 +46,9 @@ pre-destroot {
 }
 
 post-destroot {
-	file copy ${destroot}${prefix}/arcstorage-ui.app ${destroot}${applications_dir}/arcstorage-ui.app
-	file copy ${destroot}${prefix}/arcproxy-ui.app ${destroot}${applications_dir}/arcproxy-ui.app
-    file copy ${destroot}${prefix}/arccert-ui.app ${destroot}${applications_dir}/arccert-ui.app
-    file copy ${destroot}${prefix}/arcstat-ui.app ${destroot}${applications_dir}/arcstat-ui.app
-    file copy ${destroot}${prefix}/arcsub-ui.app ${destroot}${applications_dir}/arcsub-ui.app
+	file copy ${destroot}${prefix}/bin/arcstorage-ui.app ${destroot}${applications_dir}/arcstorage-ui.app
+	file copy ${destroot}${prefix}/bin/arcproxy-ui.app ${destroot}${applications_dir}/arcproxy-ui.app
+    file copy ${destroot}${prefix}/bin/arccert-ui.app ${destroot}${applications_dir}/arccert-ui.app
+    file copy ${destroot}${prefix}/bin/arcstat-ui.app ${destroot}${applications_dir}/arcstat-ui.app
+    file copy ${destroot}${prefix}/bin/arcsub-ui.app ${destroot}${applications_dir}/arcsub-ui.app
 }

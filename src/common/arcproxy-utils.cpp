@@ -953,10 +953,11 @@ int ArcProxyController::generateProxy()
         const char* trusts = "u,u,u";
 
         // Generate CSR
-        std::string proxy_csrfile = "proxy.csr";
+        std::string proxy_csrfile = Glib::build_filename(Glib::get_tmp_dir(), std::string("proxy.csr"));
         std::string proxy_keyname = "proxykey";
+        std::string dn = "CN=Test,OU=ARC,O=EMI";
         std::string proxy_privk_str = "";
-        res = AuthN::nssGenerateCSR(proxy_keyname, "CN=Test,OU=ARC,O=EMI", slotpw, proxy_csrfile, proxy_privk_str, ascii);
+        res = AuthN::nssGenerateCSR(proxy_keyname, dn, slotpw, proxy_csrfile, proxy_privk_str, ascii);
         if(!res) return EXIT_FAILURE;
 
         // Create a temporary proxy and contact voms server
@@ -978,7 +979,7 @@ int ArcProxyController::generateProxy()
             tmp_proxy_cert_s.close();
 
             // Export EEC
-            std::string cert_file = "cert.pem";
+            std::string cert_file = Glib::build_filename(Glib::get_tmp_dir(), std::string("cert.pem"));
             res = AuthN::nssExportCertificate(issuername, cert_file);
             if(!res) return EXIT_FAILURE;
             std::string eec_cert_str;
@@ -997,7 +998,7 @@ int ArcProxyController::generateProxy()
         }
 
         // Create proxy with VOMS AC
-        std::string proxy_certfile = "myproxy.pem";
+        std::string proxy_certfile = Glib::build_filename(Glib::get_tmp_dir(), std::string("myproxy.pem"));
 
         // Let user to choose which credential to use
         if(issuername.empty()) get_nss_certname_dialog(issuername, logger);
@@ -1025,7 +1026,7 @@ int ArcProxyController::generateProxy()
         }
         if(proxy_path.empty()) proxy_path = usercfg.ProxyPath();
         usercfg.ProxyPath(proxy_path);
-        std::string cert_file = "cert.pem";
+        std::string cert_file = Glib::build_filename(Glib::get_tmp_dir(), std::string("cert.pem"));
         res = AuthN::nssExportCertificate(issuername, cert_file);
         if(!res) return EXIT_FAILURE;
 

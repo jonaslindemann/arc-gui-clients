@@ -37,27 +37,28 @@ QT4_WRAP_UI(arcproxyui_UIS_H ${arcproxyui_UIS} )
 QT4_ADD_RESOURCES( arcproxyui_RC_SRCS ${arcproxyui_RCS} )
 
 IF(APPLE)
-ADD_EXECUTABLE(
-	arcproxy-ui 
-	MACOSX_BUNDLE
-	${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H}
-        ../../images/arcproxy_icon.icns
-)
+	ADD_EXECUTABLE(
+		arcproxy-ui 
+		MACOSX_BUNDLE
+		${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS}
+		${arcproxyui_UIS_H}
+		../../images/arcproxy_icon.icns
+	)
 
-install(TARGETS arcproxy-ui
-   BUNDLE
-   DESTINATION .
-)
+	install(TARGETS arcproxy-ui
+		BUNDLE
+		DESTINATION bin
+	)
 
-SET( MACOSX_BUNDLE_ICON_FILE arcproxy_icon.icns )
-SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
-SET( MACOSX_BUNDLE_VERSION 0.1 )
-SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
-SET_SOURCE_FILES_PROPERTIES(
-        ../../images/arcproxy_icon.icns
-	PROPERTIES
-	MACOSX_PACKAGE_LOCATION Resources
-)
+	SET( MACOSX_BUNDLE_ICON_FILE arcproxy_icon.icns )
+	SET( MACOSX_BUNDLE_SHORT_VERSION_STRING 0.1 )
+	SET( MACOSX_BUNDLE_VERSION 0.1 )
+	SET( MACOSX_BUNDLE_LONG_VERSION_STRING 0.1 )
+	SET_SOURCE_FILES_PROPERTIES(
+		../../images/arcproxy_icon.icns
+		PROPERTIES
+		MACOSX_PACKAGE_LOCATION Resources
+	)
 ELSE(APPLE)
 	add_executable(arcproxy-ui ${arcproxyui_SRCS} ${arcproxyui_MOC_SRCS} ${arcproxyui_RC_SRCS} ${arcproxyui_UIS_H} )
 ENDIF(APPLE)
@@ -66,7 +67,7 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DI
 
 target_link_libraries (arcproxy-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} ${NSS_LIBRARY} ${NSPR_LIBRARY})
 
-#if(LINUX)
+if(LINUX)
 install(TARGETS arcproxy-ui DESTINATION bin)
 install(FILES arcproxy-ui.desktop DESTINATION share/applications)
-#endif(LINUX)
+endif(LINUX)
