@@ -17,8 +17,8 @@ long_description    \
         2002.
 homepage            http://www.lunarc.lu.se
 platforms           darwin
-master_sites        https://dl.dropboxusercontent.com/u/2888586/arc-gui-clients-0.4.5-Source.tar.gz
-#master_sites        http://downloads.sourceforge.net/project/arc-gui-clients/${sourcename}-${version}-Source.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Farc-gui-clients%2Ffiles%2F&ts=1368053365&use_mirror=switch
+#master_sites        https://dl.dropboxusercontent.com/u/2888586/arc-gui-clients-0.4.5-Source.tar.gz
+master_sites        http://downloads.sourceforge.net/project/arc-gui-clients/${sourcename}-${version}-Source.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Farc-gui-clients%2Ffiles%2F&ts=1368053365&use_mirror=switch
 distfiles           ${sourcename}-${version}-Source.tar.gz
 checksums           md5 1a03de464dd71fe0536fa9d83a484721
 
