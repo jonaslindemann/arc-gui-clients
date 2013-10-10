@@ -404,7 +404,13 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
 
     // Update file list
 
-    m_currentFileServer->updateFileList(m_startUrl);
+    if (m_startUrl.length()!=0)
+        m_currentFileServer->updateFileList(m_startUrl);
+    else
+    {
+        m_startUrl = QDir::homePath();
+        m_currentFileServer->updateFileList(m_startUrl);
+    }
 
     setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
@@ -426,17 +432,6 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
 void ArcStorageWindow::closeEvent(QCloseEvent *e)
 {
     logger.msg(Arc::VERBOSE, "Received close event. (closeEvent)");
-    // This method is called before window is closed.
-    // Saves settings. Closes child windows.
-    /*
-    QList<QVariant> urlList;
-
-    for (int i = 0; i < m_urlComboBox.count(); ++i)
-        urlList << m_urlComboBox.itemText(i);
-
-    Settings::setValue("urlList", urlList);
-    Settings::saveToDisk();
-    */
 
     if (!m_childWindow)
         this->writeSettings();
@@ -872,7 +867,7 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
     {
         logger.msg(Arc::ERROR, "Update of file list failed.");
         m_currentUpdateFileListsMode = CUFLM_noUpdate;
-        QMessageBox::information(this, tr("ArcFTP"), errorMsg);
+        QMessageBox::information(this, tr("ARC Storage Explorer"), errorMsg);
     }
     else
     {
@@ -926,7 +921,7 @@ void ArcStorageWindow::onCopyFromServerFinished(bool error)
     GlobalStateInfo::instance()->hideTransferWindow();
     setBusyUI(false);
     if (error == true)
-        QMessageBox::information(this, tr("ArcFTP"), "An error occured while trying to copy the file");
+        QMessageBox::information(this, tr("ARC Storage Explorer"), "An error occured while trying to copy the file");
 
     if (m_filesToOpen.length()>0)
     {
@@ -949,7 +944,7 @@ void ArcStorageWindow::onDeleteFinished(bool error)
 
     setBusyUI(false);
     if (error == true)
-        QMessageBox::information(this, tr("ArcFTP"), "Delete failed");
+        QMessageBox::information(this, tr("ARC Storage Explorer"), "Could not delete file(s)");
 }
 
 

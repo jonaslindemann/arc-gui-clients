@@ -72,7 +72,7 @@ IF(APPLE)
 	)
 
 ELSE(APPLE)
-        add_executable(arcsub-ui ${arcstorageui_SRCS} ${arcstorageui_MOC_SRCS} ${arcstorageui_RC_SRCS} ${arcstorageui_UIS_H} )
+        add_executable(arcsub-ui ${arcsubui_SRCS} ${arcsubui_MOC_SRCS} ${arcsubui_RC_SRCS} ${arcsubui_UIS_H} )
 ENDIF(APPLE)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/common ${Arc_INCLUDE_DIRS} ${GlibmmConfig_INCLUDE_DIR} ${Glibmm_INCLUDE_DIR} ${GlibConfig_INCLUDE_DIR} ${Glib_INCLUDE_DIR} ${SigC++Config_INCLUDE_DIR} ${SigC++_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR} ${NSS_INCLUDE_DIR} ${NSPR_INCLUDE_DIR})

@@ -313,7 +313,11 @@ using namespace ArcCredential;
 ArcProxyController::ArcProxyController()
     :logger(Arc::Logger::getRootLogger(), "arcproxy"), logCerr(std::cerr)
 {
+    using namespace std;
+
     setlocale(LC_ALL, "");
+
+    logger.setThreshold(Arc::DEBUG);
 
     use_gsi_comm = false;
     use_gsi_proxy = false;
@@ -324,7 +328,12 @@ ArcProxyController::ArcProxyController()
     version = false;
     use_http_comm = false;
 
-    debug = "WARNING";
+    debug = "DEBUG";
+
+    cout << "cert_path = " << cert_path << endl;
+    cout << "key_path = " << key_path << endl;
+    cout << "proxy_path = " << proxy_path << endl;
+    cout << "ca_dir = " << ca_dir << endl;
 
     // This ensure command line args overwrite all other options
     if(!cert_path.empty())Arc::SetEnv("X509_USER_CERT", cert_path);
@@ -532,6 +541,8 @@ void ArcProxyController::showProxyUIAppLoop(int& argc, char** argv)
 
 int ArcProxyController::initialize()
 {
+    using namespace std;
+
     logCerr.setFormat(Arc::ShortFormat);
 
     Arc::ArcLocation::Init("");
@@ -549,7 +560,7 @@ int ArcProxyController::initialize()
 
     // Set default, predefined or guessed credentials. Also check if they exist.
 
-#ifdef HAVE_NSS
+#ifdef HAVE_NSSS
     Arc::UserConfig usercfg(conffile,
                             Arc::initializeCredentialsType(use_nssdb ? Arc::initializeCredentialsType::NotTryCredentials
                                                                      : Arc::initializeCredentialsType::TryCredentials));

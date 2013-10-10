@@ -2,10 +2,13 @@
 #include <QSplashScreen>
 #include <QPixmap>
 
+#include "arcstoragewindow.h"
+
 #include <iostream>
 
-#include "arcstoragewindow.h"
+#include "arcproxy-utils.h"
 #include "arctools.h"
+
 #include <QImage>
 
 int main(int argc, char *argv[])
