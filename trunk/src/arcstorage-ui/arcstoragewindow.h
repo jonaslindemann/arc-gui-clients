@@ -14,6 +14,7 @@ namespace Ui {
 #include <QComboBox>
 #include <QStack>
 #include <QProcess>
+#include <QPushButton>
 
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
@@ -59,7 +60,9 @@ public:
 private:
     Ui::ArcStorageWindow *ui;
     DragDropableTreeWidget m_filesTreeWidget;
-    QComboBox m_urlComboBox;
+    QLineEdit m_urlEdit;
+    QCompleter* m_urlCompleter;
+    QPushButton m_urlCompleteButton;
 
     ArcFileServer *m_currentFileServer;
     QString m_folderListUrl;
@@ -89,6 +92,7 @@ private:
 
     QStringList m_breadCrumbItems;
     QStack<QString> m_backStack;
+    QSet<QString> m_recent;
 
     void pushUrl(QString url);
     QString popUrl();
@@ -119,6 +123,8 @@ private Q_SLOTS:
     void onURLEditReturnPressed();
     void onContextMenu(const QPoint& pos);
     void onUrlComboBoxCurrentIndexChanged(int index);
+    void onUrlCompletePressed();
+    void onEditTextChanged(const QString& text);
     void onBreadCrumbTriggered();
 
     void on_actionDelete_triggered();
