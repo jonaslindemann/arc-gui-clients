@@ -147,6 +147,8 @@ void ArcFileServer::updateFileListSilent(QString URL)
 
 void ArcFileServer::startUpdateFileList(QString URL)
 {
+    m_currentUrlString = URL;
+    currentPath = URL;
     m_updateFileListWatcher.setFuture(QtConcurrent::run(this, &ArcFileServer::updateFileList, URL));
 }
 
