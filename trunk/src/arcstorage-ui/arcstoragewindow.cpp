@@ -87,11 +87,13 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     m_urlCompleteButton.setText("...");
     m_urlCompleteButton.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     m_urlCompleteButton.setBaseSize(20, -1);
+    m_urlCompleteButton.setMaximumWidth(20);
     ui->mainToolBar->addWidget(&m_urlEdit);
     ui->mainToolBar->addWidget(&m_urlCompleteButton);
 
     connect(&m_urlEdit, SIGNAL(returnPressed()), this, SLOT(onURLEditReturnPressed()));  // When someone presses return in the url combobox...
     connect(&m_urlCompleteButton, SIGNAL(clicked()), this, SLOT(onUrlCompletePressed()));
+    connect(m_urlCompleter, SIGNAL(activated(QString)), this, SLOT(onUrlCompleteActivated()));
 
     // Can't add empty space in toolbar, so we add a dummy widget instead.
 
@@ -670,10 +672,12 @@ void ArcStorageWindow::updateFileTree()
 
     // Update recent file list
 
-    std::cout << "updateFileTree: " << m_currentFileServer->getCurrentURL().toStdString() << std::endl;
     this->setCurrentComboBoxURL(m_currentFileServer->getCurrentURL());
 
     m_recent.insert(m_currentFileServer->getCurrentURL());
+
+    // Create auto completer from updated recent urls
+
     QStringList urls;
 
     if (m_urlCompleter!=0)
@@ -684,6 +688,7 @@ void ArcStorageWindow::updateFileTree()
         urls.append(i.next());
 
     m_urlCompleter = new QCompleter(urls);
+    connect(m_urlCompleter, SIGNAL(activated(QString)), this, SLOT(onUrlCompleteActivated(QString)));
     m_urlEdit.setCompleter(m_urlCompleter);
 
     logger.msg(Arc::VERBOSE, "File list update done.");
@@ -822,7 +827,6 @@ void ArcStorageWindow::setCurrentComboBoxURL(QString url)
             connect(action, SIGNAL(triggered()), this, SLOT(onBreadCrumbTriggered()));
         }
     }
-    std::cout << "setCurrentComboURL: " << url.toStdString() << std::endl;
     m_urlEdit.setText(url);
 }
 
@@ -1111,13 +1115,18 @@ void ArcStorageWindow::onUrlCompletePressed()
     m_urlEdit.completer()->complete();
 }
 
+void ArcStorageWindow::onUrlCompleteActivated(const QString& text)
+{
+    on_actionReload_triggered();
+}
+
 void ArcStorageWindow::onUrlComboBoxCurrentIndexChanged(int index)
 {
 }
 
 void ArcStorageWindow::onEditTextChanged(const QString& text)
 {
-    std::cout << "onEditTextChanged" << std::endl;
+
 }
 
 void ArcStorageWindow::onBreadCrumbTriggered()

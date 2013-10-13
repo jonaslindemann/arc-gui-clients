@@ -124,6 +124,7 @@ private Q_SLOTS:
     void onContextMenu(const QPoint& pos);
     void onUrlComboBoxCurrentIndexChanged(int index);
     void onUrlCompletePressed();
+    void onUrlCompleteActivated(const QString& text);
     void onEditTextChanged(const QString& text);
     void onBreadCrumbTriggered();
 
