@@ -15,6 +15,7 @@ namespace Ui {
 #include <QStack>
 #include <QProcess>
 #include <QPushButton>
+#include <QToolButton>
 
 #include "qdebugstream.h"
 #include "transferlistwindow.h"
@@ -62,7 +63,7 @@ private:
     DragDropableTreeWidget m_filesTreeWidget;
     QLineEdit m_urlEdit;
     QCompleter* m_urlCompleter;
-    QPushButton m_urlCompleteButton;
+    QToolButton m_urlCompleteButton;
 
     ArcFileServer *m_currentFileServer;
     QString m_folderListUrl;
