@@ -84,10 +84,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     m_urlCompleter = new QCompleter();
     m_urlEdit.setCompleter(m_urlCompleter);
-    m_urlCompleteButton.setText("...");
-    m_urlCompleteButton.setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-    m_urlCompleteButton.setBaseSize(20, -1);
-    m_urlCompleteButton.setMaximumWidth(20);
+    m_urlCompleteButton.setArrowType(Qt::DownArrow);
+    m_urlCompleteButton.setMaximumHeight(28);
     ui->mainToolBar->addWidget(&m_urlEdit);
     ui->mainToolBar->addWidget(&m_urlCompleteButton);
 
@@ -860,6 +858,14 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
         logger.msg(Arc::ERROR, "Update of file list failed.");
         m_currentUpdateFileListsMode = CUFLM_noUpdate;
         QMessageBox::information(this, tr("ARC Storage Explorer"), errorMsg);
+        QString url;
+        if (this->m_backStack.size()==0)
+            url = QDir::homePath();
+        else
+            url = this->popUrl();
+
+        this->setCurrentComboBoxURL(url);
+        this->openUrl(url);
     }
     else
     {
