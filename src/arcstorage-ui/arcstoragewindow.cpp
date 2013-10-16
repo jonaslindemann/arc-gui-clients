@@ -12,6 +12,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDesktopServices>
+#include <QMenuItem>
 
 #include <iostream>
 #include "arcstoragewindow.h"
@@ -207,6 +208,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
         m_fileProcessingThread = new FileTransferProcessingThread();
         m_fileProcessingThread->start();
     }
+
+    this->updateBookmarkMenu();
 }
 
 ArcStorageWindow::~ArcStorageWindow()
@@ -755,6 +758,21 @@ void ArcStorageWindow::updateFoldersTreeBelow()
     logger.msg(Arc::INFO, "Folder tree update done.");
 }
 
+void ArcStorageWindow::updateBookmarkMenu()
+{
+    for (int i=0; i<m_bookmarkActions.length(); i++)
+        ui->menuBookmarks->removeAction(m_bookmarkActions.at(i));
+
+    for (int i=0; i<GlobalStateInfo::instance()->bookmarkCount(); i++)
+    {
+        QAction* action = new QAction(ui->menuBookmarks);
+        m_bookmarkActions.append(action);
+        action->setText(GlobalStateInfo::instance()->bookmark(i));
+        ui->menuBookmarks->addAction(action);
+        connect(action, SIGNAL(triggered()), this, SLOT(onBookmarkTriggered()));
+    }
+}
+
 void ArcStorageWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
 {
     logger.msg(Arc::VERBOSE, "Expanding folder in tree. (expandFolderTreeWidget)");
@@ -1140,6 +1158,13 @@ void ArcStorageWindow::onBreadCrumbTriggered()
     QAction* action = (QAction*)sender();
     this->openUrl(action->toolTip());
 }
+
+void ArcStorageWindow::onBookmarkTriggered()
+{
+    QAction* action = (QAction*)sender();
+    this->openUrl(action->text());
+}
+
 
 void ArcStorageWindow::on_foldersTreeWidget_expanded(QModelIndex index)
 {
@@ -1748,5 +1773,37 @@ void ArcStorageWindow::on_actionOpenURLExt_triggered()
         FileTransferList::instance()->pauseProcessing();
         m_currentFileServer->copyToServer(urlList, destDir);
         FileTransferList::instance()->resumeProcessing();
+    }
+}
+
+void ArcStorageWindow::on_actionAddBookmark_triggered()
+{
+    if (m_urlEdit.text().length()!=0)
+    {
+        GlobalStateInfo::instance()->addBookmark(m_urlEdit.text());
+    }
+}
+
+void ArcStorageWindow::on_actionEditBookmarks_triggered()
+{
+    QStringList items;
+
+    for (int i=0; i<GlobalStateInfo::instance()->bookmarkCount(); i++)
+        items << GlobalStateInfo::instance()->bookmark(i);
+
+    bool ok;
+    QString item = QInputDialog::getItem(this, tr("Delete bookmark"),
+                                         tr("Bookmark"), items, 0, false, &ok);
+    if (ok && !item.isEmpty())
+    {
+        GlobalStateInfo::instance()->removeBookmark(item);
+    }
+}
+
+void ArcStorageWindow::on_actionClearBookmarks_triggered()
+{
+    if (m_urlEdit.text().length()!=0)
+    {
+        GlobalStateInfo::instance()->clearBookmarks();
     }
 }

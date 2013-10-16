@@ -21,16 +21,7 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>0</number>
     </property>
     <item>
@@ -195,7 +186,7 @@
      <x>0</x>
      <y>0</y>
      <width>985</width>
-     <height>25</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -251,11 +242,21 @@
     <addaction name="actionUploadDirectory"/>
     <addaction name="actionUploadDirAndArchive"/>
    </widget>
+   <widget class="QMenu" name="menuBookmarks">
+    <property name="title">
+     <string>Bookmarks</string>
+    </property>
+    <addaction name="actionAddBookmark"/>
+    <addaction name="actionEditBookmarks"/>
+    <addaction name="actionClearBookmarks"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuGo"/>
    <addaction name="menuTransfer"/>
+   <addaction name="menuBookmarks"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -646,6 +647,24 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionAddBookmark">
+   <property name="text">
+    <string>Add bookmark</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionEditBookmarks">
+   <property name="text">
+    <string>Edit bookmarks...</string>
+   </property>
+  </action>
+  <action name="actionClearBookmarks">
+   <property name="text">
+    <string>Clear bookmarks</string>
    </property>
   </action>
  </widget>

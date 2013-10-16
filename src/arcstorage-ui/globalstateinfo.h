@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QMenu>
+#include <QStringList>
 
 #include "arcstoragewindow.h"
 #include "transferlistwindow.h"
@@ -15,6 +16,7 @@ private:
     QList<ArcStorageWindow*> m_childWindows;
     ArcStorageWindow* m_mainWindow;
     QMenu* m_windowMenu;
+    QStringList m_bookmarks;
 public:
     enum TLogLevel {LL_VERBOSE, LL_INFO, LL_WARNING, LL_ERROR};
     static GlobalStateInfo* instance()
@@ -93,6 +95,13 @@ public:
 
     void setNewWindowUrl(QString url);
     QString newWindowUrl();
+
+    void addBookmark(QString url);
+    void removeBookmark(QString url);
+    void removeBookmark(int idx);
+    QString bookmark(int idx);
+    int bookmarkCount();
+    void clearBookmarks();
 
 private:
 
