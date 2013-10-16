@@ -37,18 +37,6 @@ GlobalStateInfo::GlobalStateInfo()
 
 void GlobalStateInfo::writeSettings()
 {
-    /*
-    GlobalStateInfo::instance()->setMaxTransfers(ui->maxTransferSpin->value());
-    GlobalStateInfo::instance()->setPassiveTransfers(ui->passiveTransfersCheck->isChecked());
-    GlobalStateInfo::instance()->setSecureTransfers(ui->secureTransfersCheck->isChecked());
-    GlobalStateInfo::instance()->setTransferRetries(ui->transferRetriesSpin->value());
-    GlobalStateInfo::instance()->setTransferTimeout(ui->transferTimeoutSpin->value());
-
-    GlobalStateInfo::instance()->setNewWindowUrl(ui->windowURLText->text());
-    GlobalStateInfo::instance()->setRememberWindowPositions(ui->rememberWindowPosCheck->isChecked());
-    GlobalStateInfo::instance()->setRememberStartupDirs(ui->rememberWindowURLsCheck->isChecked());
-    */
-
     QSettings settings;
     settings.remove("Transfers");
     settings.beginGroup("Transfers");
@@ -70,6 +58,12 @@ void GlobalStateInfo::writeSettings()
     settings.beginGroup("Logging");
     settings.setValue("log_level", m_logLevel);
     settings.setValue("redirect_log", m_redirectLog);
+    settings.endGroup();
+
+    settings.remove("Bookmarks");
+    settings.beginGroup("Bookmarks");
+    for (int i=0; i<this->bookmarkCount(); i++)
+        settings.setValue("url"+QString::number(i), this->bookmark(i));
     settings.endGroup();
 }
 
@@ -100,6 +94,21 @@ void GlobalStateInfo::readSettings()
         settings.beginGroup("Logging");
         m_rememberWindowsPositions = settings.value("log_level").toInt();
         m_redirectLog = settings.value("redirect_log", true).toBool();
+        settings.endGroup();
+    }
+    if (settings.childGroups().contains("Bookmarks"))
+    {
+        settings.beginGroup("Bookmarks");
+        this->clearBookmarks();
+        for (int i=0; i<100; i++)
+        {
+            QString urlKey = "url"+QString::number(i);
+            if (settings.contains(urlKey))
+            {
+                QString url = settings.value(urlKey, "").toString();
+                this->addBookmark(url);
+            }
+        }
         settings.endGroup();
     }
 }
@@ -165,12 +174,6 @@ ArcStorageWindow* GlobalStateInfo::getChildWindow(int idx)
 
 void GlobalStateInfo::updateWindowList(QMenu* menu)
 {
-    /*
-    menu->clear();
-    menu->addMenu(m_ArcStorageWindow->getCurrentURL());
-    for (int i=0; i<m_childWindows.count(); i++)
-        menu->addMenu(m_childWindows.at(i)->getCurrentURL());
-    */
 }
 
 void GlobalStateInfo::showTransferWindow()
@@ -321,4 +324,47 @@ QString GlobalStateInfo::newWindowUrl()
 {
     return m_newWindowUrl;
 }
+
+void GlobalStateInfo::addBookmark(QString url)
+{
+    m_bookmarks.append(url);
+    this->mainWindow()->updateBookmarkMenu();
+    for (int i=0; i<m_childWindows.count(); i++)
+        m_childWindows.at(i)->updateBookmarkMenu();
+}
+
+void GlobalStateInfo::removeBookmark(QString url)
+{
+    m_bookmarks.removeOne(url);
+    this->mainWindow()->updateBookmarkMenu();
+    for (int i=0; i<m_childWindows.count(); i++)
+        m_childWindows.at(i)->updateBookmarkMenu();
+}
+
+void GlobalStateInfo::removeBookmark(int idx)
+{
+    m_bookmarks.removeAt(idx);
+    this->mainWindow()->updateBookmarkMenu();
+    for (int i=0; i<m_childWindows.count(); i++)
+        m_childWindows.at(i)->updateBookmarkMenu();
+}
+
+QString GlobalStateInfo::bookmark(int idx)
+{
+    return m_bookmarks.at(idx);
+}
+
+int GlobalStateInfo::bookmarkCount()
+{
+    return m_bookmarks.count();
+}
+
+void GlobalStateInfo::clearBookmarks()
+{
+    m_bookmarks.clear();
+    this->mainWindow()->updateBookmarkMenu();
+    for (int i=0; i<m_childWindows.count(); i++)
+        m_childWindows.at(i)->updateBookmarkMenu();
+}
+
 

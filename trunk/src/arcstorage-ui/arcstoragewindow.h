@@ -57,6 +57,7 @@ public:
     void openUrl(QString url);
     void setWindowId(int id);
     int getWindowId();
+    void updateBookmarkMenu();
 
 private:
     Ui::ArcStorageWindow *ui;
@@ -115,6 +116,7 @@ private:
     QString m_tarDestDir;
 
     QList<QUrl> m_filesToOpen;
+    QList<QAction*> m_bookmarkActions;
 
 protected:
     void showEvent(QShowEvent *e);
@@ -128,6 +130,7 @@ private Q_SLOTS:
     void onUrlCompleteActivated(const QString& text);
     void onEditTextChanged(const QString& text);
     void onBreadCrumbTriggered();
+    void onBookmarkTriggered();
 
     void on_actionDelete_triggered();
     void on_actionQuit_triggered();
@@ -190,6 +193,12 @@ private Q_SLOTS:
     void on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column);
 
     void on_actionOpenURLExt_triggered();
+
+    void on_actionAddBookmark_triggered();
+
+    void on_actionEditBookmarks_triggered();
+
+    void on_actionClearBookmarks_triggered();
 
 public Q_SLOTS:
     void onFilesDroppedInFileListWidget(QList<QUrl> &urlList);

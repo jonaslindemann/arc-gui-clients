@@ -59,7 +59,7 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src
 
 target_link_libraries (arccert-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
 
-if(LINUX)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 install(TARGETS arccert-ui DESTINATION bin)
 install(FILES arccert-ui.desktop DESTINATION share/applications)
-endif(LINUX)
+endif()
