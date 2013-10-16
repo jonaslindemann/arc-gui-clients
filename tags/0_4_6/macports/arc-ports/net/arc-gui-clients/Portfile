@@ -1,0 +1,54 @@
+# $Id$
+
+PortSystem          1.0
+
+set sourcename arc-gui-clients
+set type experimental
+
+name                ${sourcename}
+version             0.4.5
+categories          net
+maintainers         lunarc.lu.se:lindemann
+description         ${version} release of ARC Graphical clients
+long_description    \
+        The Advanced Resource Connector (ARC) middleware, introduced by \
+        NorduGrid (www.nordugrid.org), is an open source software solution \
+        enabling production quality computational and data Grids since May \
+        2002.
+homepage            http://www.lunarc.lu.se
+platforms           darwin
+#master_sites        https://dl.dropboxusercontent.com/u/2888586/arc-gui-clients-0.4.5-Source.tar.gz
+master_sites        http://downloads.sourceforge.net/project/arc-gui-clients/${sourcename}-${version}-Source.tar.gz?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Farc-gui-clients%2Ffiles%2F&ts=1368053365&use_mirror=switch
+distfiles           ${sourcename}-${version}-Source.tar.gz
+checksums           md5 1a03de464dd71fe0536fa9d83a484721
+
+depends_build       port:nordugrid-arc-client port:openssl port:libiconv port:xmlsec port:glib2 port:nspr port:glibmm port:libxml2 port:zlib port:gettext port:xz port:qt4-mac port:libtool port:libsigcxx2 port:libffi port:libxslt port:nss port:cmake
+                        
+worksrcdir          ${workpath}/${sourcename}-${version}-Source
+
+compiler.blacklist clang
+
+#configure.cflags-append -I/opt/local/include/globus
+#configure.args-append --disable-all-services --disable-doc --disable-java --disable-python --disable-acix
+
+post-extract {
+	file mkdir ${worksrcdir}/builddir
+}
+
+configure.dir ${worksrcdir}/builddir
+configure.cmd cmake
+configure.args -DCMAKE_INSTALL_PREFIX:PATH=${prefix} -DCMAKE_BUILD_TYPE=Release ..
+
+build.dir ${worksrcdir}/builddir
+
+pre-destroot {
+	xinstall -m 755 -d ${destroot}${applications_dir}
+}
+
+post-destroot {
+	file copy ${destroot}${prefix}/bin/arcstorage-ui.app ${destroot}${applications_dir}/arcstorage-ui.app
+	file copy ${destroot}${prefix}/bin/arcproxy-ui.app ${destroot}${applications_dir}/arcproxy-ui.app
+    file copy ${destroot}${prefix}/bin/arccert-ui.app ${destroot}${applications_dir}/arccert-ui.app
+    file copy ${destroot}${prefix}/bin/arcstat-ui.app ${destroot}${applications_dir}/arcstat-ui.app
+    file copy ${destroot}${prefix}/bin/arcsub-ui.app ${destroot}${applications_dir}/arcsub-ui.app
+}

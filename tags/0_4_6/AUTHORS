@@ -1,0 +1,10 @@
+arcstat-ui:    Jonas Lindemann, <jonas.lindemann@lunarc.lu.se>
+arcproxy-ui:   Jonas Lindemann, <jonas.lindemann@lunarc.lu.se>
+
+The arcproxy-ui is largely based on code from arcproxy.cpp from NorduGrid ARC 
+
+arcstorage-ui:
+Alexander Lapajne, <alexander.lapajne@gmail.com>, Initial development
+Jonas Lindemann, <jonas.lindemann@lunarc.lu.se>, Continued development
+ 
+ARC C++ examples and configuration: Jonas Lindemann, <jonas.lindemann@lunarc.lu.se>

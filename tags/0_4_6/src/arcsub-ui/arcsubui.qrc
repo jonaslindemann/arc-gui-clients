@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/arcsub-ui">
+        <file>images/splash_arcsub.png</file>
+    </qresource>
+</RCC>
