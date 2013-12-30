@@ -873,54 +873,61 @@ void ArcStorageWindow::onFileListFinished(bool error, QString errorMsg)
 
     if (error == true)
     {
-        logger.msg(Arc::ERROR, "Update of file list failed.");
+        logger.msg(Arc::ERROR, errorMsg.toStdString());
         m_currentUpdateFileListsMode = CUFLM_noUpdate;
-        QMessageBox::information(this, tr("ARC Storage Explorer"), errorMsg);
-        QString url;
-        if (this->m_backStack.size()==0)
-            url = QDir::homePath();
-        else
-            url = this->popUrl();
 
-        this->setCurrentComboBoxURL(url);
-        this->openUrl(url);
-    }
-    else
-    {
-        switch (m_currentUpdateFileListsMode)
+        if (errorMsg == "Proxy not valid.")
         {
-        case CUFLM_noUpdate:
-            break;
-        case CUFLM_syncBoth:
-            updateFoldersTree();
-            updateFileTree();
-            break;
-        case CUFLM_clickedBrowse:
-            //---updateFoldersTree();
-            updateFileTree();
-            break;
-        case CUFLM_clickedFolder:
-            updateFileTree();
-            break;
-        case CUFLM_clickedUp:
-            //---updateFoldersTree();
-            updateFileTree();
-
-            if (m_folderListUrl.length()>m_currentFileServer->getCurrentURL().length())
-                updateFoldersTree();
-
-            break;
-        case CUFLM_expandedFolder:
-            expandFolderTreeWidget(m_folderWidgetBeingUpdated);
-            m_folderWidgetBeingUpdated = NULL;
-            break;
-        case CUFLM_doubleClickedFolder:
-            updateFileTree();
-            updateFoldersTreeBelow();
-        default:
-            qDebug() << "shouldn't happen.";
-            break;
+            ARCTools::instance()->initUserConfig(true);
+            if (!ARCTools::instance()->hasValidProxy())
+                return;
         }
+        else
+        {
+            QString url;
+            if (this->m_backStack.size()==0)
+                url = QDir::homePath();
+            else
+                url = this->popUrl();
+            this->setCurrentComboBoxURL(url);
+            this->openUrl(url);
+            return;
+        }
+    }
+
+    switch (m_currentUpdateFileListsMode)
+    {
+    case CUFLM_noUpdate:
+        break;
+    case CUFLM_syncBoth:
+        updateFoldersTree();
+        updateFileTree();
+        break;
+    case CUFLM_clickedBrowse:
+        //---updateFoldersTree();
+        updateFileTree();
+        break;
+    case CUFLM_clickedFolder:
+        updateFileTree();
+        break;
+    case CUFLM_clickedUp:
+        //---updateFoldersTree();
+        updateFileTree();
+
+        if (m_folderListUrl.length()>m_currentFileServer->getCurrentURL().length())
+            updateFoldersTree();
+
+        break;
+    case CUFLM_expandedFolder:
+        expandFolderTreeWidget(m_folderWidgetBeingUpdated);
+        m_folderWidgetBeingUpdated = NULL;
+        break;
+    case CUFLM_doubleClickedFolder:
+        updateFileTree();
+        updateFoldersTreeBelow();
+    default:
+        qDebug() << "shouldn't happen.";
+        break;
     }
 
     m_currentUpdateFileListsMode = CUFLM_noUpdate;
@@ -937,7 +944,10 @@ void ArcStorageWindow::onCopyFromServerFinished(bool error)
     GlobalStateInfo::instance()->hideTransferWindow();
     setBusyUI(false);
     if (error == true)
-        QMessageBox::information(this, tr("ARC Storage Explorer"), "An error occured while trying to copy the file");
+    {
+        logger.msg(Arc::ERROR, "An error occured while copying the file.");
+        //QMessageBox::information(this, tr("ARC Storage Explorer"), "An error occured while trying to copy the file");
+    }
 
     if (m_filesToOpen.length()>0)
     {
@@ -960,7 +970,10 @@ void ArcStorageWindow::onDeleteFinished(bool error)
 
     setBusyUI(false);
     if (error == true)
-        QMessageBox::information(this, tr("ARC Storage Explorer"), "Could not delete file(s)");
+    {
+        logger.msg(Arc::ERROR, "Could not delete selected file(s).");
+        //QMessageBox::information(this, tr("ARC Storage Explorer"), "Could not delete file(s)");
+    }
 }
 
 
@@ -971,7 +984,10 @@ void ArcStorageWindow::onMakeDirFinished(bool error)
     setBusyUI(false);
 
     if (error == true)
-        QMessageBox::information(this, tr("ArcFTP"), "Makedir failed");
+    {
+        logger.msg(Arc::ERROR, "Could not create directory.");
+        //QMessageBox::information(this, tr("ArcFTP"), "Makedir failed");
+    }
 }
 
 
@@ -995,7 +1011,8 @@ void ArcStorageWindow::onCopyToServerFinished(bool error, QList<QString> &failed
             message += failedFiles.at(i) + "\n";
         }
 
-        QMessageBox::information(this, tr("ArcFTP"), message);
+        logger.msg(Arc::ERROR, message.toStdString());
+        //QMessageBox::information(this, tr("ArcFTP"), message);
 
         m_filesToOpen.clear();
     }
@@ -1017,7 +1034,8 @@ void ArcStorageWindow::onError(QString errorStr)
 {
     setBusyUI(false);
 
-    QMessageBox::information(this, tr("ArcFTP"), errorStr);
+    logger.msg(Arc::ERROR, errorStr.toStdString());
+    //QMessageBox::information(this, tr("ArcFTP"), errorStr);
 }
 
 void ArcStorageWindow::onNewStatus(QString statusStr)
@@ -1229,7 +1247,7 @@ void ArcStorageWindow::on_actionQuit_triggered()
 }
 
 void ArcStorageWindow::on_actionDelete_triggered()
-{    
+{
     this->deleteSelectedFiles();
 }
 

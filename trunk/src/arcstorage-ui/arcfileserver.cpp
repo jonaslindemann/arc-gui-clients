@@ -158,6 +158,13 @@ void ArcFileServer::updateFileList(QString URL)
 
     Arc::URL arcUrl = URL.toStdString();
 
+    if (!ARCTools::instance()->hasValidProxy())
+    {
+        if (m_notifyParent)
+            Q_EMIT onFileListFinished(true, "Proxy not valid.");
+        return;
+    }
+
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
     Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
