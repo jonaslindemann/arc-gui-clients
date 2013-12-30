@@ -38,6 +38,17 @@ protected:
         if (v == '\n')
         {
 
+            log_window->setTextColor(Qt::black);
+
+            if (m_string.find("ERROR")!=std::string::npos)
+                log_window->setTextColor(Qt::darkRed);
+            if (m_string.find("INFO")!=std::string::npos)
+                log_window->setTextColor(Qt::darkGreen);
+            if (m_string.find("WARNING")!=std::string::npos)
+                log_window->setTextColor(Qt::darkYellow);
+            if (m_string.find("VERBOSE")!=std::string::npos)
+                log_window->setTextColor(Qt::gray);
+
             log_window->append(m_string.c_str());
 
             // Scroll to bottom of window
@@ -66,6 +77,18 @@ protected:
             if (pos != std::string::npos)
             {
                 std::string tmp(m_string.begin(), m_string.begin() + pos);
+
+                log_window->setTextColor(Qt::black);
+
+                if (tmp.find("ERROR")!=std::string::npos)
+                    log_window->setTextColor(Qt::darkRed);
+                if (tmp.find("INFO")!=std::string::npos)
+                    log_window->setTextColor(Qt::darkGreen);
+                if (tmp.find("WARNING")!=std::string::npos)
+                    log_window->setTextColor(Qt::darkYellow);
+                if (tmp.find("VERBOSE")!=std::string::npos)
+                    log_window->setTextColor(Qt::gray);
+
                 log_window->append(tmp.c_str());
 
                 // Scroll to bottom of window

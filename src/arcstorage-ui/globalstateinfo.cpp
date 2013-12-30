@@ -92,7 +92,7 @@ void GlobalStateInfo::readSettings()
     if (settings.childGroups().contains("Logging"))
     {
         settings.beginGroup("Logging");
-        m_rememberWindowsPositions = settings.value("log_level").toInt();
+        m_logLevel = (TLogLevel) settings.value("log_level").toInt();
         m_redirectLog = settings.value("redirect_log", true).toBool();
         settings.endGroup();
     }
