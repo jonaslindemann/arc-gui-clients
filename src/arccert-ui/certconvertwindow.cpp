@@ -23,7 +23,7 @@ CertConvertWindow::CertConvertWindow(QWidget *parent) :
     // Set default values
 
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
 
     QFileInfo userCertFile(globusDir.absolutePath()+"/"+"usercert.pem");
     if (userCertFile.exists())
@@ -190,7 +190,10 @@ void CertConvertWindow::on_selectPKCS12FileButton_clicked()
     dlg.setAcceptMode(QFileDialog::AcceptSave);
 
     if (dlg.exec())
+    {
         ui->pkcsFileText->setText(dlg.selectedFiles()[0]);
+        m_pkcs12Filename = dlg.selectedFiles()[0];
+    }
 }
 
 void CertConvertWindow::on_selectPKCS12ImportFileButton_clicked()
