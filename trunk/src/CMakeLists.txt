@@ -1,1 +1,2 @@
-subdirs(arcproxy-ui arcstat-ui arcstorage-ui arccert-ui arcsub-ui)
+subdirs(arcproxy-ui arcstorage-ui arccert-ui)
+#subdirs(arcproxy-ui arcstat-ui arcstorage-ui arccert-ui arcsub-ui)
