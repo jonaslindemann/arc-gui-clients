@@ -67,7 +67,7 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DI
 
 target_link_libraries (arcproxy-ui ${Arc_LIBRARIES} ${Glibmm_LIBRARY} ${Glib_LIBRARIES} ${SigC++_LIBRARIES} ${LIBXML2_LIBRARIES} ${QT_LIBRARIES} ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} ${NSS_LIBRARY} ${NSPR_LIBRARY})
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 install(TARGETS arcproxy-ui DESTINATION bin)
 install(FILES arcproxy-ui.desktop DESTINATION share/applications)
-endif()
+#endif()

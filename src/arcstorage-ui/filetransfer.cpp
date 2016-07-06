@@ -166,19 +166,35 @@ bool FileTransfer::execute()
 
     // Make sure credentials are ok if one of the protocols are secure
 
+    if (m_config->ProxyPath().empty() )
+    {
+      logger.msg(Arc::ERROR, "Unable to copy %s: No valid credentials found", m_sourceUrl.str());
+      m_transferState = TS_FAILED;
+      return false;
+    }
+
+    Arc::Credential holder(m_config->ProxyPath(), "", "", "");
+    if (holder.GetEndTime() < Arc::Time())
+    {
+      logger.msg(Arc::ERROR, "Proxy expired");
+      logger.msg(Arc::ERROR, "Unable to copy %s: No valid credentials found", m_sourceUrl.str());
+      m_transferState = TS_FAILED;
+      return false;
+    }
+
 #if ARC_VERSION_MAJOR >= 3
     if (m_sourceHandle->RequiresCredentials() || m_destHandle->RequiresCredentials())
 #else
     if (m_sourceUrl.IsSecureProtocol() || m_destUrl.IsSecureProtocol())
 #endif
     {
-        m_config->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
-        if (!Arc::Credential::IsCredentialsValid(*m_config))
-        {
-            m_transferState = TS_FAILED;
-            logger.msg(Arc::ERROR, "Unable to copy file %s: No valid credentials found", m_sourceUrl.str());
-            return false;
-        }
+        //m_config->InitializeCredentials(Arc::initializeCredentialsType::TryCredentials);
+        //if (!Arc::Credential::IsCredentialsValid(*m_config))
+        //{
+        //    m_transferState = TS_FAILED;
+        //    logger.msg(Arc::ERROR, "Unable to copy file %s: No valid credentials found", m_sourceUrl.str());
+        //    return false;
+        //}
     }
 
     if (!m_sourceHandle)

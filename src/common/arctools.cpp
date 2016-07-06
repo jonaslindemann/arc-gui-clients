@@ -40,17 +40,17 @@ bool ARCTools::initUserConfig(bool showUi)
 
     if (certStatus == ArcProxyController::CS_NOT_FOUND)
     {
-        QMessageBox::warning(0, "Proxy", "Could not find certificates");
+        //QMessageBox::warning(0, "Proxy", "Could not find certificates");
         prereqFound = false;
     }
     else if (certStatus == ArcProxyController::CS_PATH_EMPTY)
     {
-        QMessageBox::warning(0, "Proxy", "Certificate path empty. Please Check your configuration.");
+        //QMessageBox::warning(0, "Proxy", "Certificate path empty. Please Check your configuration.");
         prereqFound = false;
     }
     else if (certStatus == ArcProxyController::CS_INVALID_CONFIG)
     {
-        QMessageBox::warning(0, "Proxy", "Certificate configuration invalid.");
+        //QMessageBox::warning(0, "Proxy", "Certificate configuration invalid.");
         prereqFound = false;
     }
     else if (certStatus == ArcProxyController::CS_CADIR_NOT_FOUND)
@@ -58,7 +58,6 @@ bool ARCTools::initUserConfig(bool showUi)
         QMessageBox::warning(0, "Proxy", "CA directory not found. Please check configuration.");
         prereqFound = false;
     }
-
     ArcProxyController::TProxyStatus proxyStatus = m_proxyController->checkProxy();
 
     if (proxyStatus == ArcProxyController::PS_NOT_FOUND)
@@ -67,6 +66,7 @@ bool ARCTools::initUserConfig(bool showUi)
     {
         QMessageBox::warning(0, "Proxy", "Proxy path is empty. Please Check your configuration.");
         prereqFound = false;
+        m_proxyController->showProxyUI();
     }
     else if (proxyStatus == ArcProxyController::PS_EXPIRED)
         m_proxyController->showProxyUI();
@@ -85,8 +85,18 @@ bool ARCTools::initUserConfig(bool showUi)
 
     delete m_userConfig;
 
-    m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+
+    //m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+    m_userConfig = new Arc::UserConfig("", Arc::initializeCredentialsType::TryCredentials);
     m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
+    //m_userConfig->CACertificatePath("/etc/grid-security/certificates");
+    m_userConfig->CACertificatesDirectory("/etc/grid-security/certificates");
+
+    //if (!m_userConfig) {
+    //  logger.msg(Arc::ERROR, "Failed configuration initialization");
+    //  return 1;
+    //}
+
 
     return true;
 }

@@ -675,16 +675,16 @@ bool contact_voms_servers(std::list<std::string>& vomslist, std::list<std::strin
 }
 
 void get_nss_certname(std::string& certname, Arc::Logger& logger) {
-    std::list<AuthN::certInfo> certInfolist;
-    AuthN::nssListUserCertificatesInfo(certInfolist);
+    std::list<ArcAuthNSS::certInfo> certInfolist;
+    ArcAuthNSS::nssListUserCertificatesInfo(certInfolist);
     if(certInfolist.size()) {
         std::cout<<Arc::IString("There are %d user certificates existing in the NSS database",
                                 certInfolist.size())<<std::endl;
     }
     int n = 1;
-    std::list<AuthN::certInfo>::iterator it;
+    std::list<ArcAuthNSS::certInfo>::iterator it;
     for(it = certInfolist.begin(); it != certInfolist.end(); it++) {
-        AuthN::certInfo cert_info = (*it);
+        ArcAuthNSS::certInfo cert_info = (*it);
         std::string sub_dn = cert_info.subject_dn;
         std::string cn_name;
         std::string::size_type pos1, pos2;

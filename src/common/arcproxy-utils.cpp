@@ -84,8 +84,8 @@ char* nss_get_password_from_msgbox(PK11SlotInfo* slot, PRBool retry, void *arg) 
 }
 
 void get_nss_certname_dialog(std::string& certname, Arc::Logger& logger) {
-    std::list<AuthN::certInfo> certInfolist;
-    AuthN::nssListUserCertificatesInfo(certInfolist);
+    std::list<ArcAuthNSS::certInfo> certInfolist;
+    ArcAuthNSS::nssListUserCertificatesInfo(certInfolist);
     if(certInfolist.size()) {
         std::cout<<Arc::IString("There are %d user certificates existing in the NSS database",
                                 certInfolist.size())<<std::endl;
@@ -95,9 +95,9 @@ void get_nss_certname_dialog(std::string& certname, Arc::Logger& logger) {
     QStringList descrNames;
 
     int n = 1;
-    std::list<AuthN::certInfo>::iterator it;
+    std::list<ArcAuthNSS::certInfo>::iterator it;
     for(it = certInfolist.begin(); it != certInfolist.end(); it++) {
-        AuthN::certInfo cert_info = (*it);
+        ArcAuthNSS::certInfo cert_info = (*it);
         std::string sub_dn = cert_info.subject_dn;
         std::string cn_name;
         std::string::size_type pos1, pos2;
@@ -560,7 +560,7 @@ int ArcProxyController::initialize()
 
     // Set default, predefined or guessed credentials. Also check if they exist.
 
-#ifdef HAVE_NSSS
+#ifdef HAVE_NSS
     Arc::UserConfig usercfg(conffile,
                             Arc::initializeCredentialsType(use_nssdb ? Arc::initializeCredentialsType::NotTryCredentials
                                                                      : Arc::initializeCredentialsType::TryCredentials));
@@ -582,7 +582,7 @@ int ArcProxyController::initialize()
     if((usercfg.CertificatePath().empty() || (usercfg.KeyPath().empty() && (usercfg.CertificatePath().find(".p12") == std::string::npos))) && !info) {
         logger.msg(Arc::ERROR, "Failed to find certificate and/or private key or files have improper permissions or ownership.");
         logger.msg(Arc::ERROR, "You may try to increase verbosity to get more information.");
-        return EXIT_FAILURE;
+        //return EXIT_FAILURE;
     }
     if(!vomslist.empty() || !myproxy_command.empty()) {
         // For external communication CAs are needed
@@ -954,7 +954,7 @@ int ArcProxyController::generateProxy()
         // if multiple profiles exist
         bool res;
         std::string configdir = m_selectedNssPath.toStdString();
-        res = AuthN::nssInit(configdir);
+        res = ArcAuthNSS::nssInit(configdir);
         PK11_SetPasswordFunc(nss_get_password_from_msgbox);
 
         std::cout<< Arc::IString("NSS database to be accessed: %s\n", configdir.c_str());
@@ -968,7 +968,7 @@ int ArcProxyController::generateProxy()
         std::string proxy_keyname = "proxykey";
         std::string dn = "CN=Test,OU=ARC,O=EMI";
         std::string proxy_privk_str = "";
-        res = AuthN::nssGenerateCSR(proxy_keyname, dn, slotpw, proxy_csrfile, proxy_privk_str, ascii);
+        res = ArcAuthNSS::nssGenerateCSR(proxy_keyname, dn, slotpw, proxy_csrfile, proxy_privk_str, ascii);
         if(!res) return EXIT_FAILURE;
 
         // Create a temporary proxy and contact voms server
@@ -982,7 +982,7 @@ int ArcProxyController::generateProxy()
 
             // Create tmp proxy cert
             int duration = 12;
-            res = AuthN::nssCreateCert(proxy_csrfile, issuername, NULL, duration, "", tmp_proxy_path, ascii);
+            res = ArcAuthNSS::nssCreateCert(proxy_csrfile, issuername, NULL, duration, "", tmp_proxy_path, ascii);
             if(!res) return EXIT_FAILURE;
             std::string tmp_proxy_cred_str;
             std::ifstream tmp_proxy_cert_s(tmp_proxy_path.c_str());
@@ -991,7 +991,7 @@ int ArcProxyController::generateProxy()
 
             // Export EEC
             std::string cert_file = Glib::build_filename(Glib::get_tmp_dir(), std::string("cert.pem"));
-            res = AuthN::nssExportCertificate(issuername, cert_file);
+            res = ArcAuthNSS::nssExportCertificate(issuername, cert_file);
             if(!res) return EXIT_FAILURE;
             std::string eec_cert_str;
             std::ifstream eec_s(cert_file.c_str());
@@ -1020,11 +1020,11 @@ int ArcProxyController::generateProxy()
 
         std::string vomsacseq_asn1;
         if(!vomsacseq.empty()) Arc::VOMSACSeqEncode(vomsacseq, vomsacseq_asn1);
-        res = AuthN::nssCreateCert(proxy_csrfile, issuername, "", duration, vomsacseq_asn1, proxy_certfile, ascii);
+        res = ArcAuthNSS::nssCreateCert(proxy_csrfile, issuername, "", duration, vomsacseq_asn1, proxy_certfile, ascii);
         if(!res) return EXIT_FAILURE;
 
         const char* proxy_certname = "proxycert";
-        res = AuthN::nssImportCert(slotpw, proxy_certfile, proxy_certname, trusts, ascii);
+        res = ArcAuthNSS::nssImportCert(slotpw, proxy_certfile, proxy_certname, trusts, ascii);
         if(!res) return EXIT_FAILURE;
 
         //Compose the proxy certificate
@@ -1038,7 +1038,7 @@ int ArcProxyController::generateProxy()
         if(proxy_path.empty()) proxy_path = usercfg.ProxyPath();
         usercfg.ProxyPath(proxy_path);
         std::string cert_file = Glib::build_filename(Glib::get_tmp_dir(), std::string("cert.pem"));
-        res = AuthN::nssExportCertificate(issuername, cert_file);
+        res = ArcAuthNSS::nssExportCertificate(issuername, cert_file);
         if(!res) return EXIT_FAILURE;
 
         std::string proxy_cred_str;
