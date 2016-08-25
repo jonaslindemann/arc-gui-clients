@@ -1,32 +1,11 @@
 // -*- indent-tabs-mode: nil -*-
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "arcproxy.h"
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#include <arc/ArcLocation.h>
-#include <arc/OptionParser.h>
-#include <arc/StringConv.h>
-#include <arc/Utils.h>
-#include <arc/UserConfig.h>
-#include <arc/FileUtils.h>
-#include <arc/communication/ClientInterface.h>
-#include <arc/credentialstore/ClientVOMS.h>
-#include <arc/credentialstore/ClientVOMSRESTful.h>
-#include <arc/credential/VOMSConfig.h>
-#include <arc/credential/VOMSUtil.h>
-#include <arc/credential/Credential.h>
-#include <arc/credentialstore/CredentialStore.h>
-#include <arc/crypto/OpenSSL.h>
-
-#ifdef HAVE_NSS
-#include <arc/credential/NSSUtil.h>
-#endif
 
 using namespace ArcCredential;
 

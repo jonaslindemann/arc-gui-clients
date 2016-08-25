@@ -1,3 +1,34 @@
+#ifndef __arcproxytest_h__
+#define __arcproxytest_h__
+
+#include <map>
+
+#include <arc/ArcLocation.h>
+#include <arc/OptionParser.h>
+#include <arc/StringConv.h>
+#include <arc/Utils.h>
+#include <arc/UserConfig.h>
+#include <arc/FileUtils.h>
+#include <arc/communication/ClientInterface.h>
+#include <arc/credentialstore/ClientVOMS.h>
+#include <arc/credentialstore/ClientVOMSRESTful.h>
+#include <arc/credential/VOMSConfig.h>
+#include <arc/credential/VOMSUtil.h>
+#include <arc/credential/Credential.h>
+#include <arc/credentialstore/CredentialStore.h>
+#include <arc/crypto/OpenSSL.h>
+
+#include <arc/credential/NSSUtil.h>
+
+typedef enum {
+    pass_all,
+    pass_private_key,
+    pass_myproxy,
+    pass_myproxy_new,
+    pass_nss
+} pass_destination_type;
+
+extern std::map<pass_destination_type, Arc::PasswordSource*> g_passsources;
 
 // Functions in arcproxy_proxy.cpp
 
@@ -45,5 +76,4 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
     std::list<std::string>& vomslist, std::string& vomses_path, const std::string& proxy_path,
     Arc::UserConfig& usercfg, Arc::Logger& logger);
 
-
-
+#endif

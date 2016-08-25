@@ -1,46 +1,14 @@
 // -*- indent-tabs-mode: nil -*-
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "arcproxy.h"
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <arc/ArcLocation.h>
-#include <arc/OptionParser.h>
-#include <arc/StringConv.h>
-#include <arc/Utils.h>
-#include <arc/UserConfig.h>
-#include <arc/FileUtils.h>
-#include <arc/communication/ClientInterface.h>
-#include <arc/credentialstore/ClientVOMS.h>
-#include <arc/credentialstore/ClientVOMSRESTful.h>
-#include <arc/credential/VOMSConfig.h>
-#include <arc/credential/VOMSUtil.h>
-#include <arc/credential/Credential.h>
-#include <arc/credentialstore/CredentialStore.h>
-#include <arc/crypto/OpenSSL.h>
-
-#ifdef HAVE_NSS
-#include <arc/credential/NSSUtil.h>
-#endif
-
-#include "arcproxy.h"
 
 using namespace ArcCredential;
-
-typedef enum {
-  pass_all,
-  pass_private_key,
-  pass_myproxy,
-  pass_myproxy_new,
-  pass_nss
-} pass_destination_type;
-
-extern  std::map<pass_destination_type, Arc::PasswordSource*> passsources;
 
 static std::string get_cert_dn(const std::string& cert_file) {
   std::string dn_str;
@@ -49,14 +17,14 @@ static std::string get_cert_dn(const std::string& cert_file) {
   return dn_str;
 }
 
-bool contact_myproxy_server(const std::string& myproxy_server, const std::string& myproxy_command, 
+bool contact_myproxy_server(const std::string& myproxy_server, const std::string& myproxy_command,
       const std::string& myproxy_user_name, bool use_empty_passphrase, const std::string& myproxy_period,
       const std::string& retrievable_by_cert, Arc::Time& proxy_start, Arc::Period& proxy_period,
       std::list<std::string>& vomslist,
       std::string& vomses_path,
-      const std::string& proxy_path, 
+      const std::string& proxy_path,
       Arc::UserConfig& usercfg, Arc::Logger& logger) {
-  
+
   std::string user_name = myproxy_user_name;
   std::string key_path, cert_path, ca_dir;
   key_path = usercfg.KeyPath();
@@ -69,8 +37,8 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
     user_name = get_cert_dn(cert_path);
   }
 
-  //If the "INFO" myproxy command is given, try to get the 
-  //information about the existence of stored credentials 
+  //If the "INFO" myproxy command is given, try to get the
+  //information about the existence of stored credentials
   //on the myproxy server.
   try {
     if (Arc::lower(myproxy_command) == "info") {
@@ -88,7 +56,7 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
       else {
         if(usercfg.CertificatePath().empty() && !cert_path.empty()) usercfg.CertificatePath(cert_path);
         if(usercfg.KeyPath().empty() && !key_path.empty()) usercfg.KeyPath(key_path);
-      }      
+      }
       if(usercfg.CACertificatesDirectory().empty()) usercfg.CACertificatesDirectory(ca_dir);
 
       Arc::CredentialStore cstore(usercfg,Arc::URL("myproxy://"+myproxy_server));
@@ -107,8 +75,8 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
     return false;
   }
 
-  //If the "NEWPASS" myproxy command is given, try to get the 
-  //information about the existence of stored credentials 
+  //If the "NEWPASS" myproxy command is given, try to get the
+  //information about the existence of stored credentials
   //on the myproxy server.
   try {
     if (Arc::lower(myproxy_command) == "newpass") {
@@ -119,13 +87,13 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
         throw std::invalid_argument("Username to MyProxy server is missing");
 
       std::string passphrase;
-      if(passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD) 
+      if(g_passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
         throw std::invalid_argument("Error entering passphrase");
-     
+
       std::string newpassphrase;
-      if(passsources[pass_myproxy_new]->Get(newpassphrase, 4, 256) != Arc::PasswordSource::PASSWORD) 
+      if(g_passsources[pass_myproxy_new]->Get(newpassphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
         throw std::invalid_argument("Error entering passphrase");
-     
+
       if(usercfg.ProxyPath().empty() && !proxy_path.empty()) usercfg.ProxyPath(proxy_path);
       else {
         if(usercfg.CertificatePath().empty() && !cert_path.empty()) usercfg.CertificatePath(cert_path);
@@ -151,8 +119,8 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
     return false;
   }
 
-  //If the "DESTROY" myproxy command is given, try to get the 
-  //information about the existence of stored credentials 
+  //If the "DESTROY" myproxy command is given, try to get the
+  //information about the existence of stored credentials
   //on the myproxy server.
   try {
     if (Arc::lower(myproxy_command) == "destroy") {
@@ -163,7 +131,7 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
         throw std::invalid_argument("Username to MyProxy server is missing");
 
       std::string passphrase;
-      if(passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD) 
+      if(g_passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
         throw std::invalid_argument("Error entering passphrase");
 
       std::string respinfo;
@@ -205,12 +173,12 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
 
       std::string passphrase;
       if(!use_empty_passphrase) {
-        if(passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
+        if(g_passsources[pass_myproxy]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
           throw std::invalid_argument("Error entering passphrase");
       }
 
       std::string proxy_cred_str_pem;
-     
+
       Arc::initializeCredentialsType cred_type(Arc::initializeCredentialsType::SkipCredentials);
       Arc::UserConfig usercfg_tmp(cred_type);
       usercfg_tmp.CACertificatesDirectory(usercfg.CACertificatesDirectory());
@@ -222,7 +190,7 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
       myproxyopt["lifetime"] = myproxy_period;
       // According to the protocol of myproxy, the "Get" command can
       // include the information about vo name, so that myproxy server
-      // can contact voms server to retrieve AC for myproxy client 
+      // can contact voms server to retrieve AC for myproxy client
       // See 2.4 of http://grid.ncsa.illinois.edu/myproxy/protocol/
       // "When VONAME appears in the message, the server will generate VOMS
       // proxy certificate using VONAME and VOMSES, or the server's VOMS server information."
@@ -242,7 +210,7 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
               break;
             };
           };
-          // Because rsult is stored imeediately there is no sense to keep matched lines in 
+          // Because rsult is stored imeediately there is no sense to keep matched lines in
           // VOMSConfig object.
           return false;
         };
@@ -280,13 +248,13 @@ bool contact_myproxy_server(const std::string& myproxy_server, const std::string
       if (myproxy_server.empty())
         throw std::invalid_argument("URL of MyProxy server is missing");
 
-      if (user_name.empty()) 
+      if (user_name.empty())
         throw std::invalid_argument("Username to MyProxy server is missing");
 
       std::string prompt1 = "MyProxy server";
       std::string passphrase;
       if(retrievable_by_cert.empty()) {
-        if(passsources[pass_myproxy_new]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
+        if(g_passsources[pass_myproxy_new]->Get(passphrase, 4, 256) != Arc::PasswordSource::PASSWORD)
           throw std::invalid_argument("Error entering passphrase");
       }
 

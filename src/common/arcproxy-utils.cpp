@@ -62,8 +62,8 @@ char* nss_get_password_from_msgbox(PK11SlotInfo* slot, PRBool retry, void *arg) 
     char prompt[255];
     char* pw = NULL;
 
-    if(arg != NULL) pw = (char *)PORT_Strdup((char *)arg);
-    if(pw != NULL) return pw;
+    //if(arg != NULL) pw = (char *)PORT_Strdup((char *)arg);
+    //if(pw != NULL) return pw;
 
     sprintf(prompt, "Password or Pin for \"%s\":",
             PK11_GetTokenName(slot));
@@ -955,6 +955,7 @@ int ArcProxyController::generateProxy()
         bool res;
         std::string configdir = m_selectedNssPath.toStdString();
         res = ArcAuthNSS::nssInit(configdir);
+
         PK11_SetPasswordFunc(nss_get_password_from_msgbox);
 
         std::cout<< Arc::IString("NSS database to be accessed: %s\n", configdir.c_str());

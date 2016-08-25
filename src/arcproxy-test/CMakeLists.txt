@@ -1,6 +1,6 @@
 
 SET(arcproxytest_SRCS
-  arcproxy.h arcproxy.cpp arcproxy_myproxy.cpp arcproxy_proxy.cpp arcproxy_voms.cpp
+  arcproxy.h arcproxy.cpp arcproxy_myproxy.cpp arcproxy_proxy.cpp arcproxy_voms.cpp arcproxy_manager.h arcproxy_manager.cpp
 )
 
 add_executable(arcproxy-test ${arcproxytest_SRCS} )
