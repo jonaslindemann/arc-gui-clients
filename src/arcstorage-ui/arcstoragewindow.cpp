@@ -15,6 +15,7 @@
 #include <QMenuItem>
 
 #include <iostream>
+
 #include "arcstoragewindow.h"
 #include "ui_arcstoragewindow.h"
 #include "filelister.h"
@@ -83,12 +84,20 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     // Create and add the url combobox manually to the toolbar because QT Designer doesn't support it
 
+    QToolBar* toolbar = new QToolBar();
+    toolbar->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+
     m_urlCompleter = new QCompleter();
     m_urlEdit.setCompleter(m_urlCompleter);
     m_urlCompleteButton.setArrowType(Qt::DownArrow);
     m_urlCompleteButton.setMaximumHeight(28);
-    ui->mainToolBar->addWidget(&m_urlEdit);
-    ui->mainToolBar->addWidget(&m_urlCompleteButton);
+    m_urlEdit.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    //ui->mainToolBar->addWidget(&m_urlEdit);
+    //ui->mainToolBar->addWidget(&m_urlCompleteButton);
+    toolbar->addWidget(&m_urlEdit);
+    toolbar->addWidget(&m_urlCompleteButton);
+    this->addToolBarBreak();
+    this->addToolBar(toolbar);
 
     connect(&m_urlEdit, SIGNAL(returnPressed()), this, SLOT(onURLEditReturnPressed()));  // When someone presses return in the url combobox...
     connect(&m_urlCompleteButton, SIGNAL(clicked()), this, SLOT(onUrlCompletePressed()));
@@ -144,10 +153,10 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
             m_debugStream2 = 0;
         }
         ui->textOutput->clear();
-        this->setWindowTitle("ARC Storage Explorer - [Main Window]");
+        this->setWindowTitle("SNIC Storage Explorer - [Main Window]");
     }
     else
-        this->setWindowTitle("ARC Storage Explorer - [Child]");
+        this->setWindowTitle("SNIC Storage Explorer - [Child]");
 
     // Redirect ARC logging to std::cout (in main window)
 
@@ -157,7 +166,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
         Arc::Logger::getRootLogger().addDestination(*m_logStream);
         Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
 
-        logger.msg(Arc::INFO, "ARC Storage Explorer initialising...");
+        logger.msg(Arc::INFO, "SNIC Storage Explorer initialising...");
     }
 
     // Set splitter sizes
@@ -1226,7 +1235,7 @@ void ArcStorageWindow::on_foldersTreeWidget_clicked(QModelIndex index)
 void ArcStorageWindow::on_actionAbout_ARC_File_Navigator_triggered()
 {
     QMessageBox msgBox;
-    msgBox.setText("ARC Storage Explorer\n\nCopyright (C) 2011-2016 Lunarc, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
+    msgBox.setText("SNIC Storage Explorer\n\nCopyright (C) 2011-2018 LUNARC, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
     msgBox.exec();
 }
 

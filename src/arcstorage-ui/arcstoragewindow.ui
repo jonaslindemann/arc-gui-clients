@@ -10,8 +10,17 @@
     <height>606</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <weight>50</weight>
+    <bold>false</bold>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Arc Storage Explorer</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">font-weight: 400</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -21,7 +30,16 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -88,6 +106,11 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -115,6 +138,11 @@
           <width>16777215</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
         </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -186,8 +214,18 @@
      <x>0</x>
      <y>0</y>
      <width>985</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
@@ -266,8 +304,13 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonIconOnly</enum>
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -328,6 +371,9 @@
    <property name="text">
     <string>About ARC Storage Explorer</string>
    </property>
+   <property name="toolTip">
+    <string>About SNIC Storage Explorer</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -339,6 +385,11 @@
    </property>
    <property name="text">
     <string>Reload</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -363,6 +414,11 @@
    <property name="text">
     <string>Back</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Alt+Left</string>
    </property>
@@ -386,6 +442,11 @@
    <property name="text">
     <string>Up</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Alt+Up</string>
    </property>
@@ -401,6 +462,11 @@
    <property name="text">
     <string>Stop</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -412,6 +478,11 @@
    </property>
    <property name="text">
     <string>Delete</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Del</string>
@@ -426,10 +497,15 @@
      <normaloff>:/resources/icons/24px/Window-New.png</normaloff>:/resources/icons/24px/Window-New.png</iconset>
    </property>
    <property name="text">
-    <string>New Window</string>
+    <string>New</string>
    </property>
    <property name="toolTip">
     <string>Create a new file browser</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -480,7 +556,12 @@
      <normaloff>:/resources/icons/24px/Folder-New.png</normaloff>:/resources/icons/24px/Folder-New.png</iconset>
    </property>
    <property name="text">
-    <string>Create directory</string>
+    <string>New directory</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -497,7 +578,12 @@
      <normaloff>:/resources/icons/24px/Network Sharing.png</normaloff>:/resources/icons/24px/Network Sharing.png</iconset>
    </property>
    <property name="text">
-    <string>Open new location....</string>
+    <string>Open URL</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
@@ -509,8 +595,7 @@
   <action name="actionCreateProxyCert">
    <property name="icon">
     <iconset>
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Create proxy cert...</string>
@@ -573,6 +658,11 @@
    <property name="text">
     <string>Download</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
    </property>
@@ -587,6 +677,11 @@
    </property>
    <property name="text">
     <string>Upload files</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
@@ -603,6 +698,11 @@
    <property name="text">
     <string>Upload directory</string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -615,6 +715,11 @@
    <property name="text">
     <string>Upload directory as archive </string>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
@@ -626,6 +731,11 @@
    </property>
    <property name="text">
     <string>Rename</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>F2</string>
@@ -641,6 +751,11 @@
    </property>
    <property name="text">
     <string>Open</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>

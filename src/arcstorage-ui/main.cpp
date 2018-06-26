@@ -13,6 +13,10 @@
 
 int main(int argc, char *argv[])
 {
+    // Not sure why this is needed. Can't hurt.
+
+    Arc::SetEnv("X509_CERT_DIR", "/etc/grid-security/certificates");
+
     QApplication app(argc, argv);
     app.setStyle("gtk");
 
