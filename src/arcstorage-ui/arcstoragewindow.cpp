@@ -99,9 +99,21 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     this->addToolBarBreak();
     this->addToolBar(toolbar);
 
+    // Working indicator
+
+    m_workingMovie = new QMovie(":/resources/images/ajax-loader.gif");
+    m_workingImage = new QLabel(this);
+    m_workingImage->setPixmap(QPixmap(":/resources/images/ajax-loader-static.gif"));
+    m_workingImage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_workingImage->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    m_workingImage->setContentsMargins(4,4,4,4);
+    m_workingImage->setVisible(true);
+
+    ui->mainToolBar->addWidget(m_workingImage);
+
     connect(&m_urlEdit, SIGNAL(returnPressed()), this, SLOT(onURLEditReturnPressed()));  // When someone presses return in the url combobox...
     connect(&m_urlCompleteButton, SIGNAL(clicked()), this, SLOT(onUrlCompletePressed()));
-    connect(m_urlCompleter, SIGNAL(activated(QString)), this, SLOT(onUrlCompleteActivated()));
+    //connect(m_urlCompleter, SIGNAL(activated(QString)), this, SLOT(onUrlCompleteActivated()));
 
     // Can't add empty space in toolbar, so we add a dummy widget instead.
 
@@ -512,6 +524,9 @@ void ArcStorageWindow::setBusyUI(bool busy)
         m_urlEdit.setEnabled(false);
         ui->foldersTreeWidget->setEnabled(false);
         ui->urlBreadCrumbToolbar->setEnabled(false);
+        m_workingImage->setMovie(m_workingMovie);
+        m_workingImage->setEnabled(true);
+        m_workingMovie->start();
     }
     else
     {
@@ -523,6 +538,8 @@ void ArcStorageWindow::setBusyUI(bool busy)
         m_urlEdit.setEnabled(true);
         ui->foldersTreeWidget->setEnabled(true);
         ui->urlBreadCrumbToolbar->setEnabled(true);
+        m_workingImage->setPixmap(QPixmap(":/resources/images/ajax-loader-static.gif"));
+        m_workingMovie->stop();
     }
 }
 

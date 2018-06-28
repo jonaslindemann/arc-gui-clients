@@ -244,6 +244,14 @@ void ArcFileServer::updateFileList(QString URL)
 
                 if (!fileNameQS.indexOf(".")==0) // Don't show hidden files.
                 {
+                    if (ft == ARCDir)
+                    {
+                        // Check for trailing slash i directory name
+
+                        if (fileNameQS.contains("/"))
+                            fileNameQS = fileNameQS.left(fileNameQS.lastIndexOf('/'));
+                    }
+
                     ARCFileElement* arcFileElement = new ARCFileElement(fileNameQS,
                                                                         URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
                                                                         ft,
@@ -269,7 +277,8 @@ void ArcFileServer::updateFileList(QString URL)
 bool ArcFileServer::goUpOneFolder()
 {
     QString url = m_currentUrlString.left(m_currentUrlString.lastIndexOf('/'));
-    if (url.length() > (int)strlen("SRM://"))
+    //if (url.length() > (int)strlen("SRM://"))
+    if (url.length() > 4)
     {
         updateFileList(url);
         return true;
@@ -388,6 +397,12 @@ void ArcFileServer::listFiles(QList<QUrl> &urlList, QString currentDir)
                 {
                     QUrl url;
                     QString dirName = arcFile->GetName().c_str();
+
+                    // Check for trailing slash (happens when https is used)
+
+                    if (dirName.contains("/"))
+                        dirName = dirName.left(dirName.lastIndexOf('/'));
+
                     QString newDir = currentDir+dirName+"/";
                     this->listFiles(urlList, newDir);
                 }

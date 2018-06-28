@@ -33,5 +33,7 @@
         <file>icons/24px/Folder-Information.png</file>
         <file>icons/24px/Untitled.png</file>
         <file>icons/24px/Current Folder.png</file>
+        <file>images/ajax-loader.gif</file>
+        <file>images/ajax-loader-static.gif</file>
     </qresource>
 </RCC>

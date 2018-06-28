@@ -27,21 +27,35 @@ void TransferStatusDisplay::paintEvent(QPaintEvent *event)
 
     p.setBrush(Qt::red);
 
-    // | ----W---- | ---R--- |
-    // 0           x1        x2
+    //         | --------- w --------|
+    // | - m - | ----W---- | ---R--- | - m - |
+    //        x0          x1        x2
+    //
+    // | --------------- width() ----------- |
 
-    int x1 = int((double)(m_transferred/(double)m_totalSize) * (double)this->width()-1);
-    int x2 = int(1.0 * (double)this->width()-1);
+    int m = 4;
+    int w = this->width() - 2*m;
+    int h = this->height() - 2*m;
+    int x0 = m;
+    int x1 = x0 + int((double)(m_transferred/(double)m_totalSize) * (double)w);
+    int x2 = m + w;
 
-    p.setFont(QFont("Arial",8));
-    p.setBrush(Qt::green);
-    p.drawRect(0, 0, x1, this->height()-1);
-    p.setBrush(Qt::gray);
-    p.drawRect(x1, 0, x2-x1, this->height()-1);
+
+    QLinearGradient gradient(x0, m+1, x1, m);
+    gradient.setColorAt(0, Qt::white);
+    gradient.setColorAt(1, Qt::gray);
+
+    p.setFont(QFont("Arial",6));
+
+    p.setBrush(Qt::white);
+    p.drawRect(x0, m, w, h);
+
+    //p.setBrush(Qt::green);
+    p.fillRect(x0+1, m+1, x1-x0-1, h-1, gradient);
 
     QString status = QString::number(m_transferred) + "kB/" + QString::number(m_totalSize) + "kB";
 
-    p.drawText(8,3, this->width()-4, this->height()-4, Qt::AlignHCenter|Qt::AlignVCenter, status);
+    p.drawText(x0, m, w, h, Qt::AlignHCenter|Qt::AlignVCenter, status);
 
     p.end();
 }

@@ -65,6 +65,9 @@ private:
     QLineEdit m_urlEdit;
     QCompleter* m_urlCompleter;
     QToolButton m_urlCompleteButton;
+    QLabel* m_workingImage;
+    QMovie* m_workingMovie;
+    QPixmap* m_workingIdle;
 
     ArcFileServer *m_currentFileServer;
     QString m_folderListUrl;

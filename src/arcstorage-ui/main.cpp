@@ -1,15 +1,15 @@
+#include <iostream>
+
 #include <QtGui/QApplication>
 #include <QSplashScreen>
 #include <QPixmap>
+#include <QImage>
+
 
 #include "arcstoragewindow.h"
-
-#include <iostream>
-
 #include "arcproxy-utils.h"
 #include "arctools.h"
 
-#include <QImage>
 
 int main(int argc, char *argv[])
 {
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     Arc::SetEnv("X509_CERT_DIR", "/etc/grid-security/certificates");
 
     QApplication app(argc, argv);
-    app.setStyle("gtk");
+    app.setStyle("avahi");
 
     // Show splash screen
 
