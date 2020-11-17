@@ -146,6 +146,9 @@ void ProxyWindow::on_generateButton_clicked()
 
     QString passphrase;
 
+    m_proxyController->setUseNssDb(false);
+
+#ifdef USE_NSSDB
     if (ui->tabWidget->currentIndex()==0)
         m_proxyController->setUseNssDb(true);
     else
@@ -156,6 +159,7 @@ void ProxyWindow::on_generateButton_clicked()
         if (ui->NSSProfileList->currentRow()>=0)
             m_proxyController->setNssPath(ui->NSSProfileList->currentItem()->text());
     }
+#endif
 
     if (!m_proxyController->useNssDb())
     {

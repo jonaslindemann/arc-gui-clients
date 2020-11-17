@@ -36,43 +36,6 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab_3">
-        <attribute name="title">
-         <string>Browser Cert</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_9">
-         <property name="leftMargin">
-          <number>10</number>
-         </property>
-         <property name="topMargin">
-          <number>6</number>
-         </property>
-         <property name="rightMargin">
-          <number>10</number>
-         </property>
-         <property name="bottomMargin">
-          <number>10</number>
-         </property>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <widget class="QLabel" name="NSSProfileLabel">
-               <property name="text">
-                <string>Select profile</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="NSSProfileList"/>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="standardProxyTab">
         <attribute name="title">
          <string>Standard</string>
@@ -196,7 +159,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab">
+       <widget class="QWidget" name="vomsTab">
         <property name="maximumSize">
          <size>
           <width>9999</width>
@@ -292,7 +255,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_2">
+       <widget class="QWidget" name="vomsConfigTab">
         <attribute name="title">
          <string>VOMS Config</string>
         </attribute>
@@ -371,6 +334,46 @@
               </property>
              </column>
             </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="browserCertTab">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <attribute name="title">
+         <string>Browser Cert</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_9">
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QLabel" name="NSSProfileLabel">
+               <property name="text">
+                <string>Select profile</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QListWidget" name="NSSProfileList"/>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
