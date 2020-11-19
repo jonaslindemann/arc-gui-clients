@@ -1,20 +1,14 @@
-====================
-ARC Storage Explorer
-====================
-
-The ARC Storage Explorer is a graphical client for access grid storage resources. The client builds on the ARC middlware to support most grid storage protocols. The basic design of the application is a multi-window file browser. Copying between resources are accomplished by drag and drop between file browser windows. To limit and optimise the bandwidth for transferring files, the application implements a file transfer list which can be configured with a maximum number of simultaneous transfers. Most operations in the application are also implemented using threads, to prevent locking up the user interface. However, since many file operations can take a long time to complete some user interface operations disable interaction while operations are ongoing. As the ARC Storage application is a multi-window application, work on different storage resource can be continued by opening an additional storage window.
-
 Starting ARC Storage Explorer
------------------------------
+=============================
 
-ARC Storage explorer is started by selecting "Application/Internet/ARC Storage Explorer" in the applications menu in most Linux distributions. The following image shows the start menu in Scientific Linux 6.
+ARC Storage explorer is started by selecting "Lunarc Tools/Storage Tools/SNIC Storage Explorer" in the applications menu on the LUNARC HPC Desktop. The following image shows the start menu in Scientific Linux 6.
 
 .. image:: images/arcstorage-starting-1.png
 
 When ARC Storage Explorer starts it will check for a valid proxy certificate. If not found it will show a dialog with options for creating a proxy certificate. 
 
-Proxy generation
-----------------
+Authentication
+==============
 
 In the proxy dialog, settings for creating different kind of proxy certificates can be selected. In the first tab "Standard" options for the proxy lifetime and proxy type can be set. 
 
@@ -30,8 +24,8 @@ When the proxy has been generated succesfully, a message box is shown confirming
 
 .. image:: images/arcstorage-proxy-7.png
 
-User interface
---------------
+User interface overview
+=======================
 
 The user interface of ARC Storage Explorer is designed as a standard file browser. The main window is shown in the following illustration:
 
@@ -44,6 +38,9 @@ Below the access bar, the directory- and file views can be found. The directory 
 The file view represents a listing of the current working directory. This is also the main view for file operations such as copying, deleting and viewing files and directories.  
 
 In the lower part of the main window contains a log view. In this view log messages from the lower level middleware (ARC) will be presented. The verbosity of the logging can be changed in the configuration options.
+
+Opening and browsing storage resources
+======================================
 
 Opening a URL
 -------------
@@ -84,7 +81,7 @@ Another way of navigating the directory hierarchy is to use the folder view in t
 .. figure:: images/arcstorage-browsing-3.png
    
    Selecting the folder expansion icon.
-|
+   
 .. figure:: images/arcstorage-browsing-4.png
    
    Expanded folder.
@@ -101,6 +98,9 @@ Detailed information on the file can be queried by selecting the file or directo
 .. figure:: images/arcstorage-metadata-1.png
 
    Metadata property window.
+
+Data transfer
+=============
    
 Uploading files
 ---------------
@@ -148,6 +148,14 @@ Files can be downloaded to the local file system using the **Transfer/Download**
 
 The file transfer dialog is shown during the active file transfer. From this dialog all transfers can be monitored and controlled.
 
+Transferring files between open windows
+---------------------------------------
+
+TODO
+
+File and directory operations
+=============================
+
 Copying URL links
 -----------------
 
@@ -158,7 +166,6 @@ Sometimes you need to communicate a URL of a specific file. This can be done usi
    Copy full URL of selected file.
    
 The URL is now available from the clipboard and can be pasted into other applications.
-
 
 Creating directories
 --------------------
@@ -189,10 +196,5 @@ Files can be delected by selecting them in the file view and selecting **Edit/De
    Currently, ARC Storage Explorer does not support recursive delete operations. Also, directories must be empty before they can be deleted. The next version of the application will support recursive delete operations.
    
 A confirmation dialog is shown before any file or directory will be deleted.
-
-
-
-Copying files
--------------
 
 

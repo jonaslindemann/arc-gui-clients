@@ -1,7 +1,13 @@
-============
 Introduction
 ============
 
-The ARC Graphical Clients is an attempt of creating a set of graphical client tools for using the ARC middleware. The tools covers certificate handling, proxy creating, job submission and storage. The main idea is to create a set of tools that can be used together or separately, depending on the need of the users. 
+The SNIC Storage Explorer is a graphical client for access grid storage resources. The client builds on the ARC middlware to support most grid storage protocols. The basic design of the application is a multi-window file browser. Copying between resources are accomplished by drag and drop between file browser windows. To limit and optimise the bandwidth for transferring files, the application implements a file transfer list which can be configured with a maximum number of simultaneous transfers. Most operations in the application are also implemented using threads, to prevent locking up the user interface. However, since many file operations can take a long time to complete some user interface operations disable interaction while operations are ongoing. As the SNIC Storage application is a multi-window application, work on different storage resource can be continued by opening an additional storage window. 
 
-All tools have been implemented using the Qt user interface library, to make them portable on all platforms such as Linux, Windows and Mac OS X. Currently only Linux and to a limited extent Mac OS X clients are available. As soon as the Windows port of ARC have been finalised it should be possible to compiler these client tools to this platform as well.
+SNIC Storage Explorer currently support the following protocols.
+
+ * gsiftp - GridFTP
+ * srm - Storage Resrouce Manager
+ * https - WebDav with X509 authentication
+ * local - Local file systems
+
+ In future versions we are also planning for iRODS support.
