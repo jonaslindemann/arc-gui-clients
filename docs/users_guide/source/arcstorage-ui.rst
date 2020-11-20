@@ -1,14 +1,17 @@
-Starting ARC Storage Explorer
-=============================
+SNIC Storage Explorer
+=====================
 
-ARC Storage explorer is started by selecting "Lunarc Tools/Storage Tools/SNIC Storage Explorer" in the applications menu on the LUNARC HPC Desktop. The following image shows the start menu in Scientific Linux 6.
+Strating the application
+------------------------
+
+SNIC Storage explorer is started by selecting "Lunarc Tools/Storage Tools/SNIC Storage Explorer" in the applications menu on the LUNARC HPC Desktop. The following image shows the start menu in Scientific Linux 6.
 
 .. image:: images/arcstorage-starting-1.png
 
-When ARC Storage Explorer starts it will check for a valid proxy certificate. If not found it will show a dialog with options for creating a proxy certificate. 
+When SNIC Storage Explorer starts it will check for a valid proxy certificate. If not found it will show a dialog with options for creating a proxy certificate. 
 
 Authentication
-==============
+--------------
 
 In the proxy dialog, settings for creating different kind of proxy certificates can be selected. In the first tab "Standard" options for the proxy lifetime and proxy type can be set. 
 
@@ -25,7 +28,7 @@ When the proxy has been generated succesfully, a message box is shown confirming
 .. image:: images/arcstorage-proxy-7.png
 
 User interface overview
-=======================
+-----------------------
 
 The user interface of ARC Storage Explorer is designed as a standard file browser. The main window is shown in the following illustration:
 
@@ -40,17 +43,17 @@ The file view represents a listing of the current working directory. This is als
 In the lower part of the main window contains a log view. In this view log messages from the lower level middleware (ARC) will be presented. The verbosity of the logging can be changed in the configuration options.
 
 Opening and browsing storage resources
-======================================
+--------------------------------------
 
 Opening a URL
--------------
+^^^^^^^^^^^^^
 
 To open a URL in the current window, click on the URL-bar and type the desired URL, then click [Enter] to open the selected URL, as shown in the following figure:
 
 .. image:: images/arcstorage-opening-url-2.png
 
 Open a new browser window
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ARC Storage Explorer is a multi-window application. To copy files between different URL:s requires 2 windows to drag between. There are two ways of opening a new browser window:
 
@@ -68,7 +71,7 @@ The second option of opening a new window is to use the **File/Open new location
 .. image:: images/arcstorage-new-window-2.png
 
 Browsing files
---------------
+^^^^^^^^^^^^^^
 
 There are many ways of browsing the file tree in ARC Storage Explorer. The most used way is to use the file list view together with the **Up** button in the menu and toolbar. Double-clicking on a directory in the file view will change current working directory to the selected directory. 
 
@@ -87,7 +90,7 @@ Another way of navigating the directory hierarchy is to use the folder view in t
    Expanded folder.
 
 Displaying file/directory properties
-------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Detailed information on the file can be queried by selecting the file or directory and clicking on the right mouse button and selecting **Properties** in the context menu. This action brings up a property window, displaying the properties (metadata) of the selected file or directory.
 
@@ -100,10 +103,10 @@ Detailed information on the file can be queried by selecting the file or directo
    Metadata property window.
 
 Data transfer
-=============
+-------------
    
 Uploading files
----------------
+^^^^^^^^^^^^^^^
 
 Uploading files to the current directory is accomplished using the **Transfer/Upload files** menu or using the **Ctrl-U** shortcut. This opens a file selection dialog in which files that should be uploaded can be selected, as shown in the following figure:
 
@@ -114,7 +117,7 @@ Uploading files to the current directory is accomplished using the **Transfer/Up
 The file transfer is started when the **Open** button in chosen in the file selection dialog. The file transfer dialog is shown during the active file transfer. From this dialog all transfers can be monitored and controlled.
 
 Uploading directories
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Uploading directories to the current directory is accomplished using the **Transfer/Upload directory** menu. This opens a directory selection dialog in which directories to be uploaded can be selected.
 
@@ -127,7 +130,7 @@ Uploading directories to the current directory is accomplished using the **Trans
    It is not efficient to store thousands of small files in a directory structure. To archive and upload a larger directory structure please see the next section on how this can be accomplished.
 
 Upload directory as archive
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To be able to upload large directory structures, ARC Storage Explorer, provides a special function for automatically uploading an archived version of a directory. To upload a directory as an archive, select **Transfer/Upload directory as archive**. This will display a directory selection dialog.
 
@@ -138,7 +141,7 @@ To be able to upload large directory structures, ARC Storage Explorer, provides 
 When the directory has been selected using the **Open** button, ARC Storage Explorer, will create a compressed tar-archive with the same filename as the selected directory followed by a time stamp.
 
 Download files and directories
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Files can be downloaded to the local file system using the **Transfer/Download** menu or **Ctrl-D** shortcut. Selecting **Open**, will start the download. 
 
@@ -149,15 +152,15 @@ Files can be downloaded to the local file system using the **Transfer/Download**
 The file transfer dialog is shown during the active file transfer. From this dialog all transfers can be monitored and controlled.
 
 Transferring files between open windows
----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TODO
 
 File and directory operations
-=============================
+-----------------------------
 
 Copying URL links
------------------
+^^^^^^^^^^^^^^^^^
 
 Sometimes you need to communicate a URL of a specific file. This can be done using the context menu of the file list view. Select a file in the file list and use the right mouse button to show the context menu for the selected file. Select the **Copy URL** item in the menu.
 
@@ -168,7 +171,7 @@ Sometimes you need to communicate a URL of a specific file. This can be done usi
 The URL is now available from the clipboard and can be pasted into other applications.
 
 Creating directories
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Directories are created in the current directory either by using the toolbar button or the menu option in the file list context menu as shown in the following figures.
 
@@ -187,7 +190,7 @@ Next, a dialog is shown asking for the directory name. Enter a name of the new d
    Dialog for chosing a name for the new directory.
 
 Deleting files
---------------
+^^^^^^^^^^^^^^
 
 Files can be delected by selecting them in the file view and selecting **Edit/Delete** in the menu or using the shortcut **Del**. There is also a option of deleting files from the file view context menu. 
 

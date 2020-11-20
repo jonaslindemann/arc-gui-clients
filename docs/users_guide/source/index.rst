@@ -12,6 +12,8 @@ Contents:
    :maxdepth: 2
 
    introduction.rst
+   arccert-ui.rst
+   arcproxy-ui.rst
    arcstorage-ui.rst
 
 

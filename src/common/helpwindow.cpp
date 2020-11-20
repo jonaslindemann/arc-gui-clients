@@ -15,7 +15,7 @@ HelpWindow::HelpWindow(QWidget *parent) :
     ui->actionBack->setIcon(QIcon::fromTheme("back"));
     ui->actionHome->setIcon(QIcon::fromTheme("go-home"));
     ui->actionStop->setIcon(QIcon::fromTheme("stop"));
-    ui->webView->load(QUrl("http://arc-gui-clients.sourceforge.net/docs/"));
+    ui->webView->load(QUrl("https://snic-storage-explorer.readthedocs.io/en/latest/"));
 }
 
 HelpWindow::~HelpWindow()

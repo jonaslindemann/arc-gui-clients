@@ -52,7 +52,7 @@
 
 #include "proxywindow.h"
 
-#define HAVE_NSS
+#undef HAVE_NSS
 
 #ifdef HAVE_NSS
 #include <pk11pub.h>
@@ -619,7 +619,10 @@ int ArcProxyController::initialize()
     if (timeout > 0) usercfg.Timeout(timeout);
 
     m_nssPaths.clear();
+
+#ifdef HAVE_NSS
     get_default_nssdb_path(m_nssPaths);
+#endif
 
     return EXIT_SUCCESS;
 }

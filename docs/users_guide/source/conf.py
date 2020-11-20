@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SNIC Storage Explorer'
-copyright = u'2013-2018, Jonas Lindemann'
+copyright = u'2013-2020, Jonas Lindemann'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

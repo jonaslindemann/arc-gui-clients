@@ -1252,7 +1252,15 @@ void ArcStorageWindow::on_foldersTreeWidget_clicked(QModelIndex index)
 void ArcStorageWindow::on_actionAbout_ARC_File_Navigator_triggered()
 {
     QMessageBox msgBox;
-    msgBox.setText("SNIC Storage Explorer\n\nCopyright (C) 2011-2018 LUNARC, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
+
+    QString appName = ARC_GUI_STORAGE_EXPLORER;
+    QString version = ARC_GUI_VERSION;
+    QString copyrightText = ARC_GUI_COPYRIGHT;
+    QString author1 = ARC_GUI_AUTHOR1;
+    QString author2 = ARC_GUI_AUTHOR2;
+
+    msgBox.setText(appName+" - "+version+"\n\n"+copyrightText+"\n\nDeveloped by \n\n"+author1+"\n"+author2);
+    //msgBox.setText("SNIC Storage Explorer\n\nCopyright (C)2011-2020 LUNARC, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
     msgBox.exec();
 }
 

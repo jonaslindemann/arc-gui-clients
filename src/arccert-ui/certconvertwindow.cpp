@@ -13,6 +13,8 @@ CertConvertWindow::CertConvertWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::CertConvertWindow)
 {
+    // Certificate Windows constructor
+
     ui->setupUi(this);
 
     // Redirect standard output
@@ -35,14 +37,19 @@ CertConvertWindow::CertConvertWindow(QWidget *parent) :
 
     m_pkcs12Filename = globusDir.absolutePath()+"/"+"usercert.p12";
 
+    // Update user interface
+
     ui->usercertFileText->setText(m_certificateFilename);
     ui->userkeyFileText->setText(m_keyFilename);
     ui->pkcsFileText->setText(m_pkcs12Filename);
+    ui->certKeyDirText->setText(globusDir.absolutePath());
 
 }
 
 CertConvertWindow::~CertConvertWindow()
 {
+    // Clean up after us
+
     delete ui;
     delete m_debugStream;
     delete m_debugStream2;
@@ -156,7 +163,7 @@ void CertConvertWindow::on_convertToPKCS12Button_clicked()
 void CertConvertWindow::on_selectCertFileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
     qDebug() << globusDir.absolutePath();
 
     m_certificateFilename = QFileDialog::getOpenFileName(this,
@@ -168,7 +175,7 @@ void CertConvertWindow::on_selectCertFileButton_clicked()
 void CertConvertWindow::on_selectKeyButton_clicked()
 {
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
     qDebug() << globusDir.absolutePath();
 
     m_keyFilename = QFileDialog::getOpenFileName(this,
@@ -180,7 +187,7 @@ void CertConvertWindow::on_selectKeyButton_clicked()
 void CertConvertWindow::on_selectPKCS12FileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
     qDebug() << globusDir.absolutePath();
 
     QFileDialog dlg(this);
@@ -199,7 +206,7 @@ void CertConvertWindow::on_selectPKCS12FileButton_clicked()
 void CertConvertWindow::on_selectPKCS12ImportFileButton_clicked()
 {
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
     qDebug() << globusDir.absolutePath();
 
     m_pkcs12ImportFilename = QFileDialog::getOpenFileName(this,
@@ -211,7 +218,7 @@ void CertConvertWindow::on_selectPKCS12ImportFileButton_clicked()
 void CertConvertWindow::on_selectCertKeyOutputDirButton_clicked()
 {
     QDir globusDir = QDir::homePath();
-    globusDir.cd(".globus");
+    globusDir.cd(".arc");
     qDebug() << globusDir.absolutePath();
 
     m_certOutputDir = QFileDialog::getExistingDirectory(this, "Convert", globusDir.absolutePath());
@@ -225,6 +232,7 @@ void CertConvertWindow::on_convertToX509Button_clicked()
 
     m_passin = "";
     m_passout = "";
+    m_certOutputDir = ui->certKeyDirText->text();
 
     // Get private key passphrase
 

@@ -33,7 +33,7 @@ bool is_dir(std::string path);
 std::vector<std::string> search_vomses(std::string path);
 std::string tokens_to_string(std::vector<std::string> tokens);
 
-#define HAVE_NSS
+#undef HAVE_NSS
 #ifdef HAVE_NSS
 void get_default_nssdb_path(std::vector<std::string>& nss_paths);
 void get_nss_certname(std::string& certname, Arc::Logger& logger);
