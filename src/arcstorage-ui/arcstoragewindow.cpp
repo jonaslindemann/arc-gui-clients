@@ -16,6 +16,7 @@
 
 #include <iostream>
 
+#include "arc-gui-version.h"
 #include "arcstoragewindow.h"
 #include "ui_arcstoragewindow.h"
 #include "filelister.h"
@@ -1258,8 +1259,11 @@ void ArcStorageWindow::on_actionAbout_ARC_File_Navigator_triggered()
     QString copyrightText = ARC_GUI_COPYRIGHT;
     QString author1 = ARC_GUI_AUTHOR1;
     QString author2 = ARC_GUI_AUTHOR2;
+    QString buildDate = ARC_GUI_BUILD_DATE;
+    QString buildTime = ARC_GUI_BUILD_TIME;
 
-    msgBox.setText(appName+" - "+version+"\n\n"+copyrightText+"\n\nDeveloped by \n\n"+author1+"\n"+author2);
+
+    msgBox.setText(appName+" - "+version+"\n\n"+copyrightText+"\n\nDeveloped by \n\n"+author1+"\n"+author2+"\n\nBuild info - "+buildDate+" - "+buildTime);
     //msgBox.setText("SNIC Storage Explorer\n\nCopyright (C)2011-2020 LUNARC, Lund University\n\nDeveloped by\n\nUser interface - Alexander Lapajne\nJonas Lindemann");
     msgBox.exec();
 }
