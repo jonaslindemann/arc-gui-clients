@@ -88,7 +88,11 @@ bool ARCTools::initUserConfig(bool showUi)
 
     //m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
     m_userConfig = new Arc::UserConfig("", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+#if ARC_VERSION_MAJOR >= 6
+    m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY());
+#else
     m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
+#endif
     //m_userConfig->CACertificatePath("/etc/grid-security/certificates");
     m_userConfig->CACertificatesDirectory("/etc/grid-security/certificates");
 
