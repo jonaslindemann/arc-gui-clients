@@ -644,7 +644,7 @@ QString convertToSizeWithUnit(qint64 num_bytes)
     else if (doubleNumBytes>KiB)
     {
         q = (double)doubleNumBytes/KiB;
-        unit = " KB";
+        unit = " kB";
     }
     else
     {
@@ -673,20 +673,20 @@ void ArcStorageWindow::updateFileTree()
         if (AFE->getFileType()==ARCDir)
         {
             item->setIcon(0,QIcon(":/resources/icons/16px/Folder Open.png"));
-            item->setText(1, "---");
+            item->setText(3, "---");
             item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         else
         {
             item->setIcon(0,QIcon(":/resources/icons/16px/Untitled.png"));
-            item->setText(1, convertToSizeWithUnit(AFE->getSize()));
+            item->setText(3, convertToSizeWithUnit(AFE->getSize()));
             item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         if (AFE->getFileType()==ARCDir)
             item->setText(2, "folder");
         else
             item->setText(2, "file");
-        item->setText(3, AFE->getLastModfied().toString());
+        item->setText(1, AFE->getLastModfied().toString());
         setURLOfItem(item, AFE->getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }

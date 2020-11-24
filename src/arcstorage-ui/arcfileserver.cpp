@@ -125,7 +125,7 @@ ArcFileServer::ArcFileServer()
 QStringList ArcFileServer::getFileInfoLabels()
 {
     QStringList labels;
-    labels << "File" << "Size" << "Type" << "Last modified";
+    labels << "File" << "Date" << "Type" << "Size";
     return labels;
 }
 

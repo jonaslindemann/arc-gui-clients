@@ -4,7 +4,7 @@
 #include <QSplashScreen>
 #include <QPixmap>
 #include <QImage>
-
+#include <QStringList>
 
 #include "arcstoragewindow.h"
 #include "arcproxy-utils.h"
@@ -18,7 +18,21 @@ int main(int argc, char *argv[])
     Arc::SetEnv("X509_CERT_DIR", "/etc/grid-security/certificates");
 
     QApplication app(argc, argv);
-    app.setStyle("avahi");
+
+    QStringList defaultStyles = QStyleFactory::keys();
+
+    qDebug() << defaultStyles;
+
+    if (defaultStyles.contains("avahi"))
+        app.setStyle("avahi");
+    else if (defaultStyles.contains("Plastique"))
+        app.setStyle("Plastique");
+    else if (defaultStyles.contains("Cleanlooks"))
+        app.setStyle("Cleanlooks");
+    else if (defaultStyles.contains("GTK+"))
+        app.setStyle("GTK+");
+
+    qDebug() << app.style(); 
 
     // Show splash screen
 

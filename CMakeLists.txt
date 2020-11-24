@@ -23,7 +23,11 @@ find_package(Arc REQUIRED)
 # find_package(NSS REQUIRED)
 # find_package(NSPR REQUIRED)
 
-add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+message("ARC Libraries")
+message(${Arc_LIBRARIES})
+message("-------------")
+
+# add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 configure_file(${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h.in ${CMAKE_SOURCE_DIR}/src/common/arc-gui-config.h)
 
