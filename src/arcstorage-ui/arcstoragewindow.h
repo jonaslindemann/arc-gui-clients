@@ -5,6 +5,8 @@ namespace Ui {
     class ArcStorageWindow;
 }
 
+#include <memory>
+
 #include "dragdropabletreewidget.h"
 
 #include <QMainWindow>
@@ -102,9 +104,12 @@ private:
     void pushUrl(QString url);
     QString popUrl();
 
-    Arc::LogStream* m_logStream;
-    QDebugStream* m_debugStream;
-    QDebugStream* m_debugStream2;
+    std::unique_ptr<Arc::LogStream> m_logStream;
+    std::unique_ptr<QDebugStream> m_debugStream;
+    std::unique_ptr<QDebugStream> m_debugStream2;
+    //Arc::LogStream* m_logStream;
+    //QDebugStream* m_debugStream;
+    //QDebugStream* m_debugStream2;
 
     bool m_childWindow;
     int m_windowId;

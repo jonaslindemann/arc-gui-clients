@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QStringList>
+#include <QStyleFactory>
 
 #include "arcstoragewindow.h"
 #include "arcproxy-utils.h"
@@ -19,20 +20,18 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
+    // Select appropriate style
+
     QStringList defaultStyles = QStyleFactory::keys();
 
-    qDebug() << defaultStyles;
-
-    if (defaultStyles.contains("avahi"))
-        app.setStyle("avahi");
+    if (defaultStyles.contains("Adwaita"))
+        app.setStyle("adwaita");
     else if (defaultStyles.contains("Plastique"))
         app.setStyle("Plastique");
     else if (defaultStyles.contains("Cleanlooks"))
         app.setStyle("Cleanlooks");
     else if (defaultStyles.contains("GTK+"))
         app.setStyle("GTK+");
-
-    qDebug() << app.style(); 
 
     // Show splash screen
 
@@ -58,5 +57,9 @@ int main(int argc, char *argv[])
     splash.show();
     splash.raise();
 
-    return app.exec();
+    int result = app.exec();
+
+    Arc::ThreadInitializer().waitExit();
+
+    return result;
 }

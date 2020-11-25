@@ -78,7 +78,7 @@ void DragDropableTreeWidget::mouseMoveEvent(QMouseEvent *event)
                 for (int i=0; i<m_selectedItems.count(); i++)
                 {
                     QTreeWidgetItem* item = m_selectedItems.at(i);
-                    if (item->text(2)=="file")
+                    if (item->text(2)!="-- folder --")
                     {
                         QVariant dataQV = item->data(0, Qt::ToolTipRole);
                         QUrl url = QUrl::fromLocalFile(dataQV.toString());

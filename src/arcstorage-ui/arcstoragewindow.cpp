@@ -93,8 +93,6 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     m_urlCompleteButton.setArrowType(Qt::DownArrow);
     m_urlCompleteButton.setMaximumHeight(28);
     m_urlEdit.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-    //ui->mainToolBar->addWidget(&m_urlEdit);
-    //ui->mainToolBar->addWidget(&m_urlCompleteButton);
     toolbar->addWidget(&m_urlEdit);
     toolbar->addWidget(&m_urlCompleteButton);
     this->addToolBarBreak();
@@ -114,7 +112,6 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     connect(&m_urlEdit, SIGNAL(returnPressed()), this, SLOT(onURLEditReturnPressed()));  // When someone presses return in the url combobox...
     connect(&m_urlCompleteButton, SIGNAL(clicked()), this, SLOT(onUrlCompletePressed()));
-    //connect(m_urlCompleter, SIGNAL(activated(QString)), this, SLOT(onUrlCompleteActivated()));
 
     // Can't add empty space in toolbar, so we add a dummy widget instead.
 
@@ -143,6 +140,7 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     // Setup the headers in the file tree widget
 
     fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
+    fileTreeHeaderLabels.append("");
     ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
     ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
     ui->filesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -157,13 +155,13 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     if (!m_childWindow) {
         if (GlobalStateInfo::instance()->redirectLog())
         {
-            m_debugStream = new QDebugStream(std::cout, ui->textOutput);
-            m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+            m_debugStream = std::make_unique<QDebugStream>(std::cout, ui->textOutput);
+            m_debugStream2 = std::make_unique<QDebugStream>(std::cerr, ui->textOutput);
         }
         else
         {
-            m_debugStream = 0;
-            m_debugStream2 = 0;
+            //m_debugStream = 0;
+            //m_debugStream2 = 0;
         }
         ui->textOutput->clear();
         this->setWindowTitle("SNIC Storage Explorer - [Main Window]");
@@ -173,8 +171,9 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     // Redirect ARC logging to std::cout (in main window)
 
-    if (!m_childWindow) {
-        m_logStream = new Arc::LogStream(std::cout);
+    if (!m_childWindow)
+    {
+        m_logStream = std::make_unique<Arc::LogStream>(std::cout);
         m_logStream->setFormat(Arc::ShortFormat);
         Arc::Logger::getRootLogger().addDestination(*m_logStream);
         Arc::Logger::getRootLogger().setThreshold(Arc::WARNING);
@@ -236,22 +235,6 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
 ArcStorageWindow::~ArcStorageWindow()
 {
-    // Shut down file transfer process thread (from Main Window)
-
-    if (!m_childWindow)
-        m_fileProcessingThread->shutdown();
-
-    // Disconnect log streams
-
-    if (!m_childWindow)
-    {
-        ARCTools::instance()->closeHelpWindow();
-        Arc::Logger::getRootLogger().removeDestinations();
-        delete m_logStream;
-        delete m_debugStream;
-        delete m_debugStream2;
-    }
-
     delete ui;
 }
 
@@ -377,6 +360,8 @@ void ArcStorageWindow::readSettings()
 
 void ArcStorageWindow::pushUrl(QString url)
 {
+    // Push an URL to the history stack for the back function
+
     if (url!="")
     {
         m_backStack.push_back(url);
@@ -386,6 +371,9 @@ void ArcStorageWindow::pushUrl(QString url)
 
 QString ArcStorageWindow::popUrl()
 {
+    // Remove an URL from the stack when clicking on the back button.
+    // Also enables/disables the back button depending on size of stack.
+
     if (m_backStack.size()>0)
     {
         QString url = m_backStack.back();
@@ -440,13 +428,39 @@ void ArcStorageWindow::showEvent(QShowEvent *e)
 
 void ArcStorageWindow::closeEvent(QCloseEvent *e)
 {
+    // Handles window close event. Depending on if it is the main window
+    // also does cleanup and writing of settings.
+
     logger.msg(Arc::VERBOSE, "Received close event. (closeEvent)");
 
     if (!m_childWindow)
+    {
+        // Save settings
+
         this->writeSettings();
 
-    if (!m_childWindow)
+        // Shut down file transfer process thread (from Main Window)
+
+        if (!m_childWindow)
+        {
+            m_fileProcessingThread->shutdown();
+            m_fileProcessingThread->wait();
+        }
+
+        // Disconnect log streams
+
+        if (!m_childWindow)
+        {
+            ARCTools::instance()->closeHelpWindow();
+            Arc::Logger::getRootLogger().setThreshold(Arc::LogLevel::FATAL);
+            Arc::Logger::getRootLogger().removeDestinations();
+
+            m_debugStream = nullptr;
+            m_debugStream2 = nullptr;
+        }
+
         GlobalStateInfo::instance()->closeChildWindows();
+    }
     else
         GlobalStateInfo::instance()->removeChildWindow(this);
 
@@ -455,9 +469,9 @@ void ArcStorageWindow::closeEvent(QCloseEvent *e)
 
 void ArcStorageWindow::deleteSelectedFiles()
 {
-    logger.msg(Arc::VERBOSE, "Delete selected files started. (deleteSelectedFiles)");
+    // Delete selecteded files.
 
-    // Delete selected file
+    logger.msg(Arc::VERBOSE, "Delete selected files started. (deleteSelectedFiles)");
 
     QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems();
 
@@ -487,6 +501,8 @@ void ArcStorageWindow::deleteSelectedFiles()
 
 void ArcStorageWindow::createDir()
 {
+    // Creates an directory in the current working directory.
+
     logger.msg(Arc::VERBOSE, "Creating directory. (createDir)");
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;   // Update the listview displaying the folder...
 
@@ -503,18 +519,24 @@ void ArcStorageWindow::createDir()
 
 QString ArcStorageWindow::getURLOfItem(QTreeWidgetItem *item)
 {
+    // Convenience function for extracting a URL fomr an item.
+
     QVariant dataQV = item->data(0, Qt::ToolTipRole);
     return dataQV.toString();
 }
 
 void ArcStorageWindow::setURLOfItem(QTreeWidgetItem *item, QString URL)
 {
+    // Convenience function for assigning URL to tree item.
+
     QVariant dataQV = URL;
     item->setData(0, Qt::ToolTipRole, dataQV);
 }
 
 void ArcStorageWindow::setBusyUI(bool busy)
 {
+    // Enable/Disable user interface
+
     if (busy == true)
     {
         logger.msg(Arc::VERBOSE, "Disable UI");
@@ -546,6 +568,8 @@ void ArcStorageWindow::setBusyUI(bool busy)
 
 QString ArcStorageWindow::getCurrentURL()
 {
+    // Reurn current URL of the window.
+
     return m_currentFileServer->getCurrentURL();
 }
 
@@ -590,6 +614,9 @@ QMenu* ArcStorageWindow::getWindowListMenu()
 
 QString convertToSizeWithUnit(qint64 num_bytes)
 {
+    // Unit conversion function. Converts file size to a
+    // readable string.
+
     double KiB = 1024;
     double MiB = KiB * KiB;
     double GiB = KiB * MiB;
@@ -605,6 +632,7 @@ QString convertToSizeWithUnit(qint64 num_bytes)
     QString unit = "";
 
 
+    /*
     if (doubleNumBytes>YiB)
     {
         q = (double)doubleNumBytes/YiB;
@@ -641,7 +669,8 @@ QString convertToSizeWithUnit(qint64 num_bytes)
         q = (double)doubleNumBytes/MiB;
         unit = " MB";
     }
-    else if (doubleNumBytes>KiB)
+    */
+    if (doubleNumBytes>KiB)
     {
         q = (double)doubleNumBytes/KiB;
         unit = " kB";
@@ -652,12 +681,14 @@ QString convertToSizeWithUnit(qint64 num_bytes)
         unit = "";
     }
 
-    QString finalString = QString::number(q, 'g', 5)+unit;
+    QString finalString = QString("%L1").arg(int(q)) + unit;
     return finalString;
 }
 
 void ArcStorageWindow::updateFileTree()
 {
+    // Updates the file tree table
+
     logger.msg(Arc::VERBOSE, "Updating file list. (updateFileTree)");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
@@ -673,7 +704,7 @@ void ArcStorageWindow::updateFileTree()
         if (AFE->getFileType()==ARCDir)
         {
             item->setIcon(0,QIcon(":/resources/icons/16px/Folder Open.png"));
-            item->setText(3, "---");
+            item->setText(3, "");
             item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         }
         else
@@ -681,18 +712,24 @@ void ArcStorageWindow::updateFileTree()
             item->setIcon(0,QIcon(":/resources/icons/16px/Untitled.png"));
             item->setText(3, convertToSizeWithUnit(AFE->getSize()));
             item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            item->setTextAlignment(3, Qt::AlignRight);
+            item->setExpanded(false);
         }
         if (AFE->getFileType()==ARCDir)
-            item->setText(2, "folder");
+            item->setText(2, "-- folder --");
         else
-            item->setText(2, "file");
-        item->setText(1, AFE->getLastModfied().toString());
+        {
+            QFileInfo fi(AFE->getFileName());
+            item->setText(2, fi.suffix()+"-file");
+        }
+
+        item->setText(1, AFE->getLastModfied().toString("yyyy-MM-dd hh:mm"));
         setURLOfItem(item, AFE->getFilePath());
         ui->filesTreeWidget->addTopLevelItem(item);
     }
 
     ui->filesTreeWidget->setSortingEnabled(true);
-    ui->filesTreeWidget->sortByColumn(2, Qt::DescendingOrder);
+    ui->filesTreeWidget->sortByColumn(2, Qt::AscendingOrder);
     ui->filesTreeWidget->header()->setResizeMode(QHeaderView::ResizeToContents);
 
     for (int i=0; i<8; i++)
@@ -725,6 +762,8 @@ void ArcStorageWindow::updateFileTree()
 
 void ArcStorageWindow::updateFoldersTree()
 {
+    // Updates the folder tree on the left side.
+
     logger.msg(Arc::VERBOSE, "Updating folder tree. (updateFolderTree)");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
@@ -753,6 +792,8 @@ void ArcStorageWindow::updateFoldersTree()
 
 void ArcStorageWindow::updateFoldersTreeBelow()
 {
+    // Update folder tree below selected tree item.
+
     logger.msg(Arc::VERBOSE, "Update folders tree below. (updateFoldersTreeBelow)");
 
     m_currentFileServer->setNotifyParent(false);
@@ -770,7 +811,6 @@ void ArcStorageWindow::updateFoldersTreeBelow()
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
             item->setText(0, AFE->getFileName());
-            //item->setIcon(0, QIcon::fromTheme("folder"));
             item->setIcon(0, QIcon(":/resources/icons/16px/Folder Open.png"));
             setURLOfItem(item, AFE->getFilePath());
             // Create dummy child item so that the folder can be expanded, removed when folder is expanded
@@ -787,6 +827,8 @@ void ArcStorageWindow::updateFoldersTreeBelow()
 
 void ArcStorageWindow::updateBookmarkMenu()
 {
+    // Update bookmarks menu.
+
     for (int i=0; i<m_bookmarkActions.length(); i++)
         ui->menuBookmarks->removeAction(m_bookmarkActions.at(i));
 
@@ -802,6 +844,8 @@ void ArcStorageWindow::updateBookmarkMenu()
 
 void ArcStorageWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
 {
+    // Expands folder tree item.
+
     logger.msg(Arc::VERBOSE, "Expanding folder in tree. (expandFolderTreeWidget)");
 
     QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
@@ -1306,7 +1350,7 @@ void ArcStorageWindow::on_actionNewWindow_triggered()
 
 void ArcStorageWindow::on_filesTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
-    if (item->text(2)=="folder")
+    if (item->text(2)=="-- folder --")
     {
         QString clickedString = item->text(0);
         logger.msg(Arc::VERBOSE, "on_filesTreeWidget_itemDoubleClicked() %s", clickedString.toStdString());
@@ -1460,16 +1504,14 @@ void ArcStorageWindow::on_actionSettings_triggered()
             {
                 if (m_debugStream == 0)
                 {
-                    m_debugStream = new QDebugStream(std::cout, ui->textOutput);
-                    m_debugStream2 = new QDebugStream(std::cerr, ui->textOutput);
+                    m_debugStream = std::make_unique<QDebugStream>(std::cout, ui->textOutput);
+                    m_debugStream = std::make_unique<QDebugStream>(std::cerr, ui->textOutput);
                 }
             }
             else
             {
-                delete m_debugStream;
-                delete m_debugStream2;
-                m_debugStream = 0;
-                m_debugStream2 = 0;
+                m_debugStream = nullptr;
+                m_debugStream2 = nullptr;
             }
         }
     }
@@ -1602,7 +1644,7 @@ void ArcStorageWindow::on_actionDownloadSelected_triggered()
         for (int i=0; i<selectedItems.length(); i++)
         {
             QTreeWidgetItem* item = selectedItems.at(i);
-            if (item->text(2)=="file")
+            if (item->text(2)!="-- folder --")
             {
                 QVariant dataQV = item->data(0, Qt::ToolTipRole);
                 QUrl url = QUrl::fromLocalFile(dataQV.toString());
@@ -1805,7 +1847,7 @@ void ArcStorageWindow::on_actionOpenURLExt_triggered()
         for (int i=0; i<selectedItems.length(); i++)
         {
             QTreeWidgetItem* item = selectedItems.at(i);
-            if (item->text(2)=="file")
+            if (item->text(2)!="-- folder --")
             {
                 QVariant dataQV = item->data(0, Qt::ToolTipRole);
                 QUrl url = QUrl::fromLocalFile(dataQV.toString());
