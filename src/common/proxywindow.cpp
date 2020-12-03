@@ -12,7 +12,7 @@
 
 ProxyWindow::ProxyWindow(QWidget *parent, ArcProxyController* proxyController) :
     QDialog(parent),
-    ui(new Ui::ProxyWindow)
+    ui(std::make_unique<Ui::ProxyWindow>())
 {
     m_helpWindow = 0;
 
@@ -133,11 +133,6 @@ ProxyWindow::~ProxyWindow()
     }
 
     this->writeSettings();
-
-    if (m_helpWindow!=0)
-        delete m_helpWindow;
-
-    delete ui;
 }
 
 void ProxyWindow::on_generateButton_clicked()
@@ -278,7 +273,7 @@ void ProxyWindow::on_vomsConfigTable_cellChanged(int row, int column)
 
 void ProxyWindow::on_helpButton_clicked()
 {
-    m_helpWindow = new HelpWindow(this);
+    m_helpWindow = std::make_unique<HelpWindow>(this);
     m_helpWindow->setWindowFlags(m_helpWindow->windowFlags() | Qt::WindowStaysOnTopHint);
     m_helpWindow->show();
 }

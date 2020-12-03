@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QDialog>
 #include <QDebug>
 #include <QCloseEvent>
@@ -21,7 +23,7 @@ class ProxyWindow : public QDialog
 private:
     ArcProxyController* m_proxyController;
 
-    HelpWindow* m_helpWindow;
+    std::unique_ptr<HelpWindow> m_helpWindow;
 
     bool m_configTableDirty;
 
@@ -34,33 +36,21 @@ public:
     
 private Q_SLOTS:
     void on_generateButton_clicked();
-
     void on_removeButton_clicked();
-
     void on_proxyTypeCombo_currentIndexChanged(int index);
-
     void on_addVomsServer_clicked();
-
     void on_removeVomsServer_clicked();
-
     void on_addVomsServerConfig_clicked();
-
     void on_removeVomsServerConfig_clicked();
-
     void on_modifyVomsConfigItem_clicked();
-
     void on_vomsList_clicked(const QModelIndex &index);
-
     void on_vomsConfigTable_cellChanged(int row, int column);
-
     void on_helpButton_clicked();
-
     void on_NSSProfileList_itemClicked(QListWidgetItem *item);
-
     void on_tabWidget_currentChanged(int index);
 
 private:
-    Ui::ProxyWindow *ui;
+    std::unique_ptr<Ui::ProxyWindow> ui;
 };
 
 #endif // MAINWINDOW_H

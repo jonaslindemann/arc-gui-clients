@@ -21,7 +21,7 @@ public:
 
     QStringList getFileInfoLabels();
     void updateFileList(QString URL);
-    QVector<ARCFileElement*> &getFileList() { return fileList; }
+    QVector<std::shared_ptr<ARCFileElement>> &getFileList() { return fileList; }
     bool goUpOneFolder();
     QString getCurrentURL();
     QString getCurrentPath();
@@ -74,7 +74,7 @@ public Q_SLOTS:
 private:
     Arc::UserConfig* m_usercfg;
     QString m_currentUrlString;
-    QList<FileTransfer*> m_transferList;
+    QList<std::shared_ptr<FileTransfer>> m_transferList;
     bool m_notifyParent;
     bool initUserConfig();
     void updateFileListSilent(QString URL);

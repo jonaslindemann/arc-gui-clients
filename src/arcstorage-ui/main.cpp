@@ -58,8 +58,5 @@ int main(int argc, char *argv[])
     splash.raise();
 
     int result = app.exec();
-
-    Arc::ThreadInitializer().waitExit();
-
-    return result;
+     _Exit (result);
 }

@@ -22,7 +22,7 @@ ARCTools::ARCTools()
     :QObject()
 {
     m_userConfig = 0;
-    m_proxyController = new ArcProxyController();
+    m_proxyController = std::make_unique<ArcProxyController>();
     m_helpWindow = 0;
 }
 
@@ -32,7 +32,7 @@ bool ARCTools::initUserConfig(bool showUi)
 
     bool prereqFound = true;
 
-    m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+    m_userConfig = std::make_unique<Arc::UserConfig>("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
 
     ArcProxyController::TCertStatus certStatus = m_proxyController->checkCert();
 
@@ -83,33 +83,22 @@ bool ARCTools::initUserConfig(bool showUi)
     if (!prereqFound)
         return false;
 
-    delete m_userConfig;
-
-
-    //m_userConfig = new Arc::UserConfig("", "", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
-    m_userConfig = new Arc::UserConfig("", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
+    m_userConfig = std::make_unique<Arc::UserConfig>("", Arc::initializeCredentialsType(Arc::initializeCredentialsType::TryCredentials));
 #if ARC_VERSION_MAJOR >= 6
     m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY());
 #else
     m_userConfig->UtilsDirPath(Arc::UserConfig::ARCUSERDIRECTORY);
 #endif
-    //m_userConfig->CACertificatePath("/etc/grid-security/certificates");
     m_userConfig->CACertificatesDirectory("/etc/grid-security/certificates");
-
-    //if (!m_userConfig) {
-    //  logger.msg(Arc::ERROR, "Failed configuration initialization");
-    //  return 1;
-    //}
-
 
     return true;
 }
 
 Arc::UserConfig* ARCTools::currentUserConfig()
 {
-    if (m_userConfig == 0)
+    if (m_userConfig == nullptr)
         this->initUserConfig();
-    return m_userConfig;
+    return m_userConfig.get();
 }
 
 bool ARCTools::hasValidProxy()
@@ -180,7 +169,7 @@ void ARCTools::showHelpWindow(QMainWindow* window)
 {
     if (m_helpWindow == 0)
     {
-        m_helpWindow = new HelpWindow(window);
+        m_helpWindow = std::make_unique<HelpWindow>(window);
 
         int x, y;
         int screenWidth;
@@ -204,8 +193,5 @@ void ARCTools::showHelpWindow(QMainWindow* window)
 void ARCTools::closeHelpWindow()
 {
     if (m_helpWindow!=0)
-    {
         m_helpWindow->close();
-        delete m_helpWindow;
-    }
 }

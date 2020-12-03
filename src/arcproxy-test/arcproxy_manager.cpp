@@ -604,11 +604,7 @@ bool ArcProxyManager::init()
     if (m_debug.empty() && !usercfg.Verbosity().empty())
         Arc::Logger::getRootLogger().setThreshold(Arc::istring_to_level(usercfg.Verbosity()));
 
-
-    //if (!params.empty()) {
-    //    logger.msg(Arc::ERROR, "Wrong number of arguments!");
-    //    return EXIT_FAILURE;
-    //}
+    return true;
 }
 
 int ArcProxyManager::removeProxy()
@@ -847,6 +843,7 @@ int ArcProxyManager::showInfoList()
         }
         return EXIT_SUCCESS;
     }
+    return EXIT_SUCCESS;
 }
 
 int ArcProxyManager::createProxy()

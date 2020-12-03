@@ -11,7 +11,7 @@
 
 CertConvertWindow::CertConvertWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::CertConvertWindow)
+    ui(std::make_unique<Ui::CertConvertWindow>())
 {
     // Certificate Windows constructor
 
@@ -19,8 +19,8 @@ CertConvertWindow::CertConvertWindow(QWidget *parent) :
 
     // Redirect standard output
 
-    m_debugStream = new QDebugStream(std::cout, this);
-    m_debugStream2 = new QDebugStream(std::cerr, this);
+    m_debugStream = std::make_unique<QDebugStream>(std::cout, this);
+    m_debugStream2 = std::make_unique<QDebugStream>(std::cerr, this);
 
     // Set default values
 
@@ -43,16 +43,10 @@ CertConvertWindow::CertConvertWindow(QWidget *parent) :
     ui->userkeyFileText->setText(m_keyFilename);
     ui->pkcsFileText->setText(m_pkcs12Filename);
     ui->certKeyDirText->setText(globusDir.absolutePath());
-
 }
 
 CertConvertWindow::~CertConvertWindow()
 {
-    // Clean up after us
-
-    delete ui;
-    delete m_debugStream;
-    delete m_debugStream2;
 }
 
 void CertConvertWindow::customEvent(QEvent * event)

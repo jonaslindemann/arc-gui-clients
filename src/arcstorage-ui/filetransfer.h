@@ -63,9 +63,9 @@ private:
     Arc::URL m_destUrl;
     Arc::DataHandle m_sourceHandle;
     Arc::DataHandle m_destHandle;
-    Arc::DataMover* m_mover;
-    Arc::FileCache* m_cache;
-    Arc::URLMap* m_urlMap;
+    std::unique_ptr<Arc::DataMover> m_mover;
+    std::unique_ptr<Arc::FileCache> m_cache;
+    std::unique_ptr<Arc::URLMap> m_urlMap;
     Arc::UserConfig* m_config;
     Arc::DataStatus m_status;
     Arc::SimpleCondition m_cond;

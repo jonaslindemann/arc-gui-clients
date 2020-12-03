@@ -1,6 +1,8 @@
 #ifndef FILETRANSFERLIST_H
 #define FILETRANSFERLIST_H
 
+#include <memory>
+
 #include <QMutex>
 #include <QList>
 #include <QHash>
@@ -44,10 +46,10 @@ class FileTransferList : public QObject
 {
     Q_OBJECT
 private:
-    QList<FileTransfer*> m_transferList;
-    QList<FileTransfer*> m_activeTransferList;
-    QHash<QString, FileTransfer*> m_transferDict;
-    QHash<QString, FileTransfer*> m_activeTransferDict;
+    QList<std::shared_ptr<FileTransfer>> m_transferList;
+    QList<std::shared_ptr<FileTransfer>> m_activeTransferList;
+    QHash<QString, std::shared_ptr<FileTransfer>> m_transferDict;
+    QHash<QString, std::shared_ptr<FileTransfer>> m_activeTransferDict;
     FileTransferProcessingThread* m_fileProcessingThread;
     QMutex m_accessMutex;
     int m_maxTransfers;
@@ -93,9 +95,10 @@ public:
     void setProcessingThread(FileTransferProcessingThread* processingThread);
 
     /// Adds a FileTransfer object to the list.
-    void addTransfer(FileTransfer* fileTransfer);
+    void addTransfer(std::shared_ptr<FileTransfer> fileTransfer);
 
     /// Remove a FileTransfer object from the list.
+    void removeTransfer(std::shared_ptr<FileTransfer> fileTransfer);
     void removeTransfer(FileTransfer* fileTransfer);
 
     /// Return a FileTransfer object from the list
@@ -103,7 +106,7 @@ public:
      * @param i is the position in the list.
      * @return a valid FileTransfer object. If i is outside the list a null pointer is returned.
      */
-    FileTransfer* getTransfer(int i);
+    std::shared_ptr<FileTransfer> getTransfer(int i);
 
     /// Returns the size of the transfer list.
     int getTransferCount();
@@ -114,7 +117,7 @@ public:
      * @return a valid FilaTransfer object if the id of the FileTransfer object is found, otherwise
      * return a null object.
      */
-    FileTransfer* getTransfer(QString id);
+    std::shared_ptr<FileTransfer> getTransfer(QString id);
 
     /// Cancels all idle transfers.
     /**

@@ -131,14 +131,20 @@ QMenu* GlobalStateInfo::windowMenu()
 
 void GlobalStateInfo::addChildWindow(ArcStorageWindow* window)
 {
-    m_childWindows.append(window);
+    m_childWindows.append(std::shared_ptr<ArcStorageWindow>(window));
     this->enumerateWindows();
 }
 
 void GlobalStateInfo::removeChildWindow(ArcStorageWindow* window)
 {
-    m_childWindows.removeOne(window);
-    delete window;
+    for (int i=0; i<m_childWindows.size(); i++)
+    {
+        if (m_childWindows.at(i).get()==window)
+        {
+            m_childWindows.removeAt(i);
+            break;
+        }
+    }
     this->enumerateWindows();
 }
 
@@ -167,7 +173,7 @@ void GlobalStateInfo::enumerateWindows()
 ArcStorageWindow* GlobalStateInfo::getChildWindow(int idx)
 {
     if ((idx>=0)&&(idx<m_childWindows.count()))
-        return m_childWindows.at(idx);
+        return m_childWindows.at(idx).get();
     else
         return 0;
 }
@@ -178,8 +184,7 @@ void GlobalStateInfo::updateWindowList(QMenu* menu)
 
 void GlobalStateInfo::showTransferWindow()
 {
-    if (m_transferListWindow == 0)
-        m_transferListWindow = new TransferListWindow(m_mainWindow);
+    m_transferListWindow = std::make_unique<TransferListWindow>(m_mainWindow);
 
     Qt::WindowFlags flags = m_transferListWindow->windowFlags();
     m_transferListWindow->setWindowFlags(flags | Qt::WindowStaysOnTopHint);
@@ -190,6 +195,7 @@ void GlobalStateInfo::showTransferWindow()
             m_transferListWindow->size(),
             qApp->desktop()->availableGeometry()
         ));
+
     m_transferListWindow->show();
 }
 

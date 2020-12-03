@@ -1,6 +1,8 @@
 #ifndef CertConvertWindow_H
 #define CertConvertWindow_H
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QDebug>
 
@@ -14,8 +16,8 @@ class CertConvertWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    QDebugStream* m_debugStream;
-    QDebugStream* m_debugStream2;
+    std::unique_ptr<QDebugStream> m_debugStream;
+    std::unique_ptr<QDebugStream> m_debugStream2;
 
     QString m_certificateFilename;
     QString m_keyFilename;
@@ -37,21 +39,15 @@ protected:
 private Q_SLOTS:
 
     void on_convertToPKCS12Button_clicked();
-
     void on_selectCertFileButton_clicked();
-
     void on_selectKeyButton_clicked();
-
     void on_selectPKCS12FileButton_clicked();
-
     void on_selectPKCS12ImportFileButton_clicked();
-
     void on_selectCertKeyOutputDirButton_clicked();
-
     void on_convertToX509Button_clicked();
 
 private:
-    Ui::CertConvertWindow *ui;
+    std::unique_ptr<Ui::CertConvertWindow> ui;
 };
 
 #endif // CertConvertWindow_H

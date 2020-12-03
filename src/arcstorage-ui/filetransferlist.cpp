@@ -84,11 +84,9 @@ void FileTransferList::processTransfers()
     int idleCount = 0;
     for (int i=0; i<m_transferList.length(); i++)
     {
-        FileTransfer* xfr = m_transferList.at(i);
-        //qDebug() << "checking: " << xfr->id();
+        auto xfr = m_transferList.at(i);
         if (xfr->transferState()==TS_IDLE)
         {
-            //qDebug() << xfr->id() << " is idle.";
             idleCount++;
             if (m_activeTransferList.length()<m_maxTransfers)
             {
@@ -99,21 +97,20 @@ void FileTransferList::processTransfers()
             }
         }
     }
-    //qDebug() << "processTransfers: idle = " << idleCount << "active = " << m_activeTransferList.length()<< " total = " << m_transferList.length();
     m_accessMutex.unlock();
 }
 
-void FileTransferList::addTransfer(FileTransfer* fileTransfer)
+void FileTransferList::addTransfer(std::shared_ptr<FileTransfer> fileTransfer)
 {
     m_accessMutex.lock();
     m_transferList.append(fileTransfer);
     m_transferDict[fileTransfer->id()] = fileTransfer;
     Q_EMIT onAddTransfer(fileTransfer->id());
-    connect(fileTransfer, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+    connect(fileTransfer.get(), SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
     m_accessMutex.unlock();
 }
 
-void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
+void FileTransferList::removeTransfer(std::shared_ptr<FileTransfer> fileTransfer)
 {
     m_accessMutex.lock();
     m_transferList.removeOne(fileTransfer);
@@ -121,7 +118,36 @@ void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
     m_activeTransferList.removeOne(fileTransfer);
     m_activeTransferDict.remove(fileTransfer->id());
     Q_EMIT onRemoveTransfer(fileTransfer->id());
-    delete fileTransfer;
+    m_accessMutex.unlock();
+}
+
+void FileTransferList::removeTransfer(FileTransfer* fileTransfer)
+{
+    m_accessMutex.lock();
+
+    for (int i=0; i<m_transferList.size(); i++)
+    {
+       if (m_transferList.at(i).get() == fileTransfer)
+       {
+           m_transferList.removeAt(i);
+           break;
+       }
+    }
+
+    m_transferDict.remove(fileTransfer->id());
+
+    for (int i=0; i<m_activeTransferList.size(); i++)
+    {
+        if (m_activeTransferList.at(i).get() == fileTransfer)
+        {
+            m_activeTransferList.removeAt(i);
+            break;
+        }
+    }
+
+    //m_activeTransferList.removeOne(fileTransfer);
+    m_activeTransferDict.remove(fileTransfer->id());
+    Q_EMIT onRemoveTransfer(fileTransfer->id());
     m_accessMutex.unlock();
 }
 
@@ -129,13 +155,13 @@ void FileTransferList::cancelAllTransfers()
 {
     m_accessMutex.lock();
 
-    QList<FileTransfer*> removeTransferList;
+    QList<std::shared_ptr<FileTransfer>> removeTransferList;
 
     // Only remove idle transfers
 
     for (int i=0; i<m_transferList.length(); i++)
     {
-        FileTransfer* xfr = m_transferList.at(i);
+        auto xfr = m_transferList.at(i);
 
         if (xfr->transferState() == TS_IDLE)
             removeTransferList.append(xfr);
@@ -143,21 +169,20 @@ void FileTransferList::cancelAllTransfers()
 
     for (int i=0; i<removeTransferList.count(); i++)
     {
-        FileTransfer* xfr = removeTransferList.at(i);
+        auto xfr = removeTransferList.at(i);
         m_transferList.removeOne(xfr);
         m_transferDict.remove(xfr->id());
         m_activeTransferList.removeOne(xfr);
         m_activeTransferDict.remove(xfr->id());
         Q_EMIT onRemoveTransfer(xfr->id());
-        delete xfr;
     }
     m_accessMutex.unlock();
 }
 
-FileTransfer* FileTransferList::getTransfer(int i)
+std::shared_ptr<FileTransfer> FileTransferList::getTransfer(int i)
 {
     m_accessMutex.lock();
-    FileTransfer* xfr = m_transferList.at(i);
+    auto xfr = m_transferList.at(i);
     m_accessMutex.unlock();
     return xfr;
 }
@@ -168,9 +193,9 @@ int FileTransferList::getTransferCount()
     return count;
 }
 
-FileTransfer* FileTransferList::getTransfer(QString id)
+std::shared_ptr<FileTransfer> FileTransferList::getTransfer(QString id)
 {
-    FileTransfer* xfr = 0;
+    std::shared_ptr<FileTransfer> xfr;
     if (m_transferDict.contains(id))
         xfr = m_transferDict[id];
     return xfr;
@@ -178,7 +203,7 @@ FileTransfer* FileTransferList::getTransfer(QString id)
 
 void FileTransferList::updateStatus(QString id, unsigned long transferred, unsigned long totalSize)
 {
-    FileTransfer* xfr = this->getTransfer(id);
+    auto xfr = this->getTransfer(id);
     xfr->updateTransferStatus(transferred, totalSize);
     Q_EMIT onUpdateStatus(id);
 }

@@ -77,10 +77,6 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
     m_nocopy = false;
     m_recursion = 0;
 
-    m_mover = 0;
-    m_cache = 0;
-    m_urlMap = 0;
-
     m_id = convertPointerToStringAddress(this);
     m_transferred = 0;
     m_totalSize = 0;
@@ -91,14 +87,6 @@ FileTransfer::FileTransfer(const std::string& source_str, const std::string& des
 
 FileTransfer::~FileTransfer()
 {
-    if (m_cache!=0)
-        delete m_cache;
-
-    if (m_mover!=0)
-        delete m_mover;
-
-    if (m_urlMap!=0)
-        delete m_urlMap;
 }
 
 TTransferState FileTransfer::transferState()
@@ -210,15 +198,8 @@ bool FileTransfer::execute()
         return false;
     }
 
-    if (m_urlMap!=0)
-        delete m_urlMap;
-
-    m_urlMap = new Arc::URLMap();
-
-    if (m_mover!=0)
-        delete m_mover;
-
-    m_mover = new Arc::DataMover();
+    m_urlMap = std::make_unique<Arc::URLMap>();
+    m_mover = std::make_unique<Arc::DataMover>();
 
     m_mover->secure(m_secure);
     m_mover->passive(m_passive);
@@ -231,10 +212,7 @@ bool FileTransfer::execute()
         m_destHandle->SetTries(m_retries);
     }
 
-    if (m_cache!=0)
-        delete m_cache;
-
-    m_cache = new Arc::FileCache();
+    m_cache = std::make_unique<Arc::FileCache>();
 
     // Add callback for progress information.
 
@@ -281,8 +259,7 @@ void FileTransfer::wait()
 
 void FileTransfer::cancel()
 {
-    if (m_mover!=0)
-        delete m_mover;
+    m_mover = nullptr;
 }
 
 void FileTransfer::completed(Arc::DataStatus res, std::string error)

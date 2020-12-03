@@ -19,8 +19,8 @@ void FileServer::clearFileList()
 {
     int i;
 
-    for (i=0; i<fileList.size(); i++)
-        delete fileList.at(i);
+    //for (i=0; i<fileList.size(); i++)
+    //    delete fileList.at(i);
 
     fileList.clear();
 }

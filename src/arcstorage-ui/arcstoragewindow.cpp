@@ -46,7 +46,7 @@ const QString ArcStorageWindow::CHANGE_PERMISSIONS_TEXT = QString("Change permis
 
 ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Url):
     QMainWindow(parent),
-    ui(new Ui::ArcStorageWindow)
+    ui(std::make_unique<Ui::ArcStorageWindow>())
 {
     if (!childWindow)
     {
@@ -70,10 +70,10 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     m_folderWidgetBeingUpdated = NULL;
     m_currentUpdateFileListsMode = CUFLM_clickedBrowse;
-    m_transferWindow = 0;
-    m_filePropertyInspector = 0;
+    m_transferWindow = nullptr;
+    m_filePropertyInspector = nullptr;
     m_startUrl = Url;
-    m_tarProcess = 0;
+    m_tarProcess = nullptr;
 
     // Initialise Qt user interface
 
@@ -125,24 +125,24 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
     // Get fileserver and wire it up
 
-    m_currentFileServer = new ArcFileServer();
+    //m_currentFileServer = new ArcFileServer();
+    m_currentFileServer = std::make_unique<ArcFileServer>();
 
     // So basically we handle everything using a SRMFileServer (...)
 
-    ArcFileServer* arcFileServer = m_currentFileServer;
-    connect(arcFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
-    connect(arcFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
-    connect(arcFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
-    connect(arcFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
-    connect(arcFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
-    connect(arcFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+    connect(m_currentFileServer.get(), SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(m_currentFileServer.get(), SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(m_currentFileServer.get(), SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget
 
-    fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
-    fileTreeHeaderLabels.append("");
-    ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
-    ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
+    m_fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
+    m_fileTreeHeaderLabels.append("");
+    ui->filesTreeWidget->setColumnCount(m_fileTreeHeaderLabels.size());
+    ui->filesTreeWidget->setHeaderLabels(m_fileTreeHeaderLabels);
     ui->filesTreeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
     ui->filesTreeWidget->setEditTriggers(QTreeWidget::SelectedClicked | QTreeWidget::EditKeyPressed);
 
@@ -226,7 +226,8 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
     if (!m_childWindow)
     {
         logger.msg(Arc::INFO, "File transfer thread starting...");
-        m_fileProcessingThread = new FileTransferProcessingThread();
+        //m_fileProcessingThread = new FileTransferProcessingThread();
+        m_fileProcessingThread = std::make_unique<FileTransferProcessingThread>();
         m_fileProcessingThread->start();
     }
 
@@ -235,7 +236,6 @@ ArcStorageWindow::ArcStorageWindow(QWidget *parent, bool childWindow, QString Ur
 
 ArcStorageWindow::~ArcStorageWindow()
 {
-    delete ui;
 }
 
 void ArcStorageWindow::setWindowId(int id)
@@ -575,6 +575,7 @@ QString ArcStorageWindow::getCurrentURL()
 
 QMenu* ArcStorageWindow::getWindowListMenu()
 {
+    return nullptr;
 }
 
 
@@ -691,14 +692,14 @@ void ArcStorageWindow::updateFileTree()
 
     logger.msg(Arc::VERBOSE, "Updating file list. (updateFileTree)");
 
-    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
+    QVector<std::shared_ptr<ARCFileElement>> fileList = m_currentFileServer->getFileList();
 
     ui->filesTreeWidget->clear();
     ui->filesTreeWidget->setSortingEnabled(false);
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement* AFE = fileList.at(i);
+        std::shared_ptr<ARCFileElement> AFE = fileList.at(i);
         QTreeWidgetItem *item = new QTreeWidgetItem;
         item->setText(0, AFE->getFileName());
         if (AFE->getFileType()==ARCDir)
@@ -766,14 +767,14 @@ void ArcStorageWindow::updateFoldersTree()
 
     logger.msg(Arc::VERBOSE, "Updating folder tree. (updateFolderTree)");
 
-    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
+    QVector<std::shared_ptr<ARCFileElement>> fileList = m_currentFileServer->getFileList();
     m_folderListUrl = m_currentFileServer->getCurrentURL();
 
     ui->foldersTreeWidget->clear();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement* AFE = fileList.at(i);
+        std::shared_ptr<ARCFileElement> AFE = fileList.at(i);
         if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
@@ -800,13 +801,13 @@ void ArcStorageWindow::updateFoldersTreeBelow()
     QString currentURL = m_currentFileServer->getCurrentURL();
     m_currentFileServer->goUpOneFolder();
 
-    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
+    QVector<std::shared_ptr<ARCFileElement>> fileList = m_currentFileServer->getFileList();
 
     ui->foldersTreeWidget->clear();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement* AFE = fileList.at(i);
+        std::shared_ptr<ARCFileElement> AFE = fileList.at(i);
         if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
@@ -848,11 +849,11 @@ void ArcStorageWindow::expandFolderTreeWidget(QTreeWidgetItem *folderWidget)
 
     logger.msg(Arc::VERBOSE, "Expanding folder in tree. (expandFolderTreeWidget)");
 
-    QVector<ARCFileElement*> fileList = m_currentFileServer->getFileList();
+    QVector<std::shared_ptr<ARCFileElement>> fileList = m_currentFileServer->getFileList();
 
     for (int i = 0; i < fileList.size(); ++i)
     {
-        ARCFileElement* AFE = fileList.at(i);
+        std::shared_ptr<ARCFileElement> AFE = fileList.at(i);
         if (AFE->getFileType() == ARCDir)  // If this item in the file list is a folder...
         {
             QTreeWidgetItem *item = new QTreeWidgetItem;
@@ -1431,27 +1432,21 @@ void ArcStorageWindow::openUrl(QString url)
 
     this->pushUrl(m_currentFileServer->getCurrentURL());
 
-    // Delete previous file server
-
-    if (m_currentFileServer!=0)
-        delete m_currentFileServer;
-
     // Create and wire up new file server.
 
-    m_currentFileServer = new ArcFileServer();
-    ArcFileServer* arcFileServer = m_currentFileServer;
-    connect(arcFileServer, SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
-    connect(arcFileServer, SIGNAL(onError(QString)), this, SLOT(onError(QString)));
-    connect(arcFileServer, SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
-    connect(arcFileServer, SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
-    connect(arcFileServer, SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
-    connect(arcFileServer, SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
+    m_currentFileServer = std::make_unique<ArcFileServer>();
+    connect(m_currentFileServer.get(), SIGNAL(onFileListFinished(bool, QString)), this, SLOT(onFileListFinished(bool, QString)));
+    connect(m_currentFileServer.get(), SIGNAL(onError(QString)), this, SLOT(onError(QString)));
+    connect(m_currentFileServer.get(), SIGNAL(onCopyFromServerFinished(bool)), this, SLOT(onCopyFromServerFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onDeleteFinished(bool)), this, SLOT(onDeleteFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onMakeDirFinished(bool)), this, SLOT(onMakeDirFinished(bool)));
+    connect(m_currentFileServer.get(), SIGNAL(onCopyToServerFinished(bool, QList<QString>&)), this, SLOT(onCopyToServerFinished(bool, QList<QString>&)));
 
     // Setup the headers in the file tree widget (in case it's a new file server)
 
-    fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
-    ui->filesTreeWidget->setColumnCount(fileTreeHeaderLabels.size());
-    ui->filesTreeWidget->setHeaderLabels(fileTreeHeaderLabels);
+    m_fileTreeHeaderLabels = m_currentFileServer->getFileInfoLabels();
+    ui->filesTreeWidget->setColumnCount(m_fileTreeHeaderLabels.size());
+    ui->filesTreeWidget->setHeaderLabels(m_fileTreeHeaderLabels);
 
     while (url.endsWith('/')) { url = url.left(url.length() - 1); }  // Get rid of trailing /
 
@@ -1602,9 +1597,7 @@ void ArcStorageWindow::on_actionShowFileProperties_triggered()
 
     if (selectedItems.size() != 0)
     {
-        if (m_filePropertyInspector == 0)
-            m_filePropertyInspector = new FilePropertyInspector(this);
-
+        m_filePropertyInspector = std::make_unique<FilePropertyInspector>(this);
         m_filePropertyInspector->show();
         QMap<QString, QString> propertyMap = m_currentFileServer->fileProperties(getURLOfItem(selectedItems.at(0)));
         m_filePropertyInspector->setProperties(propertyMap);
@@ -1774,14 +1767,13 @@ void ArcStorageWindow::on_actionUploadDirAndArchive_triggered()
         QString currentTimeStamp = currentTime.toString("yyyyMMdd-hhmmss");
         m_tarFilename = m_tarDestDir+"/"+dirName+"-"+currentTimeStamp+".tar.gz";
 
-        if (m_tarProcess != 0)
-            delete m_tarProcess;
+        m_tarProcess = nullptr;
 
-        m_tarProcess = new QProcess(this);
+        m_tarProcess = std::make_unique<QProcess>(this);
 
-        connect(m_tarProcess, SIGNAL(readyReadStandardError()), this, SLOT(onTarErrorOutput()));
-        connect(m_tarProcess, SIGNAL(readyReadStandardOutput()), this, SLOT(onTarStandardOutput()));
-        connect(m_tarProcess, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onTarFinished(int,QProcess::ExitStatus)));
+        connect(m_tarProcess.get(), SIGNAL(readyReadStandardError()), this, SLOT(onTarErrorOutput()));
+        connect(m_tarProcess.get(), SIGNAL(readyReadStandardOutput()), this, SLOT(onTarStandardOutput()));
+        connect(m_tarProcess.get(), SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onTarFinished(int,QProcess::ExitStatus)));
         m_tarProcess->start("tar cvzf "+m_tarFilename+" "+selectedDir);
         m_tarProcess->waitForStarted();
 

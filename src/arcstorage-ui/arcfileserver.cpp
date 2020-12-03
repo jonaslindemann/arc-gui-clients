@@ -26,94 +26,94 @@
 #include <map>
 
 void print_urls(const Arc::FileInfo& file) {
-  for (std::list<Arc::URL>::const_iterator u = file.GetURLs().begin();
-       u != file.GetURLs().end(); u++)
-    std::cout << "\t" << *u << std::endl;
+    for (std::list<Arc::URL>::const_iterator u = file.GetURLs().begin();
+         u != file.GetURLs().end(); u++)
+        std::cout << "\t" << *u << std::endl;
 }
 
 void print_meta(const Arc::FileInfo& file) {
-  std::map<std::string, std::string> md = file.GetMetaData();
-  for (std::map<std::string, std::string>::iterator mi = md.begin(); mi != md.end(); ++mi)
-    std::cout<<mi->first<<":"<<mi->second<<std::endl;
+    std::map<std::string, std::string> md = file.GetMetaData();
+    for (std::map<std::string, std::string>::iterator mi = md.begin(); mi != md.end(); ++mi)
+        std::cout<<mi->first<<":"<<mi->second<<std::endl;
 }
 
 // formatted output of details when long list is requested
 void print_details(const std::list<Arc::FileInfo>& files, bool show_urls, bool show_meta) {
 
-  if (files.empty()) return;
+    if (files.empty()) return;
 
-  unsigned int namewidth = 0;
-  unsigned int sizewidth = 0;
-  unsigned int csumwidth = 0;
+    unsigned int namewidth = 0;
+    unsigned int sizewidth = 0;
+    unsigned int csumwidth = 0;
 
-  // find longest length of each field to align the output
-  for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
-      i != files.end(); i++) {
-    if (i->GetName().length() > namewidth) namewidth = i->GetName().length();
-    if (i->CheckSize() && i->GetSize() > 0 && // log(0) not good!
-        (unsigned int)(log10(i->GetSize()))+1 > sizewidth) sizewidth = (unsigned int)(log10(i->GetSize()))+1;
-    if (i->CheckCheckSum() && i->GetCheckSum().length() > csumwidth) csumwidth = i->GetCheckSum().length();
-  }
-  std::cout << std::setw(namewidth) << std::left << "<Name> ";
-  std::cout << "<Type>  ";
-  std::cout << std::setw(sizewidth + 4) << std::left << "<Size>     ";
-  std::cout << "<Modified>      ";
-  std::cout << "<Validity> ";
-  std::cout << "<CheckSum> ";
-  std::cout << std::setw(csumwidth) << std::right << "<Latency>";
-  std::cout << std::endl;
-
-  // set minimum widths to accommodate headers
-  if (namewidth < 7) namewidth = 7;
-  if (sizewidth < 7) sizewidth = 7;
-  if (csumwidth < 8) csumwidth = 8;
-  for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
-       i != files.end(); i++) {
-    std::cout << std::setw(namewidth) << std::left << i->GetName();
-    switch (i->GetType()) {
-      case Arc::FileInfo::file_type_file:
-        std::cout << "  file";
-        break;
-
-      case Arc::FileInfo::file_type_dir:
-        std::cout << "   dir";
-        break;
-
-      default:
-        std::cout << " (n/a)";
-        break;
+    // find longest length of each field to align the output
+    for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
+         i != files.end(); i++) {
+        if (i->GetName().length() > namewidth) namewidth = i->GetName().length();
+        if (i->CheckSize() && i->GetSize() > 0 && // log(0) not good!
+                (unsigned int)(log10(i->GetSize()))+1 > sizewidth) sizewidth = (unsigned int)(log10(i->GetSize()))+1;
+        if (i->CheckCheckSum() && i->GetCheckSum().length() > csumwidth) csumwidth = i->GetCheckSum().length();
     }
-    if (i->CheckSize()) {
-      std::cout << " " << std::setw(sizewidth) << std::right << Arc::tostring(i->GetSize());
-    } else {
-      std::cout << " " << std::setw(sizewidth) << std::right << "  (n/a)";
-    }
-#if ARC_VERSION_MAJOR >= 3
-    if (i->CheckModified()) {
-      std::cout << " " << i->GetModified();
-    } else {
-      std::cout << "       (n/a)        ";
-    }
-#endif
-    if (i->CheckValid()) {
-      std::cout << " " << i->GetValid();
-    } else {
-      std::cout << "   (n/a)  ";
-    }
-    if (i->CheckCheckSum()) {
-      std::cout << " " << std::setw(csumwidth) << std::left << i->GetCheckSum();
-    } else {
-      std::cout << " " << std::setw(csumwidth) << std::left << "   (n/a)";
-    }
-    if (i->CheckLatency()) {
-      std::cout << "    " << i->GetLatency();
-    } else {
-      std::cout << "      (n/a)";
-    }
+    std::cout << std::setw(namewidth) << std::left << "<Name> ";
+    std::cout << "<Type>  ";
+    std::cout << std::setw(sizewidth + 4) << std::left << "<Size>     ";
+    std::cout << "<Modified>      ";
+    std::cout << "<Validity> ";
+    std::cout << "<CheckSum> ";
+    std::cout << std::setw(csumwidth) << std::right << "<Latency>";
     std::cout << std::endl;
-    if (show_urls) print_urls(*i);
-    if (show_meta) print_meta(*i);
-  }
+
+    // set minimum widths to accommodate headers
+    if (namewidth < 7) namewidth = 7;
+    if (sizewidth < 7) sizewidth = 7;
+    if (csumwidth < 8) csumwidth = 8;
+    for (std::list<Arc::FileInfo>::const_iterator i = files.begin();
+         i != files.end(); i++) {
+        std::cout << std::setw(namewidth) << std::left << i->GetName();
+        switch (i->GetType()) {
+        case Arc::FileInfo::file_type_file:
+            std::cout << "  file";
+            break;
+
+        case Arc::FileInfo::file_type_dir:
+            std::cout << "   dir";
+            break;
+
+        default:
+            std::cout << " (n/a)";
+            break;
+        }
+        if (i->CheckSize()) {
+            std::cout << " " << std::setw(sizewidth) << std::right << Arc::tostring(i->GetSize());
+        } else {
+            std::cout << " " << std::setw(sizewidth) << std::right << "  (n/a)";
+        }
+#if ARC_VERSION_MAJOR >= 3
+        if (i->CheckModified()) {
+            std::cout << " " << i->GetModified();
+        } else {
+            std::cout << "       (n/a)        ";
+        }
+#endif
+        if (i->CheckValid()) {
+            std::cout << " " << i->GetValid();
+        } else {
+            std::cout << "   (n/a)  ";
+        }
+        if (i->CheckCheckSum()) {
+            std::cout << " " << std::setw(csumwidth) << std::left << i->GetCheckSum();
+        } else {
+            std::cout << " " << std::setw(csumwidth) << std::left << "   (n/a)";
+        }
+        if (i->CheckLatency()) {
+            std::cout << "    " << i->GetLatency();
+        } else {
+            std::cout << "      (n/a)";
+        }
+        std::cout << std::endl;
+        if (show_urls) print_urls(*i);
+        if (show_meta) print_meta(*i);
+    }
 }
 
 ArcFileServer::ArcFileServer()
@@ -207,8 +207,6 @@ void ArcFileServer::updateFileList(QString URL)
         {
             m_currentUrlString = URL;
 
-            int i;
-
             this->clearFileList();
 
             currentPath = URL;
@@ -242,7 +240,7 @@ void ArcFileServer::updateFileList(QString URL)
 #endif
                 timeCreated.setTime_t(timet);
 
-                if (!fileNameQS.indexOf(".")==0) // Don't show hidden files.
+                if (fileNameQS.indexOf(".")!=0) // Don't show hidden files.
                 {
                     if (ft == ARCDir)
                     {
@@ -252,18 +250,18 @@ void ArcFileServer::updateFileList(QString URL)
                             fileNameQS = fileNameQS.left(fileNameQS.lastIndexOf('/'));
                     }
 
-                    ARCFileElement* arcFileElement = new ARCFileElement(fileNameQS,
-                                                                        URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
-                                                                        ft,
-                                                                        QString("???"), //fileInfoList.at(i).group(),
-                                                                        false, //fileInfoList.at(i).isExecutable(),
-                                                                        false, // fileInfoList.at(i).isReadable(),
-                                                                        false, //fileInfoList.at(i).isWritable(),
-                                                                        timeCreated, // fileInfoList.at(i).lastModified(),
-                                                                        QDateTime(), // fileInfoList.at(i).lastRead(),
-                                                                        QString("???"), // fileInfoList.at(i).owner(),
-                                                                        0, // fileInfoList.at(i).permissions(),
-                                                                        arcFile->GetSize());
+                    std::shared_ptr<ARCFileElement> arcFileElement = std::make_shared<ARCFileElement>(fileNameQS,
+                                                                                                      URL + "/" + fileNameQS, //fileInfoList.at(i).absoluteFilePath(),
+                                                                                                      ft,
+                                                                                                      QString("???"), //fileInfoList.at(i).group(),
+                                                                                                      false, //fileInfoList.at(i).isExecutable(),
+                                                                                                      false, // fileInfoList.at(i).isReadable(),
+                                                                                                      false, //fileInfoList.at(i).isWritable(),
+                                                                                                      timeCreated, // fileInfoList.at(i).lastModified(),
+                                                                                                      QDateTime(), // fileInfoList.at(i).lastRead(),
+                                                                                                      QString("???"), // fileInfoList.at(i).owner(),
+                                                                                                      0, // fileInfoList.at(i).permissions(),
+                                                                                                      arcFile->GetSize());
                     fileList.append(arcFileElement);
                 }
             }
@@ -277,7 +275,7 @@ void ArcFileServer::updateFileList(QString URL)
 bool ArcFileServer::goUpOneFolder()
 {
     QString url = m_currentUrlString.left(m_currentUrlString.lastIndexOf('/'));
-    //if (url.length() > (int)strlen("SRM://"))
+
     if (url.length() > 4)
     {
         updateFileList(url);
@@ -306,15 +304,14 @@ bool ArcFileServer::copyFromServer(QString sourcePath, QString destinationPath)
 
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
-    FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+    auto xfr = std::make_shared<FileTransfer>(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
     FileTransferList::instance()->addTransfer(xfr);
-    connect(xfr, SIGNAL(onCompleted(FileTransfer*, Arc::DataStatus, QString)), this, SLOT(onCompleted(FileTransfer*, Arc::DataStatus, QString)));
+    connect(xfr.get(), SIGNAL(onCompleted(FileTransfer*, Arc::DataStatus, QString)), this, SLOT(onCompleted(FileTransfer*, Arc::DataStatus, QString)));
 
     if (!xfr->execute()) // Startar filöverföringen asynkront.
     {
         logger.msg(Arc::ERROR, "File transfer failed.");
         m_transferList.removeOne(xfr);
-        delete xfr;
         Q_EMIT onError("File transfer failed.");
     }
 
@@ -329,15 +326,14 @@ bool ArcFileServer::copyToServer(QString sourcePath, QString destinationPath)
 
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
-    FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+    auto xfr = std::make_shared<FileTransfer>(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
     FileTransferList::instance()->addTransfer(xfr);
-    connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+    connect(xfr.get(), SIGNAL(onCompleted(std::shared_ptr<FileTransfer>, bool, QString)), this, SLOT(onCompleted(std::shared_ptr<FileTransfer>, bool, QString)));
 
     if (!xfr->execute()) // Startar filöverföringen asynkront.
     {
         logger.msg(Arc::INFO, "File copy failed.");
         m_transferList.removeOne(xfr);
-        delete xfr;
         Q_EMIT onError("File transfer failed.");
     }
 
@@ -422,8 +418,6 @@ bool ArcFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
 
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
-    QList<QString> *failedFilesList = new QList<QString>;
-
     success = true;
 
     for (int i = 0; i < urlList.size(); ++i)
@@ -440,9 +434,10 @@ bool ArcFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
             QString destinationPath = destinationFolder + "/" + sourceFilename;
 
             logger.msg(Arc::INFO, "Adding dir filertransfer : "+sourcePath.toStdString()+" -> " + destinationPath.toStdString());
-            FileTransfer* xfr = new FileTransfer(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+
+            auto xfr = std::make_shared<FileTransfer>(sourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
             FileTransferList::instance()->addTransfer(xfr);
-            connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+            connect(xfr.get(), SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
         }
         else
         {
@@ -465,9 +460,9 @@ bool ArcFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
                 QString destinationPath = destinationFolder + locationPath;
 
                 logger.msg(Arc::INFO, "Adding file transfer : "+fileSourcePath.toStdString()+" -> " + destinationPath.toStdString());
-                FileTransfer* xfr = new FileTransfer(fileSourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
+                auto xfr = std::make_shared<FileTransfer>(fileSourcePath.toStdString(), destinationPath.toStdString(), *m_usercfg);
                 FileTransferList::instance()->addTransfer(xfr);
-                connect(xfr, SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
+                connect(xfr.get(), SIGNAL(onCompleted(FileTransfer*, bool, QString)), this, SLOT(onCompleted(FileTransfer*, bool, QString)));
             }
         }
     }
@@ -547,7 +542,6 @@ bool ArcFileServer::deleteItem(QString URL)
 
 bool ArcFileServer::makeDir(QString path)
 {
-    bool success = false;
     path = currentPath + "/" + path + "/";
     std::string dirName = path.toStdString();
     logger.msg(Arc::INFO, "Creating directory: "+dirName);
@@ -595,22 +589,10 @@ QMap<QString, QString> ArcFileServer::fileProperties(QString URL)
     QMap<QString, QString> propertyMap;
 
     Arc::URL arcUrl = URL.toStdString();
-
-    // What information to retrieve
-    Arc::DataPoint::DataPointInfoType verb = (Arc::DataPoint::DataPointInfoType)
-            (Arc::DataPoint::INFO_TYPE_MINIMAL |
-             Arc::DataPoint::INFO_TYPE_NAME |
-             Arc::DataPoint::INFO_TYPE_STRUCT |
-             Arc::DataPoint::INFO_TYPE_ALL |
-             Arc::DataPoint::INFO_TYPE_TYPE |
-             Arc::DataPoint::INFO_TYPE_TIMES |
-             Arc::DataPoint::INFO_TYPE_CONTENT |
-             Arc::DataPoint::INFO_TYPE_ACCESS);
-
     Arc::DataStatus arcResult;
     std::list<Arc::FileInfo> arcFiles;
-
     Arc::DataHandle dataHandle(arcUrl, *m_usercfg);
+
     if (!dataHandle)
     {
         logger.msg(Arc::ERROR, "Unsupported URL given");

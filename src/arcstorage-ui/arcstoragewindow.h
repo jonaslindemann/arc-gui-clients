@@ -2,7 +2,7 @@
 #define ArcStorageWindow_H
 
 namespace Ui {
-    class ArcStorageWindow;
+class ArcStorageWindow;
 }
 
 #include <memory>
@@ -26,16 +26,15 @@ namespace Ui {
 
 #include "filepropertyinspector.h"
 
-
-
-enum updateFileListsMode { CUFLM_noUpdate,
-                           CUFLM_syncBoth,
-                           CUFLM_clickedBrowse,
-                           CUFLM_clickedUp,
-                           CUFLM_expandedFolder,
-                           CUFLM_clickedFolder,
-                           CUFLM_doubleClickedFolder
-                         };
+enum updateFileListsMode {
+    CUFLM_noUpdate,
+    CUFLM_syncBoth,
+    CUFLM_clickedBrowse,
+    CUFLM_clickedUp,
+    CUFLM_expandedFolder,
+    CUFLM_clickedFolder,
+    CUFLM_doubleClickedFolder
+};
 
 class ArcStorageWindow : public QMainWindow
 {
@@ -62,18 +61,64 @@ public:
     void updateBookmarkMenu();
 
 private:
-    Ui::ArcStorageWindow *ui;
-    DragDropableTreeWidget m_filesTreeWidget;
-    QLineEdit m_urlEdit;
-    QCompleter* m_urlCompleter;
-    QToolButton m_urlCompleteButton;
-    QLabel* m_workingImage;
-    QMovie* m_workingMovie;
-    QPixmap* m_workingIdle;
 
-    ArcFileServer *m_currentFileServer;
-    QString m_folderListUrl;
-    QString m_startUrl;
+    // User interface components
+
+    std::unique_ptr<Ui::ArcStorageWindow> ui;
+
+    DragDropableTreeWidget m_filesTreeWidget;
+    QLineEdit              m_urlEdit;
+    QCompleter*            m_urlCompleter;
+    QToolButton            m_urlCompleteButton;
+    QLabel*                m_workingImage;
+    QMovie*                m_workingMovie;
+    QPixmap*               m_workingIdle;
+    QTreeWidgetItem*       m_folderWidgetBeingUpdated;
+
+    // Class attributes
+
+    QString                m_folderListUrl;
+    QString                m_startUrl;
+
+    QString                m_tarFilename;
+    QString                m_tarDestDir;
+
+    QList<QUrl>            m_filesToOpen;
+    QList<QAction*>        m_bookmarkActions;
+
+    QStringList            m_fileTreeHeaderLabels;
+    QStringList            m_breadCrumbItems;
+
+    QStack<QString>        m_backStack;
+    QSet<QString>          m_recent;
+
+    bool                   m_childWindow;
+    int                    m_windowId;
+
+    enum updateFileListsMode m_currentUpdateFileListsMode;
+
+    // Main file server instance
+
+    std::unique_ptr<ArcFileServer> m_currentFileServer;
+
+    // File processing thread reference
+
+    std::unique_ptr<FileTransferProcessingThread> m_fileProcessingThread;
+
+    // Child windows
+
+    std::unique_ptr<TransferListWindow>    m_transferWindow;
+    std::unique_ptr<FilePropertyInspector> m_filePropertyInspector;
+
+    // Process class for running external tar-process
+
+    std::unique_ptr<QProcess> m_tarProcess;
+
+    // Logging variables
+
+    std::unique_ptr<Arc::LogStream> m_logStream;
+    std::unique_ptr<QDebugStream>   m_debugStream;
+    std::unique_ptr<QDebugStream>   m_debugStream2;
 
     static const QString COPY_TO_TEXT;
     static const QString COPY_TEXT;
@@ -82,49 +127,21 @@ private:
     static const QString MAKEDIR_TEXT;
     static const QString CHANGE_PERMISSIONS_TEXT;
 
-    enum updateFileListsMode m_currentUpdateFileListsMode;
-    QTreeWidgetItem *m_folderWidgetBeingUpdated;
+    // Class methods
 
     void updateFileTree();
     void updateFoldersTree();
     void updateFoldersTreeBelow();
     void expandFolderTreeWidget(QTreeWidgetItem *folderWidget);
+
     QString getURLOfItem(QTreeWidgetItem *item);
     void setURLOfItem(QTreeWidgetItem *item, QString URL);
 
     QString getCurrentComboBoxURL();
     void    setCurrentComboBoxURL(QString url);
 
-    QStringList fileTreeHeaderLabels;
-
-    QStringList m_breadCrumbItems;
-    QStack<QString> m_backStack;
-    QSet<QString> m_recent;
-
     void pushUrl(QString url);
     QString popUrl();
-
-    std::unique_ptr<Arc::LogStream> m_logStream;
-    std::unique_ptr<QDebugStream> m_debugStream;
-    std::unique_ptr<QDebugStream> m_debugStream2;
-    //Arc::LogStream* m_logStream;
-    //QDebugStream* m_debugStream;
-    //QDebugStream* m_debugStream2;
-
-    bool m_childWindow;
-    int m_windowId;
-
-    TransferListWindow* m_transferWindow;
-    FilePropertyInspector* m_filePropertyInspector;
-
-    FileTransferProcessingThread* m_fileProcessingThread;
-
-    QProcess* m_tarProcess;
-    QString m_tarFilename;
-    QString m_tarDestDir;
-
-    QList<QUrl> m_filesToOpen;
-    QList<QAction*> m_bookmarkActions;
 
 protected:
     void showEvent(QShowEvent *e);
@@ -139,6 +156,9 @@ private Q_SLOTS:
     void onEditTextChanged(const QString& text);
     void onBreadCrumbTriggered();
     void onBookmarkTriggered();
+    void onTarErrorOutput();
+    void onTarStandardOutput();
+    void onTarFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     void on_actionDelete_triggered();
     void on_actionQuit_triggered();
@@ -157,55 +177,29 @@ private Q_SLOTS:
     void on_actionOpenNewLocation_triggered();
     void on_actionSRM_Preferences_triggered();
     void on_actionReload_triggered();
-
     void on_actionCreateProxyCert_triggered();
-
     void on_actionConvertCertificates_triggered();
-
     void on_actionJobManager_triggered();
-
     void on_actionJobSubmissionTool_triggered();
-
     void on_actionStop_triggered();
-
     void on_actionSettings_triggered();
-
     void on_filesTreeWidget_customContextMenuRequested(const QPoint &pos);
-
     void on_actionCopyURL_triggered();
-
     void on_filesTreeWidget_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_actionCopyURLFilename_triggered();
-
     void on_actionShowFileProperties_triggered();
-
     void on_actionBack_triggered();
-
     void on_actionHelpContents_triggered();
-
     void on_actionDownloadSelected_triggered();
-
     void on_actionUploadSelected_triggered();
-
     void on_actionUploadDirectory_triggered();
-
     void on_actionUploadDirAndArchive_triggered();
 
-    void onTarErrorOutput();
-    void onTarStandardOutput();
-    void onTarFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
     void on_actionRename_triggered();
-
     void on_filesTreeWidget_itemChanged(QTreeWidgetItem *item, int column);
-
     void on_actionOpenURLExt_triggered();
-
     void on_actionAddBookmark_triggered();
-
     void on_actionEditBookmarks_triggered();
-
     void on_actionClearBookmarks_triggered();
 
 public Q_SLOTS:
@@ -216,7 +210,6 @@ public Q_SLOTS:
     void onDeleteFinished(bool error);
     void onMakeDirFinished(bool error);
     void onCopyToServerFinished(bool error, QList<QString> &failedFiles);
-
 };
 
 #endif // ArcStorageWindow_H

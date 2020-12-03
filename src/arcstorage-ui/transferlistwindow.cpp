@@ -100,7 +100,7 @@ void TransferListWindow::onUpdateStatus(QString id)
     if (m_idToRowDict.contains(id))
     {
 
-        FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
+        auto xfr = FileTransferList::instance()->getTransfer(id);
 
         int row = m_idToRowDict[id];
 
@@ -137,7 +137,7 @@ void TransferListWindow::onCancelButtonClick()
 {
     QPushButton* button = (QPushButton*)sender();
     QString id = button->objectName();
-    FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
+    auto xfr = FileTransferList::instance()->getTransfer(id);
     FileTransferList::instance()->removeTransfer(xfr);
 }
 
@@ -146,8 +146,7 @@ void TransferListWindow::onAddTransfer(QString id)
     m_accessLock.lock();
 
     logger.msg(Arc::DEBUG, "onAddTransfer(): "+id.toStdString());
-    FileTransfer* xfr = FileTransferList::instance()->getTransfer(id);
-
+    auto xfr = FileTransferList::instance()->getTransfer(id);
 
     ui->transferTable->insertRow(ui->transferTable->rowCount());
 

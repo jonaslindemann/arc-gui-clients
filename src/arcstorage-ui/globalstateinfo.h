@@ -12,8 +12,8 @@ class GlobalStateInfo : public QObject
 {
     Q_OBJECT
 private:
-    TransferListWindow* m_transferListWindow;
-    QList<ArcStorageWindow*> m_childWindows;
+    std::unique_ptr<TransferListWindow> m_transferListWindow;
+    QList<std::shared_ptr<ArcStorageWindow>> m_childWindows;
     ArcStorageWindow* m_mainWindow;
     QMenu* m_windowMenu;
     QStringList m_bookmarks;

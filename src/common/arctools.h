@@ -1,6 +1,8 @@
 #ifndef ARCTOOLS_H
 #define ARCTOOLS_H
 
+#include <memory>
+
 #include <QObject>
 #include <QMutex>
 
@@ -14,10 +16,10 @@ class ARCTools : public QObject
 {
     Q_OBJECT
 private:
-    Arc::UserConfig* m_userConfig;
-    ArcProxyController* m_proxyController;
     QString m_jobListFile;
-    HelpWindow* m_helpWindow;
+    std::unique_ptr<Arc::UserConfig> m_userConfig;
+    std::unique_ptr<ArcProxyController> m_proxyController;
+    std::unique_ptr<HelpWindow> m_helpWindow;
 public:
     static ARCTools* instance()
     {
