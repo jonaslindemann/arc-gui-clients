@@ -422,8 +422,6 @@ bool ArcFileServer::copyToServer(QList<QUrl> &urlList, QString destinationFolder
 
     m_usercfg = ARCTools::instance()->currentUserConfig();
 
-    QList<QString> *failedFilesList = new QList<QString>;
-
     success = true;
 
     for (int i = 0; i < urlList.size(); ++i)
